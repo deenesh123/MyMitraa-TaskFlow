@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck } from 'lucide-react';
+import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck, Sun, Moon, Sparkles } from 'lucide-react';
 import { CURRENT_USER } from '../../api/mockData';
 import { UserAccount } from '../../api/types';
 import { useToast } from '../common/Toast';
+import { useAppTheme } from '../../context/ThemeContext';
 
 interface TopBarProps {
   onOpenSearch: () => void;
@@ -17,6 +18,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   currentUser = CURRENT_USER,
   onSignOut
 }) => {
+  const { theme, setTheme, isGlass } = useAppTheme();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -63,34 +65,89 @@ export const TopBar: React.FC<TopBarProps> = ({
   };
 
   return (
-    <header className="h-16 px-6 bg-white border-b border-slate-200/80 flex items-center justify-between gap-6 sticky top-0 z-40">
+    <header className={`h-16 px-6 flex items-center justify-between gap-6 sticky top-0 z-40 transition-colors ${
+      isGlass
+        ? 'bg-[#0A1021]/80 backdrop-blur-xl border-b border-white/10 text-white'
+        : 'bg-white border-b border-slate-200/80 text-[#191627]'
+    }`}>
       {/* Search Input Box with Ctrl+K shortcut and field hint */}
       <div className="flex-1 max-w-xl">
         <button
           type="button"
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-between px-4 py-2 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-full text-xs text-slate-500 transition-all group focus:outline-none focus:ring-2 focus:ring-[#7B3AEC]/30"
+          className={`w-full flex items-center justify-between px-4 py-2 border rounded-full text-xs transition-all group focus:outline-none focus:ring-2 ${
+            isGlass
+              ? 'bg-white/[0.06] hover:bg-white/[0.1] border-white/15 text-zinc-300 focus:ring-amber-400/40'
+              : 'bg-slate-50 hover:bg-slate-100/80 border-slate-200/80 text-slate-500 focus:ring-[#7B3AEC]/30'
+          }`}
         >
           <div className="flex items-center gap-2.5">
-            <Search className="w-4 h-4 text-slate-400 group-hover:text-[#7B3AEC] transition-colors" />
+            <Search className={`w-4 h-4 transition-colors ${
+              isGlass ? 'text-zinc-400 group-hover:text-amber-400' : 'text-slate-400 group-hover:text-[#7B3AEC]'
+            }`} />
             <span>Search tasks, projects, tickets...</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-200 shadow-2xs">
+            <span className={`hidden sm:inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full border shadow-2xs ${
+              isGlass ? 'bg-black/40 text-zinc-400 border-white/15' : 'bg-white text-slate-400 border-slate-200'
+            }`}>
               Ctrl + K
             </span>
           </div>
         </button>
       </div>
 
-      {/* Right Action Icons: Notification Bell + User Avatar Dropdown */}
+      {/* Right Action Icons: Global Theme Switcher + Notification Bell + User Avatar Dropdown */}
       <div className="flex items-center gap-3">
+        {/* GLOBAL GLASSMORPHISM THEME TOGGLE (User can select for the whole screen) */}
+        <div className={`flex items-center p-0.5 rounded-full border transition-all ${
+          isGlass ? 'bg-black/60 border-white/20' : 'bg-slate-100 border-slate-200'
+        }`}>
+          <button
+            type="button"
+            title="Switch to Crisp Light"
+            onClick={() => {
+              setTheme('crisp');
+              showToast('Crisp Light', 'Enabled light mode for entire application', 'info');
+            }}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+              !isGlass
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Sun className="w-3 h-3 text-amber-500" />
+            <span className="hidden sm:inline">Light</span>
+          </button>
+
+          <button
+            type="button"
+            title="Switch to Frosted Glass"
+            onClick={() => {
+              setTheme('glass');
+              showToast('Frosted Glass', 'Enabled cinematic glassmorphism for entire application', 'info');
+            }}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+              isGlass
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-md shadow-amber-500/30'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Sparkles className="w-3 h-3 text-black" />
+            <span className="hidden sm:inline">Glass</span>
+          </button>
+        </div>
+
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
           <button
             type="button"
             onClick={() => setNotificationOpen(!notificationOpen)}
-            className="relative p-2.5 text-slate-600 hover:text-[#7B3AEC] hover:bg-[#7B3AEC]/10 rounded-full transition-colors"
+            className={`relative p-2.5 rounded-full transition-colors ${
+              isGlass
+                ? 'text-zinc-300 hover:text-amber-400 hover:bg-white/10'
+                : 'text-slate-600 hover:text-[#7B3AEC] hover:bg-[#7B3AEC]/10'
+            }`}
             title="Notifications"
           >
             <Bell className="w-4 h-4" />

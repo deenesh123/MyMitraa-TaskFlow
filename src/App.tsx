@@ -23,6 +23,7 @@ import { AuthPage } from './pages/auth/AuthPage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { CURRENT_USER } from './api/mockData';
 import { UserAccount } from './api/types';
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<UserAccount>(() => {
@@ -124,20 +125,22 @@ export default function App() {
   };
 
   return (
-    <ToastProvider>
-      {!isAuthenticated ? (
-        <AuthPage onSuccess={handleLoginSuccess} />
-      ) : (
-        <AppLayout
-          currentRoute={currentRoute}
-          onNavigate={handleNavigate}
-          openTasksCount={openTasksCount}
-          currentUser={currentUser}
-          onSignOut={handleSignOut}
-        >
-          {renderPage()}
-        </AppLayout>
-      )}
-    </ToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        {!isAuthenticated ? (
+          <AuthPage onSuccess={handleLoginSuccess} />
+        ) : (
+          <AppLayout
+            currentRoute={currentRoute}
+            onNavigate={handleNavigate}
+            openTasksCount={openTasksCount}
+            currentUser={currentUser}
+            onSignOut={handleSignOut}
+          >
+            {renderPage()}
+          </AppLayout>
+        )}
+      </ToastProvider>
+    </ThemeProvider>
   );
 }

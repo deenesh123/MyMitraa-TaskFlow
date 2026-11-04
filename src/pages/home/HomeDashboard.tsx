@@ -26,6 +26,7 @@ import { useToast } from '../../components/common/Toast';
 import { Skeleton } from '../../components/common/Skeleton';
 import { MascotEmpty } from '../../components/common/MascotEmpty';
 import { TEAMS, PROJECTS, CUSTOMERS, MODULES } from '../../api/mockData';
+import { useAppTheme } from '../../context/ThemeContext';
 
 interface HomeDashboardProps {
   onNavigate: (route: string) => void;
@@ -33,6 +34,7 @@ interface HomeDashboardProps {
 
 export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
   const { showToast } = useToast();
+  const { isGlass } = useAppTheme();
 
   // Date range state (HD-7)
   const [startDate, setStartDate] = useState('01-Oct-2026');
@@ -206,34 +208,50 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
       {/* Top Section: Welcome Banner (HD-1) + Overall Progress Ring (HD-2) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Welcome Banner (HD-1) */}
-        <div className="lg:col-span-8 relative bg-gradient-to-r from-[#E0F2FE] via-[#EDE9FE] to-[#FCE7F3] rounded-3xl p-7 lg:p-9 overflow-hidden border border-white/60 shadow-sm flex flex-col justify-between">
+        <div className={`lg:col-span-8 relative rounded-3xl p-7 lg:p-9 overflow-hidden border shadow-sm flex flex-col justify-between transition-all ${
+          isGlass
+            ? 'bg-gradient-to-r from-blue-950/40 via-violet-950/30 to-amber-950/20 backdrop-blur-2xl border-white/20 text-white shadow-[0_20px_50px_rgba(0,0,0,0.6)]'
+            : 'bg-gradient-to-r from-[#E0F2FE] via-[#EDE9FE] to-[#FCE7F3] border-white/60 text-[#191627]'
+        }`}>
           {/* Subtle background decoration */}
-          <div className="absolute top-0 right-1/4 w-48 h-48 bg-white/40 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-1/4 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
           <div className="max-w-md z-10 space-y-3">
             {/* Tagline */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/80 backdrop-blur-xs rounded-full text-xs font-bold text-[#7B3AEC] shadow-2xs border border-violet-100">
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-2xs border ${
+              isGlass
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                : 'bg-white/80 backdrop-blur-xs text-[#7B3AEC] border-violet-100'
+            }`}>
               <Sparkles className="w-3.5 h-3.5" />
               <span>Your Productivity Partner</span>
             </div>
 
             {/* Headline */}
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#191627] tracking-tight leading-tight">
+            <h2 className={`text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight ${
+              isGlass ? 'text-white' : 'text-[#191627]'
+            }`}>
               Stay Organised.<br />
-              <span className="text-[#7B3AEC]">Grow Faster.</span>
+              <span className={isGlass ? 'text-amber-400' : 'text-[#7B3AEC]'}>Grow Faster.</span>
             </h2>
 
             {/* Subtitle with exact product name */}
-            <p className="text-xs lg:text-sm text-slate-600 leading-relaxed font-normal">
+            <p className={`text-xs lg:text-sm leading-relaxed font-normal ${
+              isGlass ? 'text-zinc-300' : 'text-slate-600'
+            }`}>
               Manage tasks, streamline work and scale your business with MY MiTRAA TaskFlow.
             </p>
 
-            {/* Dark Charcoal CTA Pill Button */}
+            {/* CTA Pill Button */}
             <div className="pt-2">
               <button
                 type="button"
                 onClick={() => setCreateTaskModalOpen(true)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#191627] hover:bg-[#28243c] active:bg-[#100e1a] text-white rounded-full text-xs font-semibold shadow-md transition-all group"
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-semibold shadow-md transition-all group cursor-pointer ${
+                  isGlass
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-extrabold hover:brightness-110 shadow-amber-500/30'
+                    : 'bg-[#191627] hover:bg-[#28243c] active:bg-[#100e1a] text-white'
+                }`}
               >
                 <span>Create New Task</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -248,15 +266,19 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
         </div>
 
         {/* Overall Progress Card (HD-2) */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <div className={`lg:col-span-4 rounded-3xl p-6 border shadow-xs flex flex-col justify-between transition-all ${
+          isGlass
+            ? 'bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-black/50 backdrop-blur-2xl border-white/15 text-white shadow-[0_20px_50px_rgba(0,0,0,0.6)]'
+            : 'bg-white border-slate-200/80 text-[#191627]'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-[#A3D801]/20 rounded-xl text-[#4D6B00]">
                 <TrendingUp className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-bold text-[#191627]">Overall Progress</h3>
+              <h3 className={`text-sm font-bold ${isGlass ? 'text-white' : 'text-[#191627]'}`}>Overall Progress</h3>
             </div>
-            <span className="text-[11px] font-semibold text-slate-400 font-mono">
+            <span className={`text-[11px] font-semibold font-mono ${isGlass ? 'text-zinc-400' : 'text-slate-400'}`}>
               {startDate} – {endDate}
             </span>
           </div>
@@ -362,7 +384,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
       {/* 4 KPI Cards (HD-3) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Tasks */}
-        <div className="bg-[#FAF5FF] border border-violet-100 rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className={`rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all ${
+          isGlass
+            ? 'bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-black/50 backdrop-blur-2xl border border-white/15 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
+            : 'bg-[#FAF5FF] border border-violet-100 text-[#191627]'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-2xl bg-[#7B3AEC] text-white flex items-center justify-center shadow-xs">
               <ListTodo className="w-5 h-5" />
@@ -374,21 +400,26 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
           </div>
 
           <div className="my-3">
-            <span className="text-xs font-semibold text-slate-500 block">Total Tasks</span>
-            <span className="text-3xl font-black text-[#191627] font-mono tracking-tight">
+            <span className={`text-xs font-semibold block ${isGlass ? 'text-zinc-400' : 'text-slate-500'}`}>Total Tasks</span>
+            <span className={`text-3xl font-black font-mono tracking-tight ${isGlass ? 'text-white' : 'text-[#191627]'}`}>
               {counts.total}
             </span>
           </div>
 
-          {/* On Hold note inside Total Card (HD-3 requirement) */}
-          <div className="pt-2 border-t border-violet-200/60 flex items-center justify-between text-[11px]">
-            <span className="text-slate-500">On Hold:</span>
+          <div className={`pt-2 border-t flex items-center justify-between text-[11px] ${
+            isGlass ? 'border-white/10' : 'border-violet-200/60'
+          }`}>
+            <span className={isGlass ? 'text-zinc-400' : 'text-slate-500'}>On Hold:</span>
             <span className="font-mono font-bold text-[#D946EF]">{counts.on_hold} tasks</span>
           </div>
         </div>
 
         {/* In Progress */}
-        <div className="bg-[#F0F9FF] border border-sky-100 rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className={`rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all ${
+          isGlass
+            ? 'bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-black/50 backdrop-blur-2xl border border-white/15 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
+            : 'bg-[#F0F9FF] border border-sky-100 text-[#191627]'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-2xl bg-[#00A6FC] text-white flex items-center justify-center shadow-xs">
               <Clock className="w-5 h-5" />
@@ -400,20 +431,26 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
           </div>
 
           <div className="my-3">
-            <span className="text-xs font-semibold text-slate-500 block">In Progress</span>
-            <span className="text-3xl font-black text-[#191627] font-mono tracking-tight">
+            <span className={`text-xs font-semibold block ${isGlass ? 'text-zinc-400' : 'text-slate-500'}`}>In Progress</span>
+            <span className={`text-3xl font-black font-mono tracking-tight ${isGlass ? 'text-white' : 'text-[#191627]'}`}>
               {counts.in_progress}
             </span>
           </div>
 
-          <div className="pt-2 border-t border-sky-200/60 flex items-center justify-between text-[11px]">
-            <span className="text-slate-500">Active Sprint:</span>
+          <div className={`pt-2 border-t flex items-center justify-between text-[11px] ${
+            isGlass ? 'border-white/10' : 'border-sky-200/60'
+          }`}>
+            <span className={isGlass ? 'text-zinc-400' : 'text-slate-500'}>Active Sprint:</span>
             <span className="font-mono font-bold text-[#0082CA]">Sprint 14</span>
           </div>
         </div>
 
         {/* Completed / Closed */}
-        <div className="bg-[#F0FDF4] border border-lime-100 rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className={`rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all ${
+          isGlass
+            ? 'bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-black/50 backdrop-blur-2xl border border-white/15 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
+            : 'bg-[#F0FDF4] border border-lime-100 text-[#191627]'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-2xl bg-[#A3D801] text-[#191627] flex items-center justify-center shadow-xs">
               <CheckCircle2 className="w-5 h-5" />
@@ -425,20 +462,26 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
           </div>
 
           <div className="my-3">
-            <span className="text-xs font-semibold text-slate-500 block">Completed</span>
-            <span className="text-3xl font-black text-[#191627] font-mono tracking-tight">
+            <span className={`text-xs font-semibold block ${isGlass ? 'text-zinc-400' : 'text-slate-500'}`}>Completed</span>
+            <span className={`text-3xl font-black font-mono tracking-tight ${isGlass ? 'text-white' : 'text-[#191627]'}`}>
               {counts.closed}
             </span>
           </div>
 
-          <div className="pt-2 border-t border-lime-200/60 flex items-center justify-between text-[11px]">
-            <span className="text-slate-500">Resolution rate:</span>
+          <div className={`pt-2 border-t flex items-center justify-between text-[11px] ${
+            isGlass ? 'border-white/10' : 'border-lime-200/60'
+          }`}>
+            <span className={isGlass ? 'text-zinc-400' : 'text-slate-500'}>Resolution rate:</span>
             <span className="font-mono font-bold text-[#4D6B00]">{progressPercent}%</span>
           </div>
         </div>
 
-        {/* Pending / Open (fewer open tasks is good, fall is green) */}
-        <div className="bg-[#FFFBEB] border border-amber-100 rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+        {/* Pending / Open */}
+        <div className={`rounded-3xl p-5 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all ${
+          isGlass
+            ? 'bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-black/50 backdrop-blur-2xl border border-white/15 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
+            : 'bg-[#FFFBEB] border border-amber-100 text-[#191627]'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
               <Calendar className="w-5 h-5" />
@@ -450,15 +493,17 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
           </div>
 
           <div className="my-3">
-            <span className="text-xs font-semibold text-slate-500 block">Pending / Open</span>
-            <span className="text-3xl font-black text-[#191627] font-mono tracking-tight">
+            <span className={`text-xs font-semibold block ${isGlass ? 'text-zinc-400' : 'text-slate-500'}`}>Pending / Open</span>
+            <span className={`text-3xl font-black font-mono tracking-tight ${isGlass ? 'text-white' : 'text-[#191627]'}`}>
               {counts.open}
             </span>
           </div>
 
-          <div className="pt-2 border-t border-amber-200/60 flex items-center justify-between text-[11px]">
-            <span className="text-slate-500">Overdue:</span>
-            <span className="font-mono font-bold text-amber-700">{counts.overdue} tasks</span>
+          <div className={`pt-2 border-t flex items-center justify-between text-[11px] ${
+            isGlass ? 'border-white/10' : 'border-amber-200/60'
+          }`}>
+            <span className={isGlass ? 'text-zinc-400' : 'text-slate-500'}>Overdue:</span>
+            <span className="font-mono font-bold text-amber-500">{counts.overdue} tasks</span>
           </div>
         </div>
       </div>
