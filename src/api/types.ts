@@ -1,0 +1,218 @@
+/**
+ * Shared Type Definitions for MiTRAA TaskFlow
+ * Mapped to the REST API Reference v3 & Frontend BRD v2
+ */
+
+export interface CustomResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+  metaInfo?: {
+    serviceName?: string;
+    totalCount?: number;
+    page?: number;
+    size?: number;
+  };
+}
+
+export interface BaseDomain {
+  created_on?: string;
+  created_by?: string;
+  modified_date_time?: string;
+  modified_by?: string;
+  active_flag?: boolean;
+  delete_flag?: boolean;
+  delete_on?: string;
+  status_flag?: string;
+  history_flag?: boolean;
+  report_generated_date?: string;
+}
+
+export interface WorkLogEntry {
+  id?: string;
+  date: string; // DD-Mon-YYYY
+  hours: number;
+  description: string;
+}
+
+export interface FeedbackHistory extends BaseDomain {
+  id: string;
+  ticket_number: string;
+  subject: string;
+  description: string;
+  status: 'Open' | 'In Progress' | 'Closed' | 'On Hold';
+  priority: 'Critical P0' | 'Urgent P1' | 'Normal P2' | 'Low P3';
+  project: string;
+  module: string;
+  sub_module?: string;
+  epic?: string;
+  customer: string;
+  instance?: string;
+  product?: string;
+  project_category?: string;
+  team: string; // QA, Project Management, Mobile Development, BE Development, FE Development, UI / UX Design, etc.
+  task_type?: string;
+  classification?: string;
+  category?: string;
+  category_description?: string;
+  task_owner: string;
+  assigned_by?: string;
+  who_reported?: string;
+  reviewed_by?: string;
+  estimated_start_date: string;
+  estimated_close_date: string;
+  actual_start_date?: string;
+  actual_close_date?: string;
+  date_assigned?: string;
+  estimated_effort: number; // in hours
+  actual_effort: number; // automatically calculated from work_log_entries
+  productivity_savings?: number;
+  coding?: number;
+  ai_tool?: number;
+  internal_meeting?: number;
+  comments?: string;
+  reviewer_comments?: string;
+  work_log_entries: WorkLogEntry[];
+  attachments?: string[];
+  file_name?: string;
+  uploaded?: boolean;
+  subtask_count: number;
+  last_subtask_update?: string;
+}
+
+export interface MeetingTimeTracker extends BaseDomain {
+  id: string;
+  date: string; // DD-Mon-YYYY
+  customer: string;
+  project: string;
+  module: string;
+  team: string;
+  category: string;
+  meeting_by: string; // Organizer
+  meeting_with: string[]; // Attendees
+  lead_attended: boolean;
+  architect_attended: boolean;
+  start_time: string; // e.g., "10:00 AM"
+  end_time: string; // e.g., "11:00 AM"
+  total_time: number; // in minutes (e.g., 60)
+  comments?: string;
+}
+
+export interface OptimaLeaveTracker extends BaseDomain {
+  id: string;
+  name: string;
+  role: string;
+  start_date: string; // DD-Mon-YYYY
+  end_date: string; // DD-Mon-YYYY
+  day: 'Full day' | 'Half day';
+  leave_type: 'Leave' | 'Planned Leave' | 'Unplanned Leave' | 'WFH (Approved)' | 'WFH (Unapproved)' | 'Holiday';
+  comments?: string;
+}
+
+export interface OptimaWeeklyUpdateTracker extends BaseDomain {
+  id: string;
+  project_name: string;
+  customer_name: string;
+  customer_geography: string;
+  industry: string;
+  state: string; // Status
+  current_state: string;
+  current_status: string;
+  project_status: string;
+  last_week_status: string;
+  priority: string;
+  risk: string;
+  project_summery: string;
+  start_date: string;
+  go_live_date: string;
+  weekly_start_date: string; // e.g., "26-Oct-2026"
+  weekly_end_date: string; // e.g., "30-Oct-2026"
+  ref?: string;
+  code_base?: string;
+  documentation?: string;
+  kt_provider?: string;
+  hld_link?: string;
+  lld_link?: string;
+  hld_attachment?: string[];
+  lld_attachment?: string[];
+  testers: string[];
+  fe_developers: string[];
+  be_developers: string[];
+  python_developers: string[];
+  ux_designers: string[];
+  shared_resources: string[];
+  totalEnv: number;
+  dev_url: string;
+  qa_url: string;
+  la_url: string;
+  other_url: string;
+  dev_arrow: boolean;
+  qa_arrow: boolean;
+  la_arrow: boolean;
+  other_arrow: boolean;
+}
+
+export interface DropdownItem extends BaseDomain {
+  id: string;
+  type: string; // "Task Owner" | "Customer" | "Project" | "Module" | "Team" | "Category"
+  value: string;
+  sub_value?: string;
+  module?: string;
+  sub_module?: string;
+  recorded_date: string; // DD-Mon-YYYY
+  comments?: string;
+}
+
+export interface DocumentRecord extends BaseDomain {
+  id: string;
+  ticket_number: string;
+  file_name: string;
+  file_size: string;
+  file_type: string;
+  uploaded_date: string; // DD-Mon-YYYY
+  customer: string;
+  project: string;
+  task_team: string;
+  task_owner: string;
+  task_status: string;
+  task_priority: string;
+}
+
+export interface SearchVM {
+  customer?: string;
+  project?: string;
+  team?: string;
+  task_owner?: string;
+  status?: string;
+  priority?: string;
+  ticket_number?: string;
+  start_date?: string;
+  end_date?: string;
+  search_query?: string;
+  search_field?: string;
+}
+
+export interface Pageable {
+  page: number;
+  size: number;
+  sort?: string;
+}
+
+export interface NumericalCount {
+  total: number;
+  in_progress: number;
+  closed: number;
+  open: number;
+  on_hold: number;
+  overdue: number;
+  // trends
+  total_trend?: string;
+  in_progress_trend?: string;
+  closed_trend?: string;
+  open_trend?: string;
+}
+
+export interface PeopleNotFillingTasks {
+  count: number;
+  people: string[];
+}

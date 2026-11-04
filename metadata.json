@@ -1,0 +1,6 @@
+{
+  "name": "MiTRAA TaskFlow",
+  "description": "Enterprise project and task management web application with comprehensive tracker modules, reporting, and 5-colour design system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

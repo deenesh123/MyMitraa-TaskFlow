@@ -1,0 +1,253 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal } from 'lucide-react';
+import { CURRENT_USER } from '../../api/mockData';
+import { useToast } from '../common/Toast';
+
+interface TopBarProps {
+  onOpenSearch: () => void;
+  onNavigate: (route: string) => void;
+}
+
+export const TopBar: React.FC<TopBarProps> = ({ onOpenSearch, onNavigate }) => {
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [unreadCount, setUnreadCount] = useState(3);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
+
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'Task Assigned', text: 'You were assigned to AECKUWAIT-423 (Review Client Proposal)', time: '10m ago', unread: true },
+    { id: 2, title: 'Upcoming Meeting', text: 'Sprint Planning at 10:00 AM with Architecture team', time: '1h ago', unread: true },
+    { id: 3, title: 'Leave Approved', text: 'Your WFH request for 02-Oct-2026 was approved', time: '1d ago', unread: true },
+  ]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotificationOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    setUnreadCount(0);
+    showToast('Notifications cleared', 'All notifications marked as read', 'info');
+  };
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      showToast('Validation Error', 'Password must be at least 6 characters', 'error');
+      return;
+    }
+    setPasswordModalOpen(false);
+    setNewPassword('');
+    showToast('Password Updated', 'Your security credentials have been updated successfully.');
+  };
+
+  return (
+    <header className="h-16 px-6 bg-white border-b border-slate-200/80 flex items-center justify-between gap-6 sticky top-0 z-40">
+      {/* Search Input Box with Ctrl+K shortcut and field hint */}
+      <div className="flex-1 max-w-xl">
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          className="w-full flex items-center justify-between px-4 py-2 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-full text-xs text-slate-500 transition-all group focus:outline-none focus:ring-2 focus:ring-[#7B3AEC]/30"
+        >
+          <div className="flex items-center gap-2.5">
+            <Search className="w-4 h-4 text-slate-400 group-hover:text-[#7B3AEC] transition-colors" />
+            <span>Search tasks, projects, tickets...</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-200 shadow-2xs">
+              Ctrl + K
+            </span>
+          </div>
+        </button>
+      </div>
+
+      {/* Right Action Icons: Notification Bell + User Avatar Dropdown */}
+      <div className="flex items-center gap-3">
+        {/* Notifications Popover */}
+        <div className="relative" ref={notifRef}>
+          <button
+            type="button"
+            onClick={() => setNotificationOpen(!notificationOpen)}
+            className="relative p-2.5 text-slate-600 hover:text-[#7B3AEC] hover:bg-[#7B3AEC]/10 rounded-full transition-colors"
+            title="Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
+          {notificationOpen && (
+            <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-3xl shadow-xl p-3 z-50">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 px-2">
+                <span className="text-xs font-bold text-slate-800">Notifications ({unreadCount} new)</span>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={markAllRead}
+                    className="text-[11px] text-[#7B3AEC] hover:underline font-medium"
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1 max-h-64 overflow-y-auto">
+                {notifications.map(n => (
+                  <div
+                    key={n.id}
+                    className={`p-2.5 rounded-2xl transition-colors text-left ${
+                      n.unread ? 'bg-[#7B3AEC]/5' : 'hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-xs font-semibold text-slate-800">{n.title}</span>
+                      <span className="text-[10px] text-slate-400">{n.time}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-snug">{n.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* User Menu */}
+        <div className="relative" ref={userMenuRef}>
+          <button
+            type="button"
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-full border border-slate-200/80 transition-all focus:outline-none"
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7B3AEC] to-[#D946EF] text-white flex items-center justify-center text-xs font-bold shadow-xs">
+              {CURRENT_USER.avatar}
+            </div>
+            <div className="hidden md:flex flex-col text-left pr-1">
+              <span className="text-xs font-bold text-[#191627] leading-tight">{CURRENT_USER.name}</span>
+              <span className="text-[10px] text-slate-500 font-medium">{CURRENT_USER.role}</span>
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 mr-1" />
+          </button>
+
+          {userMenuOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-3xl shadow-xl p-2 z-50">
+              <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                <p className="text-xs font-bold text-[#191627]">{CURRENT_USER.name}</p>
+                <p className="text-[11px] text-[#7B3AEC] font-medium">{CURRENT_USER.role}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 truncate">{CURRENT_USER.email}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  setPasswordModalOpen(true);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#7B3AEC] rounded-2xl transition-colors"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Change Password</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  onNavigate('/task-tracker');
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#7B3AEC] rounded-2xl transition-colors"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>My Preferences</span>
+              </button>
+
+              <div className="border-t border-slate-100 my-1" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  showToast('Signed Out', 'You have been safely signed out.', 'info');
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-2xl transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign out</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Change Password Dialog */}
+      {passwordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl p-6 border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-[#191627]">Change Password</h3>
+              <button
+                type="button"
+                onClick={() => setPasswordModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-slate-700 block mb-1">Current Password</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#7B3AEC]"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-700 block mb-1">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#7B3AEC]"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPasswordModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-full text-xs text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold"
+                >
+                  Save Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
