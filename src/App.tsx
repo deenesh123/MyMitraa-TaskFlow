@@ -110,30 +110,6 @@ export default function App() {
         return <UserManagementPage />;
       case '/task-tracker':
         return <TaskTrackerPage />;
-      case '/event-management':
-        return (
-          <PlaceholderPage
-            title="Event Management"
-            subtitle="Coordinate company-wide release ceremonies, hackathons, and quarterly technical reviews"
-            onNavigate={handleNavigate}
-          />
-        );
-      case '/device-inventory':
-        return (
-          <PlaceholderPage
-            title="Device Inventory"
-            subtitle="Track hardware assets, staging test devices, and server rack allocations"
-            onNavigate={handleNavigate}
-          />
-        );
-      case '/productivity-loss':
-        return (
-          <PlaceholderPage
-            title="Productivity Loss"
-            subtitle="Analyze blockers, test environment downtime, and external dependency delays"
-            onNavigate={handleNavigate}
-          />
-        );
       case '/help-support':
         return (
           <PlaceholderPage

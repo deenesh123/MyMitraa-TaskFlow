@@ -7,11 +7,8 @@ import {
   Users,
   Palmtree,
   KanbanSquare,
-  CalendarDays,
   FolderOpen,
-  Laptop,
   BarChart3,
-  TrendingDown,
   Settings2,
   Shield,
   HelpCircle,
@@ -66,14 +63,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { title: 'Meeting Tracker', route: '/meeting-tracker', icon: Users },
         { title: 'Leaves / WFH Tracker', route: '/leave-wfh-dashboard', icon: Palmtree },
         { title: 'Project Status', route: '/project-weekly-status', icon: KanbanSquare },
-        { title: 'Event Management', route: '/event-management', icon: CalendarDays },
       ]
     },
     {
       group: 'Files and assets',
       items: [
         { title: 'View Documents', route: '/task-upload-files', icon: FolderOpen },
-        { title: 'Device Inventory', route: '/device-inventory', icon: Laptop },
       ]
     },
     {
@@ -82,7 +77,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { title: 'Reports', route: '/task-dashboard', icon: BarChart3 },
         { title: 'User Management', route: '/users/user-management', icon: Shield, badge: 'Admin' },
         { title: 'Dropdown Management', route: '/users/dropdown-management', icon: Settings2 },
-        { title: 'Productivity Loss', route: '/productivity-loss', icon: TrendingDown },
       ]
     }
   ];
