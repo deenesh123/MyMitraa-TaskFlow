@@ -19,7 +19,21 @@ import { TaskTrackerPage } from './pages/tasks/TaskTrackerPage';
 import { PlaceholderPage } from './pages/common/PlaceholderPage';
 import { ApiClient } from './api/client';
 
+import { AuthPage } from './pages/auth/AuthPage';
+import { UserManagementPage } from './pages/admin/UserManagementPage';
+import { CURRENT_USER } from './api/mockData';
+import { UserAccount } from './api/types';
+
 export default function App() {
+  const [currentUser, setCurrentUser] = useState<UserAccount>(() => {
+    return ApiClient.auth.getCurrentUserSync();
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const saved = localStorage.getItem('mitraa_is_auth');
+    return saved !== null ? saved === 'true' : true;
+  });
+
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
     // Check hash or pathname
     const hash = window.location.hash.replace('#', '');
@@ -36,6 +50,18 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleLoginSuccess = (user: UserAccount) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    localStorage.setItem('mitraa_is_auth', 'true');
+  };
+
+  const handleSignOut = () => {
+    ApiClient.auth.logout();
+    setIsAuthenticated(false);
+    localStorage.setItem('mitraa_is_auth', 'false');
+  };
+
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
@@ -49,14 +75,15 @@ export default function App() {
 
   // Sync open tasks badge count with API client
   useEffect(() => {
+    if (!isAuthenticated) return;
     ApiClient.tasks.getAll().then(res => {
       const myOpen = res.data.filter(t => 
-        (t.task_owner === 'Deenesh Sabat' || t.assigned_by === 'Deenesh Sabat') &&
+        (t.task_owner === currentUser.name || t.assigned_by === currentUser.name) &&
         t.status !== 'Closed'
       ).length;
       if (myOpen > 0) setOpenTasksCount(myOpen);
     });
-  }, [currentRoute]);
+  }, [currentRoute, isAuthenticated, currentUser]);
 
   // Render current page component
   const renderPage = () => {
@@ -79,6 +106,8 @@ export default function App() {
         return <TimelineView />;
       case '/users/dropdown-management':
         return <DropdownManagement />;
+      case '/users/user-management':
+        return <UserManagementPage />;
       case '/task-tracker':
         return <TaskTrackerPage />;
       case '/event-management':
@@ -108,8 +137,8 @@ export default function App() {
       case '/help-support':
         return (
           <PlaceholderPage
-            title="Help &amp; Support"
-            subtitle="MiTRAA TaskFlow user guides, API documentation, and engineering support desk"
+            title="Help & Support"
+            subtitle="MY MiTRAA TaskFlow user guides, API documentation, and engineering support desk"
             onNavigate={handleNavigate}
           />
         );
@@ -120,13 +149,19 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <AppLayout
-        currentRoute={currentRoute}
-        onNavigate={handleNavigate}
-        openTasksCount={openTasksCount}
-      >
-        {renderPage()}
-      </AppLayout>
+      {!isAuthenticated ? (
+        <AuthPage onSuccess={handleLoginSuccess} />
+      ) : (
+        <AppLayout
+          currentRoute={currentRoute}
+          onNavigate={handleNavigate}
+          openTasksCount={openTasksCount}
+          currentUser={currentUser}
+          onSignOut={handleSignOut}
+        >
+          {renderPage()}
+        </AppLayout>
+      )}
     </ToastProvider>
   );
 }

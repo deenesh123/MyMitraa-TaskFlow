@@ -3,10 +3,14 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { SearchModal } from './SearchModal';
 
+import { UserAccount } from '../../api/types';
+
 interface AppLayoutProps {
   currentRoute: string;
   onNavigate: (route: string) => void;
   openTasksCount?: number;
+  currentUser?: UserAccount;
+  onSignOut?: () => void;
   children: ReactNode;
 }
 
@@ -14,6 +18,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   currentRoute,
   onNavigate,
   openTasksCount = 24,
+  currentUser,
+  onSignOut,
   children
 }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -47,6 +53,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         <TopBar
           onOpenSearch={() => setSearchModalOpen(true)}
           onNavigate={onNavigate}
+          currentUser={currentUser}
+          onSignOut={onSignOut}
         />
 
         <main className="flex-1 p-6 lg:p-8 max-w-[1600px] w-full mx-auto">

@@ -23,8 +23,11 @@ import {
   INITIAL_WEEKLY_UPDATES,
   INITIAL_DOCUMENTS,
   INITIAL_DROPDOWNS,
+  INITIAL_USERS,
+  CURRENT_USER,
   PEOPLE_NOT_FILLING_TASKS
 } from './mockData';
+import { UserAccount } from './types';
 
 // Central in-memory state initialized with seed data (supports live edits in current session)
 class DataStore {
@@ -34,6 +37,8 @@ class DataStore {
   weeklyUpdates: OptimaWeeklyUpdateTracker[] = [...INITIAL_WEEKLY_UPDATES];
   documents: DocumentRecord[] = [...INITIAL_DOCUMENTS];
   dropdowns: DropdownItem[] = [...INITIAL_DROPDOWNS];
+  users: UserAccount[] = [...INITIAL_USERS];
+  currentUser: UserAccount = { ...CURRENT_USER };
   authToken: string = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mitraa-taskflow-user-session';
   useMock: boolean = true;
 }
@@ -56,6 +61,155 @@ export const ApiClient = {
   },
   isMock(): boolean {
     return dataStore.useMock;
+  },
+
+  // Auth Operations
+  auth: {
+    getCurrentUserSync(): UserAccount {
+      return dataStore.currentUser;
+    },
+    async getCurrentUser(): Promise<CustomResponse<UserAccount>> {
+      await delay(50);
+      return {
+        code: 200,
+        message: 'CURRENT_USER_FETCHED',
+        data: dataStore.currentUser,
+      };
+    },
+    async setCurrentUser(user: UserAccount): Promise<CustomResponse<UserAccount>> {
+      await delay(50);
+      dataStore.currentUser = user;
+      return {
+        code: 200,
+        message: 'CURRENT_USER_UPDATED',
+        data: user,
+      };
+    },
+    async logout(): Promise<CustomResponse<boolean>> {
+      await delay(50);
+      return {
+        code: 200,
+        message: 'LOGGED_OUT_SUCCESSFULLY',
+        data: true,
+      };
+    },
+    async login(email: string): Promise<CustomResponse<UserAccount>> {
+      await delay(150);
+      const user = dataStore.users.find(u => u.email.toLowerCase() === email.toLowerCase()) || {
+        ...dataStore.currentUser,
+        email,
+        name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      };
+      user.last_login = 'Just now';
+      dataStore.currentUser = user;
+      return {
+        code: 200,
+        message: 'LOGIN_SUCCESS',
+        data: user,
+      };
+    },
+    async register(name: string, email: string, role: string, team: string): Promise<CustomResponse<UserAccount>> {
+      await delay(150);
+      const initials = name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+      const newUser: UserAccount = {
+        id: `usr-${Date.now()}`,
+        name,
+        email,
+        role: role as any,
+        team,
+        status: 'Active',
+        avatar: initials || 'U',
+        created_date: '04-Nov-2026',
+        last_login: 'Just now',
+      };
+      dataStore.users.unshift(newUser);
+      dataStore.currentUser = newUser;
+      return {
+        code: 200,
+        message: 'REGISTRATION_SUCCESS',
+        data: newUser,
+      };
+    },
+  },
+
+  // User Management Module
+  users: {
+    async getAll(filters?: { search?: string; role?: string; team?: string; status?: string }): Promise<CustomResponse<UserAccount[]>> {
+      await delay(80);
+      let results = [...dataStore.users];
+      if (filters) {
+        if (filters.search) {
+          const q = filters.search.toLowerCase();
+          results = results.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+        }
+        if (filters.role && filters.role !== 'All') {
+          results = results.filter(u => u.role.toLowerCase() === filters.role!.toLowerCase());
+        }
+        if (filters.team && filters.team !== 'All') {
+          results = results.filter(u => u.team.toLowerCase() === filters.team!.toLowerCase());
+        }
+        if (filters.status && filters.status !== 'All') {
+          results = results.filter(u => u.status.toLowerCase() === filters.status!.toLowerCase());
+        }
+      }
+      return {
+        code: 200,
+        message: 'USERS_FETCHED_SUCCESSFULLY',
+        data: results,
+        metaInfo: { totalCount: results.length },
+      };
+    },
+    async saveUser(user: Omit<UserAccount, 'id' | 'avatar' | 'created_date'>): Promise<CustomResponse<UserAccount>> {
+      await delay(100);
+      const id = `usr-${Date.now()}`;
+      const initials = user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+      const newUser: UserAccount = {
+        ...user,
+        id,
+        avatar: initials || 'U',
+        created_date: '04-Nov-2026',
+        last_login: 'Never',
+      };
+      dataStore.users.unshift(newUser);
+      return {
+        code: 200,
+        message: 'USER_CREATED_SUCCESSFULLY',
+        data: newUser,
+      };
+    },
+    async updateUser(id: string, updates: Partial<UserAccount>): Promise<CustomResponse<UserAccount>> {
+      await delay(100);
+      const idx = dataStore.users.findIndex(u => u.id === id);
+      if (idx === -1) throw new Error('User not found');
+      dataStore.users[idx] = { ...dataStore.users[idx], ...updates };
+      if (dataStore.currentUser.id === id) {
+        dataStore.currentUser = { ...dataStore.currentUser, ...updates };
+      }
+      return {
+        code: 200,
+        message: 'USER_UPDATED_SUCCESSFULLY',
+        data: dataStore.users[idx],
+      };
+    },
+    async deleteUser(id: string): Promise<CustomResponse<boolean>> {
+      await delay(100);
+      dataStore.users = dataStore.users.filter(u => u.id !== id);
+      return {
+        code: 200,
+        message: 'USER_DELETED_SUCCESSFULLY',
+        data: true,
+      };
+    },
   },
 
   // Task Tracker / Feedback Module

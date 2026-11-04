@@ -13,12 +13,14 @@ import {
   BarChart3,
   TrendingDown,
   Settings2,
+  Shield,
   HelpCircle,
   ChevronLeft,
   ChevronRight,
   ArrowRight
 } from 'lucide-react';
 import { MascotPenguin } from '../mascot/MascotPenguin';
+import { MyMitraaLogo } from '../common/MyMitraaLogo';
 
 interface SidebarProps {
   currentRoute: string;
@@ -26,6 +28,7 @@ interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   openTasksCount?: number;
+  userRole?: string;
 }
 
 interface MenuItem {
@@ -77,8 +80,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       group: 'Insights and admin',
       items: [
         { title: 'Reports', route: '/task-dashboard', icon: BarChart3 },
-        { title: 'Productivity Loss', route: '/productivity-loss', icon: TrendingDown },
+        { title: 'User Management', route: '/users/user-management', icon: Shield, badge: 'Admin' },
         { title: 'Dropdown Management', route: '/users/dropdown-management', icon: Settings2 },
+        { title: 'Productivity Loss', route: '/productivity-loss', icon: TrendingDown },
       ]
     }
   ];
@@ -89,34 +93,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
         collapsed ? 'w-20' : 'w-64'
       } min-h-screen shrink-0`}
     >
-      {/* Top Branding Header */}
+      {/* Top Branding Header with MyMitraaLogo */}
       <div>
         <div className="h-16 px-4 flex items-center justify-between border-b border-slate-100">
           <div
             onClick={() => onNavigate('/')}
-            className="flex items-center gap-2.5 cursor-pointer overflow-hidden select-none"
+            className="flex items-center cursor-pointer overflow-hidden select-none"
           >
-            {/* Violet/Gradient 'M' Logo Mark */}
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#7B3AEC] via-[#9333EA] to-[#D946EF] flex items-center justify-center text-white font-black text-lg shadow-sm shrink-0">
-              M
-            </div>
-            {!collapsed && (
-              <div className="flex flex-col">
-                <span className="text-sm font-extrabold tracking-tight text-[#191627] leading-none">
-                  MiTRAA
-                </span>
-                <span className="text-[11px] font-bold text-[#7B3AEC] tracking-wide uppercase">
-                  TaskFlow
-                </span>
-              </div>
-            )}
+            <MyMitraaLogo
+              size={collapsed ? 'sm' : 'md'}
+              variant={collapsed ? 'mark-only' : 'full'}
+            />
           </div>
 
           {/* Collapse Toggle Arrow */}
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors shrink-0"
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

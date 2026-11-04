@@ -216,3 +216,31 @@ export interface PeopleNotFillingTasks {
   count: number;
   people: string[];
 }
+
+export type UserRole =
+  | 'Super Admin'
+  | 'Admin'
+  | 'Production Engineer'
+  | 'Lead Architect'
+  | 'Senior Backend Engineer'
+  | 'Frontend Engineer'
+  | 'Product Manager'
+  | 'QA Engineer'
+  | 'UI / UX Designer'
+  | 'Python Developer'
+  | 'DevOps Engineer';
+
+export type UserStatus = 'Active' | 'Inactive' | 'Pending';
+
+export interface UserAccount extends BaseDomain {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  team: string;
+  status: UserStatus;
+  avatar: string;
+  phone?: string;
+  last_login?: string;
+  created_date: string;
+}

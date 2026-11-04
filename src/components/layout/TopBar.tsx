@@ -1,14 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal } from 'lucide-react';
+import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck } from 'lucide-react';
 import { CURRENT_USER } from '../../api/mockData';
+import { UserAccount } from '../../api/types';
 import { useToast } from '../common/Toast';
 
 interface TopBarProps {
   onOpenSearch: () => void;
   onNavigate: (route: string) => void;
+  currentUser?: UserAccount;
+  onSignOut?: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onOpenSearch, onNavigate }) => {
+export const TopBar: React.FC<TopBarProps> = ({
+  onOpenSearch,
+  onNavigate,
+  currentUser = CURRENT_USER,
+  onSignOut
+}) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -135,22 +143,46 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenSearch, onNavigate }) => {
             className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-full border border-slate-200/80 transition-all focus:outline-none"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7B3AEC] to-[#D946EF] text-white flex items-center justify-center text-xs font-bold shadow-xs">
-              {CURRENT_USER.avatar}
+              {currentUser.avatar || currentUser.name.slice(0, 2).toUpperCase()}
             </div>
             <div className="hidden md:flex flex-col text-left pr-1">
-              <span className="text-xs font-bold text-[#191627] leading-tight">{CURRENT_USER.name}</span>
-              <span className="text-[10px] text-slate-500 font-medium">{CURRENT_USER.role}</span>
+              <span className="text-xs font-bold text-[#191627] leading-tight">{currentUser.name}</span>
+              <span className="text-[10px] text-slate-500 font-medium">{currentUser.role}</span>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 mr-1" />
           </button>
 
           {userMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-3xl shadow-xl p-2 z-50">
+            <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-3xl shadow-xl p-2 z-50">
               <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                <p className="text-xs font-bold text-[#191627]">{CURRENT_USER.name}</p>
-                <p className="text-[11px] text-[#7B3AEC] font-medium">{CURRENT_USER.role}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5 truncate">{CURRENT_USER.email}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-[#191627]">{currentUser.name}</p>
+                  {currentUser.role === 'Super Admin' && (
+                    <span className="text-[9px] bg-[#7B3AEC]/15 text-[#7B3AEC] font-bold px-1.5 py-0.5 rounded-full">
+                      Admin
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-[#7B3AEC] font-medium">{currentUser.role}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 truncate">{currentUser.email}</p>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  onNavigate('/users/user-management');
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-slate-700 hover:bg-[#7B3AEC]/10 hover:text-[#7B3AEC] rounded-2xl transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Shield className="w-3.5 h-3.5 text-[#7B3AEC]" />
+                  <span>User Management</span>
+                </div>
+                <span className="text-[9px] font-bold bg-[#A3D801]/30 text-emerald-800 px-1.5 py-0.5 rounded-full">
+                  Admin
+                </span>
+              </button>
 
               <button
                 type="button"
@@ -182,7 +214,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenSearch, onNavigate }) => {
                 type="button"
                 onClick={() => {
                   setUserMenuOpen(false);
-                  showToast('Signed Out', 'You have been safely signed out.', 'info');
+                  if (onSignOut) {
+                    onSignOut();
+                  } else {
+                    showToast('Signed Out', 'You have been safely signed out.', 'info');
+                  }
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-2xl transition-colors"
               >
