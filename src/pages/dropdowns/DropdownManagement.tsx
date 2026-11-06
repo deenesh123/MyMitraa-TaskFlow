@@ -8,6 +8,7 @@ import { DateRangeBox } from '../../components/common/DateRangeBox';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useToast } from '../../components/common/Toast';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const DropdownManagement: React.FC = () => {
   const { showToast } = useToast();
@@ -177,15 +178,21 @@ export const DropdownManagement: React.FC = () => {
           </p>
         </div>
 
-        {/* Charcoal Pill Button named dynamically (DM-2) */}
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add {selectedList}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName={`Dropdown Master (${selectedList})`}
+            buttonLabel="Import / Upload List"
+          />
+          {/* Charcoal Pill Button named dynamically (DM-2) */}
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add {selectedList}</span>
+          </button>
+        </div>
       </div>
 
       {/* DM-1: Dropdown Details selector */}

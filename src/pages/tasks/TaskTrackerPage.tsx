@@ -21,6 +21,8 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useToast } from '../../components/common/Toast';
 import { PROJECTS, TEAMS, CUSTOMERS, MODULES } from '../../api/mockData';
 
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
+
 export const TaskTrackerPage: React.FC = () => {
   const { showToast } = useToast();
   const [tasks, setTasks] = useState<FeedbackHistory[]>([]);
@@ -269,15 +271,23 @@ export const TaskTrackerPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Charcoal Pill Button */}
-        <button
-          type="button"
-          onClick={() => setCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Task</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName="Task Tracker"
+            defaultProject={selectedProject !== 'All' ? selectedProject : 'AEC Kuwait'}
+            buttonLabel="Attach Task Document"
+          />
+
+          {/* Charcoal Pill Button */}
+          <button
+            type="button"
+            onClick={() => setCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Task</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Row */}

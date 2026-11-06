@@ -5,6 +5,7 @@ import { FeedbackHistory } from '../../api/types';
 import { PROJECTS } from '../../api/mockData';
 import { getStatusStyle } from '../../utils/colorTokens';
 import { Modal } from '../../components/common/Modal';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const TaskCalendarView: React.FC = () => {
   const [tasks, setTasks] = useState<FeedbackHistory[]>([]);
@@ -94,18 +95,26 @@ export const TaskCalendarView: React.FC = () => {
           </p>
         </div>
 
-        {/* Project Selector (CV-1: Fixed typo from 'Prcject' to 'Project') */}
-        <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-          <label className="text-xs font-bold text-slate-700 whitespace-nowrap">Project:</label>
-          <select
-            value={selectedProject}
-            onChange={e => setSelectedProject(e.target.value)}
-            className="bg-transparent text-xs font-semibold text-[#7B3AEC] focus:outline-none cursor-pointer"
-          >
-            {PROJECTS.map(p => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
+        <div className="flex items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName="Calendar View"
+            defaultProject={selectedProject}
+            buttonLabel="Upload Schedule / Attachment"
+          />
+
+          {/* Project Selector (CV-1: Fixed typo from 'Prcject' to 'Project') */}
+          <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            <label className="text-xs font-bold text-slate-700 whitespace-nowrap">Project:</label>
+            <select
+              value={selectedProject}
+              onChange={e => setSelectedProject(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-[#7B3AEC] focus:outline-none cursor-pointer"
+            >
+              {PROJECTS.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

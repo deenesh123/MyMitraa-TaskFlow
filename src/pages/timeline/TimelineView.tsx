@@ -5,6 +5,7 @@ import { FeedbackHistory } from '../../api/types';
 import { PROJECTS } from '../../api/mockData';
 import { FilterBar } from '../../components/common/FilterBar';
 import { getStatusStyle } from '../../utils/colorTokens';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const TimelineView: React.FC = () => {
   const [tasks, setTasks] = useState<FeedbackHistory[]>([]);
@@ -45,8 +46,15 @@ export const TimelineView: React.FC = () => {
           </p>
         </div>
 
-        {/* Group By Toggle */}
-        <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200/80 rounded-2xl shadow-2xs text-xs">
+        <div className="flex items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName="Timeline View"
+            defaultProject={selectedProject !== 'All' ? selectedProject : 'AEC Kuwait'}
+            buttonLabel="Upload Gantt / Spec"
+          />
+
+          {/* Group By Toggle */}
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200/80 rounded-2xl shadow-2xs text-xs">
           <button
             type="button"
             onClick={() => setGroupBy('project')}
@@ -69,6 +77,7 @@ export const TimelineView: React.FC = () => {
           </button>
         </div>
       </div>
+    </div>
 
       {/* Filter Row */}
       <FilterBar>

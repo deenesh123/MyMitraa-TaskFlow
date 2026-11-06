@@ -5,6 +5,7 @@ import { OptimaLeaveTracker } from '../../api/types';
 import { Modal } from '../../components/common/Modal';
 import { useToast } from '../../components/common/Toast';
 import { getLeaveTypeStyle } from '../../utils/colorTokens';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const LeaveWfhTracker: React.FC = () => {
   const { showToast } = useToast();
@@ -108,15 +109,23 @@ export const LeaveWfhTracker: React.FC = () => {
           </p>
         </div>
 
-        {/* Charcoal Pill Button (LW-1) */}
-        <button
-          type="button"
-          onClick={() => setAddModalOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Leave / WFH</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName="Leaves / WFH"
+            defaultProject="Internal Ops"
+            buttonLabel="Upload Leave Certificate / Approval"
+          />
+
+          {/* Charcoal Pill Button (LW-1) */}
+          <button
+            type="button"
+            onClick={() => setAddModalOpen(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Leave / WFH</span>
+          </button>
+        </div>
       </div>
 
       {/* Calendar Navigation & Month Bar (LW-2 - NO LICENSE KEY BANNER!) */}

@@ -27,6 +27,7 @@ import { Skeleton } from '../../components/common/Skeleton';
 import { MascotEmpty } from '../../components/common/MascotEmpty';
 import { TEAMS, PROJECTS, CUSTOMERS, MODULES } from '../../api/mockData';
 import { useAppTheme } from '../../context/ThemeContext';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 interface HomeDashboardProps {
   onNavigate: (route: string) => void;
@@ -193,6 +194,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
         </div>
 
         <div className="flex items-center gap-3">
+          <ModuleUploadTrigger
+            moduleName="Home Dashboard"
+            defaultProject="AEC Kuwait"
+            buttonLabel="Upload Project File"
+          />
+
           <DateRangeBox
             startDate={startDate}
             endDate={endDate}

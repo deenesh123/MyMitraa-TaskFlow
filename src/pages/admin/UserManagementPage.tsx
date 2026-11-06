@@ -25,6 +25,7 @@ import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useToast } from '../../components/common/Toast';
 import { TEAMS } from '../../api/mockData';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const UserManagementPage: React.FC = () => {
   const { showToast } = useToast();
@@ -322,15 +323,23 @@ export const UserManagementPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Charcoal Pill Button: Add New User */}
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] active:bg-[#12101c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Add New User</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName="User Management"
+            defaultProject="Admin Operations"
+            buttonLabel="Import Users / Upload Roster"
+          />
+
+          {/* Charcoal Pill Button: Add New User */}
+          <button
+            type="button"
+            onClick={handleOpenCreate}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] active:bg-[#12101c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Add New User</span>
+          </button>
+        </div>
       </div>
 
       {/* 4 Stat Overview Cards */}

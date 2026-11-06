@@ -26,6 +26,7 @@ import { DateRangeBox } from '../../components/common/DateRangeBox';
 import { PROJECTS, TEAMS, PEOPLE_NOT_FILLING_TASKS } from '../../api/mockData';
 import { useToast } from '../../components/common/Toast';
 import { useAppTheme } from '../../context/ThemeContext';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const ReportsPage: React.FC = () => {
   const { showToast } = useToast();
@@ -94,8 +95,14 @@ export const ReportsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Theme Switcher Toggle (Crisp Light vs Glassmorphism) */}
-        <div className="flex items-center gap-3">
+        {/* Theme Switcher Toggle & Module Upload Trigger */}
+        <div className="flex flex-wrap items-center gap-3">
+          <ModuleUploadTrigger
+            moduleName="Reports & Analytics"
+            defaultProject={selectedProject === 'All Projects' ? 'AEC Kuwait' : selectedProject}
+            buttonLabel="Upload Analytics / Telemetry Data"
+          />
+
           <div className={`flex items-center p-1 rounded-2xl border transition-colors ${isGlass ? 'bg-black/60 border-white/20' : 'bg-slate-100 border-slate-200'}`}>
             <button
               type="button"

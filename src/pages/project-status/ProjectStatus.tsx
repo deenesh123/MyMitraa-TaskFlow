@@ -7,6 +7,7 @@ import { Modal } from '../../components/common/Modal';
 import { MascotEmpty } from '../../components/common/MascotEmpty';
 import { useToast } from '../../components/common/Toast';
 import { PROJECTS, CUSTOMERS } from '../../api/mockData';
+import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 
 export const ProjectStatus: React.FC = () => {
   const { showToast } = useToast();
@@ -101,15 +102,23 @@ export const ProjectStatus: React.FC = () => {
           </p>
         </div>
 
-        {/* Add New Charcoal Pill (PS-1) */}
-        <button
-          type="button"
-          onClick={() => setAddModalOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Weekly Update</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ModuleUploadTrigger
+            moduleName="Project Status"
+            defaultProject={formProject}
+            buttonLabel="Upload Project Status Document"
+          />
+
+          {/* Add New Charcoal Pill (PS-1) */}
+          <button
+            type="button"
+            onClick={() => setAddModalOpen(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Weekly Update</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters (PS-2) */}
