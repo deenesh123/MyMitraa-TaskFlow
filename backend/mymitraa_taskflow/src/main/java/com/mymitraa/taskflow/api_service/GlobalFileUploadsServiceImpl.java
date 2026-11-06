@@ -1,8 +1,13 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.FilesDownloadedCountDomain;
 import com.mymitraa.taskflow.api_domain.GlobalFileUploads;
 import com.mymitraa.taskflow.api_repository.GlobalFileUploadsRepository;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
+import com.mymitraa.taskflow.api_successcode.SuccessCode;
+import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
+import com.mymitraa.taskflow.api_vm.SearchVM;
+import com.mymitraa.taskflow.config.Constants;
 import com.mymitraa.taskflow.security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GlobalFileUploadsServiceImpl implements GlobalFileUploadsService {
@@ -22,7 +30,7 @@ public class GlobalFileUploadsServiceImpl implements GlobalFileUploadsService {
     private GlobalFileUploadsRepository globalFileUploadsRepository;
 
     @Override
-    public Object uploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails) {
+    public CustomResponse uploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails) {
         log.info("Uploading file: {} category: {}", multipartFile.getOriginalFilename(), category);
         GlobalFileUploads upload = new GlobalFileUploads();
         upload.setCategory(category);
@@ -31,8 +39,17 @@ public class GlobalFileUploadsServiceImpl implements GlobalFileUploadsService {
         upload.setOriginalFileName(multipartFile.getOriginalFilename());
         upload.setFileType(multipartFile.getContentType());
         upload.setStatus("UPLOADED");
-        upload.setUploadedBy(customUserDetails.getUsername());
-        return globalFileUploadsRepository.save(upload);
+        if (customUserDetails != null) {
+            upload.setUploadedBy(customUserDetails.getUsername());
+        }
+        GlobalFileUploads saved = globalFileUploadsRepository.save(upload);
+        Map<String, String> metaInfo = new HashMap<>();
+        metaInfo.put(Constants.SERVICE_NAME, SuccessCode.GLOBAL_FILE_UPLOADED_SUCCESSFULLY.getServiceName());
+        return new CustomResponse(
+                SuccessCode.GLOBAL_FILE_UPLOADED_SUCCESSFULLY.getSuccessCode(),
+                SuccessCode.GLOBAL_FILE_UPLOADED_SUCCESSFULLY.getSuccessMessage(),
+                saved,
+                metaInfo);
     }
 
     @Override

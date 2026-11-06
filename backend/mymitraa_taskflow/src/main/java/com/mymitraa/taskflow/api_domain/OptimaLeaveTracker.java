@@ -1,19 +1,14 @@
 package com.mymitraa.taskflow.api_domain;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.io.Serializable;
 import java.util.Date;
 
 @Document(collection = "optima_leave_tracker")
-public class OptimaLeaveTracker implements Serializable {
+public class OptimaLeaveTracker extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
-
-    @Id
-    private String id;
 
     @Field("name")
     private String name;
@@ -33,6 +28,9 @@ public class OptimaLeaveTracker implements Serializable {
     @Field("end_date")
     private Date endDate;
 
+    @Field("day")
+    private String day;
+
     @Field("status")
     private String status;
 
@@ -47,29 +45,6 @@ public class OptimaLeaveTracker implements Serializable {
 
     @Field("comments")
     private String comments;
-
-    @Field("delete_flag")
-    private Boolean deleteFlag = false;
-
-    @Field("created_on")
-    private Date createdOn;
-
-    @Field("created_by")
-    private String createdBy;
-
-    @Field("modified_date_time")
-    private Date modifiedDateTime;
-
-    @Field("modified_by")
-    private String modifiedBy;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name != null ? name : employeeName;
@@ -121,6 +96,14 @@ public class OptimaLeaveTracker implements Serializable {
         this.endDate = endDate;
     }
 
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -159,45 +142,5 @@ public class OptimaLeaveTracker implements Serializable {
 
     public void setComments(String comments) {
         this.comments = comments;
-    }
-
-    public Boolean getDeleteFlag() {
-        return deleteFlag;
-    }
-
-    public void setDeleteFlag(Boolean deleteFlag) {
-        this.deleteFlag = deleteFlag;
-    }
-
-    public Date getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Date getModifiedDateTime() {
-        return modifiedDateTime;
-    }
-
-    public void setModifiedDateTime(Date modifiedDateTime) {
-        this.modifiedDateTime = modifiedDateTime;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
     }
 }

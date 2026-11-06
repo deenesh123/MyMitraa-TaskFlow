@@ -1,11 +1,12 @@
 package com.mymitraa.taskflow.security;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -16,51 +17,68 @@ public class JwtTokenUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenUtil.class);
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:defaultSecretKeyForDevelopmentPurposesMustBeLongEnough1234567890}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400}")
     private long expiration;
 
     public String getUsernameFromToken(String token) {
-        String subject = Jwts
-                .parser()
-                .setSigningKey(getSignKey())
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-        return subject;
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.getSubject() : null;
     }
 
     public Date getExpirationDateFromToken(String token) {
-        return Jwts
-                .parser()
-                .setSigningKey(getSignKey())
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.getExpiration() : null;
+    }
+
+    private Claims getClaimsFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private SecretKey getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(secret);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+            if (keyBytes.length < 32) {
+                byte[] padded = new byte[32];
+                System.arraycopy(keyBytes, 0, padded, 0, keyBytes.length);
+                return Keys.hmacShaKeyFor(padded);
+            }
+            return Keys.hmacShaKeyFor(keyBytes);
+        }
     }
 
     public String generateToken(String username) {
-        return Jwts
-                .builder()
-                .setSubject(username)
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration * 1000);
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
                 .signWith(getSignKey())
                 .compact();
     }
 
     public boolean validateToken(String token, String username) {
-        String tokenUsername = getUsernameFromToken(token);
-        return tokenUsername.equals(username) && !isTokenExpired(token);
+        try {
+            String tokenUsername = getUsernameFromToken(token);
+            return tokenUsername != null && tokenUsername.equals(username) && !isTokenExpired(token);
+        } catch (Exception ex) {
+            log.warn("Token validation failed: {}", ex.getMessage());
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        return getExpirationDateFromToken(token).before(new Date());
+        Date expiry = getExpirationDateFromToken(token);
+        return expiry != null && expiry.before(new Date());
     }
 }

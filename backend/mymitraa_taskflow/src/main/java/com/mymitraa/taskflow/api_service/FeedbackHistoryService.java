@@ -17,9 +17,9 @@ import java.util.List;
 
 public interface FeedbackHistoryService {
 
-    Object saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
+    FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
 
-    Object editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
+    FeedbackHistory editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
 
     Object getAllFeedback(SearchVM searchVM, Pageable pageable);
 

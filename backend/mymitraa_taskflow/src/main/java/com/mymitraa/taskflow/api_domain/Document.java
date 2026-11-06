@@ -1,15 +1,10 @@
 package com.mymitraa.taskflow.api_domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.time.LocalDateTime;
+import org.springframework.data.mongodb.core.mapping.Document;
 import java.io.Serializable;
+import java.util.Date;
 
-@Entity
-@Table(name = "documents")
+@Document(collection = "documents")
 public class Document extends BaseDomain implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,7 +13,7 @@ public class Document extends BaseDomain implements Serializable {
     private String originalName;
     private String filePath;
     private String fileType;
-    private LocalDateTime uploadDate;
+    private Date uploadDate;
     private String uploadedBy;
     private String status;
 
@@ -54,11 +49,11 @@ public class Document extends BaseDomain implements Serializable {
         this.fileType = fileType;
     }
 
-    public LocalDateTime getUploadDate() {
+    public Date getUploadDate() {
         return uploadDate;
     }
 
-    public void setUploadDate(LocalDateTime uploadDate) {
+    public void setUploadDate(Date uploadDate) {
         this.uploadDate = uploadDate;
     }
 

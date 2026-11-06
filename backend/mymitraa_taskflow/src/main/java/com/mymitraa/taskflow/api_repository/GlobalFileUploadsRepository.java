@@ -1,25 +1,45 @@
 package com.mymitraa.taskflow.api_repository;
 
 import com.mymitraa.taskflow.api_domain.GlobalFileUploads;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+@Repository
 public interface GlobalFileUploadsRepository extends MongoRepository<GlobalFileUploads, String> {
 
-    GlobalFileUploads findByCategory(String category);
+    GlobalFileUploads findByGlobalFileUploadsIdAndDeleteFlag(String id, Boolean deleteFlag);
 
-    GlobalFileUploads findByFileName(String fileName);
+    GlobalFileUploads findByIdAndDeleteFlag(String id, Boolean deleteFlag);
 
-    List<GlobalFileUploads> findByStatus(String status);
+    Page<GlobalFileUploads> findByCategoryInAndDeleteFlagAndOperationDateTimeBetweenOrderByIndexAsc(
+            Collection<String> categories, Boolean deleteFlag, Date startDate, Date endDate, Pageable pageable);
 
-    List<GlobalFileUploads> findByUploadedBy(String uploadedBy);
+    Page<GlobalFileUploads> findByCategoryInAndDeleteFlagOrderByIndexAsc(
+            Collection<String> categories, Boolean deleteFlag, Pageable pageable);
 
-    List<GlobalFileUploads> findByOperationDateTimeBetween(Date start, Date end);
+    Page<GlobalFileUploads> findByCategoryAndDeleteFlagAndOperationDateTimeBetweenOrderByIndexAsc(
+            String category, Boolean deleteFlag, Date startDate, Date endDate, Pageable pageable);
 
-    List<GlobalFileUploads> findByApprovedDateBetween(Date start, Date end);
+    Page<GlobalFileUploads> findByCategoryAndDeleteFlagOrderByIndexAsc(
+            String category, Boolean deleteFlag, Pageable pageable);
 
-    List<GlobalFileUploads> findByRejectionDateBetween(Date start, Date end);
+    Page<GlobalFileUploads> findByCategoryAndDeleteFlagAndOperationDateTimeBetweenOrderByModifiedDateTimeDesc(
+            String category, Boolean deleteFlag, Date startDate, Date endDate, Pageable pageable);
 
-    List<GlobalFileUploads> findByCategoryAndStatus(String category, String status);
+    Page<GlobalFileUploads> findByCategoryAndDeleteFlagOrderByModifiedDateTimeDesc(
+            String category, Boolean deleteFlag, Pageable pageable);
 
-    List<GlobalFileUploads> findByUploadedByAndStatus(String uploadedBy, String status);
+    Page<GlobalFileUploads> findByDeleteFlagAndOperationDateTimeBetweenOrderByIndexAsc(
+            Boolean deleteFlag, Date startDate, Date endDate, Pageable pageable);
+
+    Page<GlobalFileUploads> findByDeleteFlagOrderByIndexAsc(
+            String category, Boolean deleteFlag, Pageable pageable);
+
+    List<GlobalFileUploads> findByDeleteFlag(Boolean deleteFlag);
 }

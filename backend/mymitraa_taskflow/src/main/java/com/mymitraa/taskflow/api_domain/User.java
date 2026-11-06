@@ -1,22 +1,19 @@
 package com.mymitraa.taskflow.api_domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 public class User extends BaseDomain {
 
     private String username;
     private String password;
     private String email;
-    private boolean enabled;
+    private String name;
+    private boolean enabled = true;
+    private Set<String> roles = new HashSet<>();
 
-    // Getters and setters
     public String getUsername() {
         return username;
     }
@@ -41,11 +38,27 @@ public class User extends BaseDomain {
         this.email = email;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 }

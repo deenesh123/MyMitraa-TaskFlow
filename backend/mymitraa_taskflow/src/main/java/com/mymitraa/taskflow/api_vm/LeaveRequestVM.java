@@ -1,14 +1,14 @@
 package com.mymitraa.taskflow.api_vm;
 
 import java.io.Serializable;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class LeaveRequestVM implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Leave type is required")
     @Size(max = 100, message = "Leave type must not exceed 100 characters")
@@ -21,13 +21,15 @@ public class LeaveRequestVM implements Serializable {
     private String endDate;
 
     private String status;
+    private String requestedBy;
+    private String approvedBy;
+    private String comments;
 
-    // Getters and setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -61,5 +63,29 @@ public class LeaveRequestVM implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getRequestedBy() {
+        return requestedBy;
+    }
+
+    public void setRequestedBy(String requestedBy) {
+        this.requestedBy = requestedBy;
+    }
+
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }

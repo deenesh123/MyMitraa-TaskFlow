@@ -1,21 +1,16 @@
 package com.mymitraa.taskflow.api_domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.time.LocalDateTime;
+import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.Date;
 
-@Entity
-@Table(name = "tasks")
+@Document(collection = "tasks")
 public class Task extends BaseDomain {
 
     private String title;
     private String description;
     private String owner;
     private String assignee;
-    private LocalDateTime dueDate;
+    private Date dueDate;
     private String status;
 
     public String getTitle() {
@@ -50,11 +45,11 @@ public class Task extends BaseDomain {
         this.assignee = assignee;
     }
 
-    public LocalDateTime getDueDate() {
+    public Date getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDateTime dueDate) {
+    public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
 

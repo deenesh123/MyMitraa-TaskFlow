@@ -1,15 +1,12 @@
 package com.mymitraa.taskflow.api_vm;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.io.Serializable;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class DropdownManagementVM {
+public class DropdownManagementVM implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String id;
 
@@ -24,12 +21,57 @@ public class DropdownManagementVM {
     @Size(max = 100, message = "Sub value must not exceed 100 characters")
     private String subValue;
 
-    @Size(max = 100, message = "Module must not exceed 100 characters")
-    private String module;
+    private String category;
+    private String description;
 
-    @Size(max = 100, message = "Sub module must not exceed 100 characters")
-    private String subModule;
+    public DropdownManagementVM() {
+    }
 
-    @Size(max = 500, message = "Comments must not exceed 500 characters")
-    private String comments;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getSubValue() {
+        return subValue;
+    }
+
+    public void setSubValue(String subValue) {
+        this.subValue = subValue;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

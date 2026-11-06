@@ -95,6 +95,9 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     @Autowired
     private DropdownManagementRepository dropdownManagementRepository;
 
+    @Autowired
+    private SubtaskService subtaskService;
+
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
@@ -108,7 +111,7 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     private String fromEmail;
 
     @Override
-    public Object saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
+    public FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
         String methodName = "saveFeedback";
         log.info("{} {} {}", this.getClass(), methodName, Constants.START);
 
@@ -263,7 +266,7 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     }
 
     @Override
-    public Object editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
+    public FeedbackHistory editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
         String methodName = "editFeedback";
         log.info("{} {} {}", this.getClass(), methodName, Constants.START);
 
@@ -476,7 +479,7 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
 
     @Override
     public Object subTaskAdvanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails) {
-        return advanceSearch(searchVM, pageable, customUserDetails);
+        return subtaskService.advanceSearchSubtasks(searchVM, pageable);
     }
 
     @Override
@@ -565,24 +568,30 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
 
     @Override
     public Object addSubTask(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
-        return saveFeedback(feedbackHistoryVM, customUserDetails);
+        String parentId = feedbackHistoryVM.getFeedbackHistoryId() != null ? feedbackHistoryVM.getFeedbackHistoryId() : feedbackHistoryVM.getId();
+        return subtaskService.createSubtask(parentId, feedbackHistoryVM, customUserDetails);
     }
 
     @Override
     public Object updateSubTask(EpicVM epicVM, String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails) {
-        FeedbackHistory task = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
-        if (task != null) {
-            task.setEpic(epicVM.getEpic());
-            task.setSubModule(epicVM.getSubModule());
-            task.setModifiedDateTime(new Date());
-            return feedbackHistoryRepository.save(task);
-        }
-        return null;
+        FeedbackHistoryVM vm = new FeedbackHistoryVM();
+        vm.setSubject(epicVM.getSubject());
+        vm.setDescription(epicVM.getDescription());
+        vm.setModule(epicVM.getModule());
+        vm.setTeam(epicVM.getTeam());
+        vm.setTaskType(epicVM.getTaskType());
+        vm.setClassification(epicVM.getClassification());
+        vm.setEstimatedEffort(epicVM.getEstimatedEffort());
+        vm.setEstimatedStartDate(epicVM.getEstimatedStartDate());
+        vm.setEstimatedCloseDate(epicVM.getEstimatedCloseDate());
+        String targetSubtaskId = epicId != null ? epicId : feedbackHistoryId;
+        return subtaskService.updateSubtask(targetSubtaskId, vm, customUserDetails);
     }
 
     @Override
     public Object deleteSubTask(String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails) {
-        return deleteFeedbackById(feedbackHistoryId);
+        String targetSubtaskId = epicId != null ? epicId : feedbackHistoryId;
+        return subtaskService.deleteSubtask(targetSubtaskId, customUserDetails);
     }
 
     @Override

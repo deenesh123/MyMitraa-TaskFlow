@@ -1,35 +1,30 @@
 package com.mymitraa.taskflow.api_domain;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "dropdown_management")
-public class DropdownManagement {
+public class DropdownManagement extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    private String id;
     @Field("domain_name")
     private String domainName;
+
     @Field("value")
     private String value;
+
     @Field("sub_value")
     private String subValue;
+
+    @Field("module")
     private String module;
+
     @Field("sub_module")
     private String subModule;
+
     @Field("comments")
     private String comments;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getDomainName() {
         return domainName;

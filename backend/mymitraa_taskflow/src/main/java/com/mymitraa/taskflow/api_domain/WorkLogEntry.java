@@ -1,40 +1,37 @@
 package com.mymitraa.taskflow.api_domain;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Entity
-@Table(name = "work_log_entries")
-public class WorkLogEntry {
+public class WorkLogEntry implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     private String id;
 
-    @Field("feedback_history_id")
-    private String feedbackHistoryId;
+    @Field("date")
+    private Date date;
 
-    @Field("work_log_date")
-    private Date workLogDate;
-
-    @Field("hours_worked")
-    private Double hoursWorked;
+    @Field("hours")
+    private Double hours;
 
     @Field("description")
     private String description;
 
+    @Field("comments")
+    private String comments;
+
+    @Field("created_by")
+    private String createdBy;
+
+    @Field("created_on")
+    private Date createdOn;
+
     @Field("task_type")
     private String taskType;
-
-    @Field("sub_task_id")
-    private String subTaskId;
 
     public String getId() {
         return id;
@@ -44,36 +41,70 @@ public class WorkLogEntry {
         this.id = id;
     }
 
-    public String getFeedbackHistoryId() {
-        return feedbackHistoryId;
+    public Date getDate() {
+        return date;
     }
 
-    public void setFeedbackHistoryId(String feedbackHistoryId) {
-        this.feedbackHistoryId = feedbackHistoryId;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public Date getWorkLogDate() {
-        return workLogDate;
+        return date;
     }
 
     public void setWorkLogDate(Date workLogDate) {
-        this.workLogDate = workLogDate;
+        this.date = workLogDate;
+    }
+
+    public Double getHours() {
+        return hours != null ? hours : 0.0;
+    }
+
+    public void setHours(Double hours) {
+        this.hours = hours;
     }
 
     public Double getHoursWorked() {
-        return hoursWorked;
+        return getHours();
     }
 
     public void setHoursWorked(Double hoursWorked) {
-        this.hoursWorked = hoursWorked;
+        setHours(hoursWorked);
     }
 
     public String getDescription() {
-        return description;
+        return description != null ? description : comments;
     }
 
     public void setDescription(String description) {
         this.description = description;
+        if (this.comments == null) this.comments = description;
+    }
+
+    public String getComments() {
+        return comments != null ? comments : description;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+        if (this.description == null) this.description = comments;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 
     public String getTaskType() {
@@ -82,13 +113,5 @@ public class WorkLogEntry {
 
     public void setTaskType(String taskType) {
         this.taskType = taskType;
-    }
-
-    public String getSubTaskId() {
-        return subTaskId;
-    }
-
-    public void setSubTaskId(String subTaskId) {
-        this.subTaskId = subTaskId;
     }
 }

@@ -1,19 +1,15 @@
 package com.mymitraa.taskflow.api_domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.Date;
 
-@Entity
-@Table(name = "meetings")
+@Document(collection = "meetings")
 public class Meeting extends BaseDomain {
 
     private String title;
     private String description;
     private String owner;
-    private java.time.LocalDate date;
+    private Date date;
 
     public String getTitle() {
         return title;
@@ -39,11 +35,11 @@ public class Meeting extends BaseDomain {
         this.owner = owner;
     }
 
-    public java.time.LocalDate getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(java.time.LocalDate date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 }

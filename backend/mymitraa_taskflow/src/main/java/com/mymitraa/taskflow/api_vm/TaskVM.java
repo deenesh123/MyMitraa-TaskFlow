@@ -1,14 +1,14 @@
 package com.mymitraa.taskflow.api_vm;
 
 import java.io.Serializable;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class TaskVM implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Task title is required")
     @Size(max = 200, message = "Task title must not exceed 200 characters")
@@ -27,11 +27,11 @@ public class TaskVM implements Serializable {
     private java.time.LocalDateTime dueDate;
 
     // Getters and setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -1,21 +1,13 @@
 package com.mymitraa.taskflow.api_domain;
 
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Entity
-@Table(name = "global_file_uploads")
-public class GlobalFileUploads {
+@Document(collection = "global_file_uploads")
+public class GlobalFileUploads extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
-
-    @Id
-    private String id;
 
     @Field("category")
     private String category;
@@ -41,6 +33,9 @@ public class GlobalFileUploads {
     @Field("status")
     private String status;
 
+    @Field("approved")
+    private Boolean approved = false;
+
     @Field("approved_by")
     private String approvedBy;
 
@@ -56,13 +51,8 @@ public class GlobalFileUploads {
     @Field("description")
     private String description;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Field("index")
+    private Double index;
 
     public String getCategory() {
         return category;
@@ -128,6 +118,14 @@ public class GlobalFileUploads {
         this.status = status;
     }
 
+    public Boolean getApproved() {
+        return approved;
+    }
+
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
+    }
+
     public String getApprovedBy() {
         return approvedBy;
     }
@@ -166,5 +164,13 @@ public class GlobalFileUploads {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Double getIndex() {
+        return index;
+    }
+
+    public void setIndex(Double index) {
+        this.index = index;
     }
 }

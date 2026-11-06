@@ -1,21 +1,16 @@
 package com.mymitraa.taskflow.api_domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.time.LocalDateTime;
+import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.Date;
 
-@Entity
-@Table(name = "timeline_entries")
+@Document(collection = "timeline_entries")
 public class TimelineEntry extends BaseDomain {
 
     private String title;
     private String description;
     private String relatedEntityType;
-    private Long relatedEntityId;
-    private LocalDateTime eventDate;
+    private String relatedEntityId;
+    private Date eventDate;
     private String eventType;
     private String performedBy;
 
@@ -43,19 +38,19 @@ public class TimelineEntry extends BaseDomain {
         this.relatedEntityType = relatedEntityType;
     }
 
-    public Long getRelatedEntityId() {
+    public String getRelatedEntityId() {
         return relatedEntityId;
     }
 
-    public void setRelatedEntityId(Long relatedEntityId) {
+    public void setRelatedEntityId(String relatedEntityId) {
         this.relatedEntityId = relatedEntityId;
     }
 
-    public LocalDateTime getEventDate() {
+    public Date getEventDate() {
         return eventDate;
     }
 
-    public void setEventDate(LocalDateTime eventDate) {
+    public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
     }
 

@@ -1,11 +1,18 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.FilesDownloadedCountDomain;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
-import com.mymitraa.taskflow.api_successcode.SuccessCode;
+import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
+import com.mymitraa.taskflow.api_vm.SearchVM;
+import com.mymitraa.taskflow.security.CustomUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Date;
 
 public interface GlobalFileUploadsService {
 
-    Object uploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails);
+    CustomResponse uploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails);
 
     Object getUploadedFiles(SearchVM dateRangeVM, Pageable pageable);
 
@@ -52,6 +59,4 @@ public interface GlobalFileUploadsService {
     Object updatePlantImport12Data(SearchVM searchVM, CustomUserDetails customUserDetails);
 
     Object removeAboveDataOtherthanImportData(CustomUserDetails customUserDetails, Date operationDateTime);
-
-    Object automaticProcessWithoutImport(SearchVM searchVM, CustomUserDetails customUserDetails);
 }

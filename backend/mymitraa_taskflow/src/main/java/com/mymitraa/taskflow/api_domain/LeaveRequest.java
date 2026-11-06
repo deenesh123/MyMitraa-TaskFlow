@@ -1,23 +1,18 @@
 package com.mymitraa.taskflow.api_domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.time.LocalDate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.Date;
 
-@Entity
-@Table(name = "leave_requests")
+@Document(collection = "leave_requests")
 public class LeaveRequest extends BaseDomain {
 
     private String leaveType;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Date startDate;
+    private Date endDate;
     private String status;
     private String requestedBy;
     private String approvedBy;
-    private LocalDate approvedDate;
+    private Date approvedDate;
 
     public String getLeaveType() {
         return leaveType;
@@ -27,19 +22,19 @@ public class LeaveRequest extends BaseDomain {
         this.leaveType = leaveType;
     }
 
-    public LocalDate getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
@@ -67,11 +62,11 @@ public class LeaveRequest extends BaseDomain {
         this.approvedBy = approvedBy;
     }
 
-    public LocalDate getApprovedDate() {
+    public Date getApprovedDate() {
         return approvedDate;
     }
 
-    public void setApprovedDate(LocalDate approvedDate) {
+    public void setApprovedDate(Date approvedDate) {
         this.approvedDate = approvedDate;
     }
 }
