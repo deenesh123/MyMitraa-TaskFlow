@@ -119,4 +119,10 @@ public class DropdownManagementServiceImpl implements DropdownManagementService 
                 false, dropdownManagement.getDomainName(), dropdownManagement.getValue(),
                 dropdownManagement.getSubValue(), dropdownManagement.getModule(), dropdownManagement.getSubModule());
     }
+
+    @Override
+    public com.mymitraa.taskflow.api_domain.AdvanceSearchList getParamterList(CustomUserDetails customUserDetails) {
+        log.info("Getting dropdown parameter list");
+        return new com.mymitraa.taskflow.api_domain.AdvanceSearchList();
+    }
 }

@@ -20,6 +20,13 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (user != null && user.getRole() != null && !user.getRole().trim().isEmpty()) {
+            String roleName = user.getRole().trim().toUpperCase().replace(" ", "_");
+            if (!roleName.startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName;
+            }
+            return Collections.singletonList(new SimpleGrantedAuthority(roleName));
+        }
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 

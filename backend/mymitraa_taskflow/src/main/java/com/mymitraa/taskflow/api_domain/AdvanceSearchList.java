@@ -12,6 +12,7 @@ public class AdvanceSearchList implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private List<String> ticketNumbers = new ArrayList<>();
     private List<String> customers = new ArrayList<>();
     private List<String> projects = new ArrayList<>();
     private List<String> modules = new ArrayList<>();
@@ -23,6 +24,46 @@ public class AdvanceSearchList implements Serializable {
     private List<String> taskOwners = new ArrayList<>();
     private List<String> assignedBys = new ArrayList<>();
     private List<String> taskTypes = new ArrayList<>();
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final AdvanceSearchList list = new AdvanceSearchList();
+
+        public Builder ticketNumbers(List<String> ticketNumbers) {
+            list.setTicketNumbers(ticketNumbers);
+            return this;
+        }
+
+        public Builder statuses(List<String> statuses) {
+            list.setStatuses(statuses);
+            return this;
+        }
+
+        public Builder projects(List<String> projects) {
+            list.setProjects(projects);
+            return this;
+        }
+
+        public Builder modules(List<String> modules) {
+            list.setModules(modules);
+            return this;
+        }
+
+        public AdvanceSearchList build() {
+            return list;
+        }
+    }
+
+    public List<String> getTicketNumbers() {
+        return ticketNumbers;
+    }
+
+    public void setTicketNumbers(List<String> ticketNumbers) {
+        this.ticketNumbers = ticketNumbers;
+    }
 
     public AdvanceSearchList() {
     }

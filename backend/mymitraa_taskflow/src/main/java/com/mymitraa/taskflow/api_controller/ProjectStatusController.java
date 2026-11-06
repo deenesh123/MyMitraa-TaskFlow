@@ -59,7 +59,7 @@ public class ProjectStatusController {
     }
 
     @PutMapping(value = "/getAll")
-    public ResponseEntity<CustomResponse> getAll(@RequestBody Object searchVM) {
+    public ResponseEntity<CustomResponse> getAll(@RequestBody(required = false) Object searchVM, Pageable pageable) {
 
         log.info("get project statuses");
         Map<String, String> metaInfo = new HashMap<>();
@@ -68,7 +68,7 @@ public class ProjectStatusController {
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("PROJECT_STATUSES_FETCHED_SUCCESSFULLY",
                         "Project statuses fetched successfully",
-                        projectStatusService.fetchAll((Pageable) searchVM), metaInfo),
+                        projectStatusService.fetchAll(pageable), metaInfo),
                 HttpStatus.OK);
     }
 

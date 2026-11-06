@@ -32,4 +32,6 @@ public interface DropdownManagementService {
 
     Object getDropdownSubValueModule(DropdownManagement dropdownManagement,
             CustomUserDetails customUserDetails);
+
+    com.mymitraa.taskflow.api_domain.AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
 }

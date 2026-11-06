@@ -1,11 +1,15 @@
 package com.mymitraa.taskflow.api_repository;
 
+import java.util.Date;
+import java.util.List;
 import com.mymitraa.taskflow.api_domain.OptimaWeeklyUpdateTracker;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface OptimaWeeklyUpdateTrackerRepository extends MongoRepository<OptimaWeeklyUpdateTracker, String> {
 
     OptimaWeeklyUpdateTracker findByProjectName(String projectName);
+
+    List<OptimaWeeklyUpdateTracker> findByProjectNameContaining(String projectName);
 
     OptimaWeeklyUpdateTracker findByStatus(String status);
 

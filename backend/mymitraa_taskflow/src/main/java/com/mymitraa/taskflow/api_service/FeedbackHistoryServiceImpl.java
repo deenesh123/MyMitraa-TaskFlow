@@ -1,11 +1,14 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.FeedbackHistory;
 import com.mymitraa.taskflow.api_domain.WorkLogEntry;
 import com.mymitraa.taskflow.api_repository.FeedbackHistoryRepository;
 import com.mymitraa.taskflow.api_vm.AssignTaskVM;
+import com.mymitraa.taskflow.api_vm.EffortRecordVM;
 import com.mymitraa.taskflow.api_vm.EpicVM;
 import com.mymitraa.taskflow.api_vm.FeedbackHistoryVM;
+import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.security.CustomUserDetails;
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -27,7 +31,7 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     private FeedbackHistoryRepository feedbackHistoryRepository;
 
     @Override
-    public Object saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
+    public FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
         log.info("Saving feedback history");
         FeedbackHistory feedbackHistory = new FeedbackHistory();
         // Map VM to domain - preserve all fields
@@ -79,7 +83,7 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     }
 
     @Override
-    public Object editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
+    public FeedbackHistory editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
         log.info("Editing feedback history");
         return saveFeedback(feedbackHistoryVM, customUserDetails);
     }
@@ -121,7 +125,7 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     }
 
     @Override
-    public Object getParamterList(CustomUserDetails customUserDetails) {
+    public AdvanceSearchList getParamterList(CustomUserDetails customUserDetails) {
         log.info("Getting parameter list");
         return AdvanceSearchList.builder()
                 .ticketNumbers(findAllTicketNumbers())
@@ -224,6 +228,19 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     }
 
     @Override
+    public Object deleteSubTask(String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails) {
+        log.info("Deleting subtask for: {} with epic: {}", feedbackHistoryId, epicId);
+        FeedbackHistory feedback = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
+        if (feedback != null) {
+            feedback.setEpic(null);
+            feedback.setSubModule(null);
+            feedbackHistoryRepository.save(feedback);
+            return "Subtask deleted successfully";
+        }
+        return "Feedback not found";
+    }
+
+    @Override
     public Object getUploadedFiles(SearchVM dateRangeVM, Pageable pageable) {
         log.info("Getting uploaded files with date range: {}", dateRangeVM.getSearch());
         String search = dateRangeVM.getSearch();
@@ -287,6 +304,11 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
             return feedbackHistoryRepository.findByTicketNumberContainingOrSubjectContaining(search, search);
         }
         return feedbackHistoryRepository.findAll(pageable);
+    }
+
+    @Override
+    public Object addWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails) {
+        return saveWorklogHours(feedbackHistoryId, epicId, workLogEntry, customUserDetails);
     }
 
     @Override

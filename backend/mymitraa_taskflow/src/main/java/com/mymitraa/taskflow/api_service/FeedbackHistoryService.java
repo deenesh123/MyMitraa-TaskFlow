@@ -1,17 +1,27 @@
 package com.mymitraa.taskflow.api_service;
 
+import java.util.Date;
+import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.FeedbackHistory;
 import com.mymitraa.taskflow.api_domain.WorkLogEntry;
+import com.mymitraa.taskflow.api_vm.AssignTaskVM;
+import com.mymitraa.taskflow.api_vm.EffortRecordVM;
+import com.mymitraa.taskflow.api_vm.EpicVM;
 import com.mymitraa.taskflow.api_vm.FeedbackHistoryVM;
+import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
+import com.mymitraa.taskflow.security.CustomUserDetails;
 
 public interface FeedbackHistoryService {
 
-    Object saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
+    FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
 
-    Object editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
+    FeedbackHistory editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
 
     Object getAllFeedback(SearchVM searchVM, Pageable pageable);
 
@@ -21,7 +31,7 @@ public interface FeedbackHistoryService {
 
     Object getFeedbackNumericalCount();
 
-    Object getParamterList(CustomUserDetails customUserDetails);
+    AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
 
     Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails);
 
@@ -39,6 +49,8 @@ public interface FeedbackHistoryService {
 
     Object updateSubTask(EpicVM epicVM, String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails);
 
+    Object deleteSubTask(String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails);
+
     Object getUploadedFiles(SearchVM dateRangeVM, Pageable pageable);
 
     Object getAllTicketNumbers(CustomUserDetails customUserDetails);
@@ -52,6 +64,8 @@ public interface FeedbackHistoryService {
     Object uploadFileByTicketNumber(String ticketNumber, MultipartFile file, CustomUserDetails customUserDetails);
 
     Object getRecord(SearchVM searchVM, Pageable pageable);
+
+    Object addWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails);
 
     Object saveWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails);
 
