@@ -1,51 +1,35 @@
 package com.mymitraa.taskflow.api_vl;
 
 import java.io.Serializable;
-import java.util.List;
 
-/**
- * View model for Weekly Email request payloads sent via Zoho Mail SMTP.
- */
 public class MailRequestVM implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String to;
-    private List<String> cc;
-    private List<String> bcc;
+    private String toEmail;
+    private String ccEmail;
     private String subject;
-    private String body;
+    private String messageBody;
     private String projectName;
     private String weekNumber;
-    private String milestonesCompleted;
-    private String highlights;
-    private String nextWeekGoals;
 
     public MailRequestVM() {
     }
 
-    public String getTo() {
-        return to;
+    public String getToEmail() {
+        return toEmail;
     }
 
-    public void setTo(String to) {
-        this.to = to;
+    public void setToEmail(String toEmail) {
+        this.toEmail = toEmail;
     }
 
-    public List<String> getCc() {
-        return cc;
+    public String getCcEmail() {
+        return ccEmail;
     }
 
-    public void setCc(List<String> cc) {
-        this.cc = cc;
-    }
-
-    public List<String> getBcc() {
-        return bcc;
-    }
-
-    public void setBcc(List<String> bcc) {
-        this.bcc = bcc;
+    public void setCcEmail(String ccEmail) {
+        this.ccEmail = ccEmail;
     }
 
     public String getSubject() {
@@ -56,12 +40,12 @@ public class MailRequestVM implements Serializable {
         this.subject = subject;
     }
 
-    public String getBody() {
-        return body;
+    public String getMessageBody() {
+        return messageBody;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setMessageBody(String messageBody) {
+        this.messageBody = messageBody;
     }
 
     public String getProjectName() {
@@ -78,29 +62,5 @@ public class MailRequestVM implements Serializable {
 
     public void setWeekNumber(String weekNumber) {
         this.weekNumber = weekNumber;
-    }
-
-    public String getMilestonesCompleted() {
-        return milestonesCompleted;
-    }
-
-    public void setMilestonesCompleted(String milestonesCompleted) {
-        this.milestonesCompleted = milestonesCompleted;
-    }
-
-    public String getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(String highlights) {
-        this.highlights = highlights;
-    }
-
-    public String getNextWeekGoals() {
-        return nextWeekGoals;
-    }
-
-    public void setNextWeekGoals(String nextWeekGoals) {
-        this.nextWeekGoals = nextWeekGoals;
     }
 }

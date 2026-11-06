@@ -1,9 +1,11 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.OptimaLeaveTracker;
 import com.mymitraa.taskflow.api_vm.OptimaLeaveTrackerVM;
-import com.mymitraa.taskflow.api_successcode.CustomResponse;
-import com.mymitraa.taskflow.api_successcode.SuccessCode;
+import com.mymitraa.taskflow.api_vm.SearchVM;
+import com.mymitraa.taskflow.security.CustomUserDetails;
+import org.springframework.data.domain.Pageable;
 
 public interface OptimaLeaveTrackerService {
 
@@ -19,9 +21,11 @@ public interface OptimaLeaveTrackerService {
 
     Object download(OptimaLeaveTrackerVM optimaLeaveTrackerVm, CustomUserDetails customUserDetails);
 
-    Object getParamterList(CustomUserDetails customUserDetails);
+    AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
 
     Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails);
+
+    Object delete(String id, CustomUserDetails customUserDetails);
 
     Object dashboard(OptimaLeaveTrackerVM optimaLeaveTrackerVm, CustomUserDetails customUserDetails);
 }

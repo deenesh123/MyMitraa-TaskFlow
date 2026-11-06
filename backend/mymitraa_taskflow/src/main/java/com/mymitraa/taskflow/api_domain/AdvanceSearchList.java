@@ -5,76 +5,113 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Filter parameter options for advanced search dropdowns across TaskFlow modules.
+ * Data transfer object representing dropdown / search parameter lists
+ * used for advance search filters across TaskFlow modules.
  */
 public class AdvanceSearchList implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<String> customerList = new ArrayList<>();
-    private List<String> projectList = new ArrayList<>();
-    private List<String> teamList = new ArrayList<>();
-    private List<String> taskOwnerList = new ArrayList<>();
-    private List<String> statusList = new ArrayList<>();
-    private List<String> priorityList = new ArrayList<>();
-    private List<String> moduleList = new ArrayList<>();
+    private List<String> customers = new ArrayList<>();
+    private List<String> projects = new ArrayList<>();
+    private List<String> modules = new ArrayList<>();
+    private List<String> subModules = new ArrayList<>();
+    private List<String> epics = new ArrayList<>();
+    private List<String> statuses = new ArrayList<>();
+    private List<String> priorities = new ArrayList<>();
+    private List<String> teams = new ArrayList<>();
+    private List<String> taskOwners = new ArrayList<>();
+    private List<String> assignedBys = new ArrayList<>();
+    private List<String> taskTypes = new ArrayList<>();
 
     public AdvanceSearchList() {
     }
 
-    public List<String> getCustomerList() {
-        return customerList;
+    public List<String> getCustomers() {
+        return customers;
     }
 
-    public void setCustomerList(List<String> customerList) {
-        this.customerList = customerList;
+    public void setCustomers(List<String> customers) {
+        this.customers = customers;
     }
 
-    public List<String> getProjectList() {
-        return projectList;
+    public List<String> getProjects() {
+        return projects;
     }
 
-    public void setProjectList(List<String> projectList) {
-        this.projectList = projectList;
+    public void setProjects(List<String> projects) {
+        this.projects = projects;
     }
 
-    public List<String> getTeamList() {
-        return teamList;
+    public List<String> getModules() {
+        return modules;
     }
 
-    public void setTeamList(List<String> teamList) {
-        this.teamList = teamList;
+    public void setModules(List<String> modules) {
+        this.modules = modules;
     }
 
-    public List<String> getTaskOwnerList() {
-        return taskOwnerList;
+    public List<String> getSubModules() {
+        return subModules;
     }
 
-    public void setTaskOwnerList(List<String> taskOwnerList) {
-        this.taskOwnerList = taskOwnerList;
+    public void setSubModules(List<String> subModules) {
+        this.subModules = subModules;
     }
 
-    public List<String> getStatusList() {
-        return statusList;
+    public List<String> getEpics() {
+        return epics;
     }
 
-    public void setStatusList(List<String> statusList) {
-        this.statusList = statusList;
+    public void setEpics(List<String> epics) {
+        this.epics = epics;
     }
 
-    public List<String> getPriorityList() {
-        return priorityList;
+    public List<String> getStatuses() {
+        return statuses;
     }
 
-    public void setPriorityList(List<String> priorityList) {
-        this.priorityList = priorityList;
+    public void setStatuses(List<String> statuses) {
+        this.statuses = statuses;
     }
 
-    public List<String> getModuleList() {
-        return moduleList;
+    public List<String> getPriorities() {
+        return priorities;
     }
 
-    public void setModuleList(List<String> moduleList) {
-        this.moduleList = moduleList;
+    public void setPriorities(List<String> priorities) {
+        this.priorities = priorities;
+    }
+
+    public List<String> getTeams() {
+        return teams;
+    }
+
+    public void setTeams(List<String> teams) {
+        this.teams = teams;
+    }
+
+    public List<String> getTaskOwners() {
+        return taskOwners;
+    }
+
+    public void setTaskOwners(List<String> taskOwners) {
+        this.taskOwners = taskOwners;
+    }
+
+    public List<String> getAssignedBys() {
+        return assignedBys;
+    }
+
+    public void setAssignedBys(List<String> assignedBys) {
+        this.assignedBys = assignedBys;
+    }
+
+    public List<String> getTaskTypes() {
+        return taskTypes;
+    }
+
+    public void setTaskTypes(List<String> taskTypes) {
+        this.taskTypes = taskTypes;
     }
 }

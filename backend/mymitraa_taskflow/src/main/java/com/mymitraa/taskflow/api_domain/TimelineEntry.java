@@ -9,7 +9,7 @@ public class TimelineEntry extends BaseDomain {
     private String title;
     private String description;
     private String relatedEntityType;
-    private String relatedEntityId;
+    private Long relatedEntityId;
     private LocalDateTime eventDate;
     private String eventType;
     private String performedBy;
@@ -38,11 +38,11 @@ public class TimelineEntry extends BaseDomain {
         this.relatedEntityType = relatedEntityType;
     }
 
-    public String getRelatedEntityId() {
+    public Long getRelatedEntityId() {
         return relatedEntityId;
     }
 
-    public void setRelatedEntityId(String relatedEntityId) {
+    public void setRelatedEntityId(Long relatedEntityId) {
         this.relatedEntityId = relatedEntityId;
     }
 

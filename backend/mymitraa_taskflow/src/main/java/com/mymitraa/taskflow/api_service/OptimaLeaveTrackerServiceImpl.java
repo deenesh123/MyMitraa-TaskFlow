@@ -1,10 +1,13 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.OptimaLeaveTracker;
-import com.mymitraa.taskflow.api_domain.OptimaLeaveTrackerVM;
+import com.mymitraa.taskflow.api_vm.OptimaLeaveTrackerVM;
+import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.api_repository.OptimaLeaveTrackerRepository;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
+import com.mymitraa.taskflow.security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,20 +37,18 @@ public class OptimaLeaveTrackerServiceImpl implements OptimaLeaveTrackerService 
 
     @Override
     public Object fetchAll(String username, SearchVM searchVM) {
-        log.info("Fetching all OptimaLeaveTracker with search: {}", searchVM.getSearch());
-        String search = searchVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return optimaLeaveTrackerRepository.findByEmployeeNameContaining(search);
+        log.info("Fetching all OptimaLeaveTracker with search");
+        if (searchVM != null && searchVM.getSearch() != null && !searchVM.getSearch().isEmpty()) {
+            return optimaLeaveTrackerRepository.findByEmployeeNameContaining(searchVM.getSearch());
         }
         return optimaLeaveTrackerRepository.findAll();
     }
 
     @Override
     public Object getAllWithPagination(String username, SearchVM searchVM, Pageable pageable) {
-        log.info("Fetching OptimaLeaveTracker with pagination and search: {}", searchVM.getSearch());
-        String search = searchVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return optimaLeaveTrackerRepository.findByEmployeeNameContaining(search);
+        log.info("Fetching OptimaLeaveTracker with pagination");
+        if (searchVM != null && searchVM.getSearch() != null && !searchVM.getSearch().isEmpty()) {
+            return optimaLeaveTrackerRepository.findByEmployeeNameContaining(searchVM.getSearch());
         }
         return optimaLeaveTrackerRepository.findAll(pageable);
     }
@@ -62,7 +63,6 @@ public class OptimaLeaveTrackerServiceImpl implements OptimaLeaveTrackerService 
             existing.setEndDate(optimaLeaveTrackerVM.getEndDate());
             existing.setStatus(optimaLeaveTrackerVM.getStatus());
             existing.setTotalDays(optimaLeaveTrackerVM.getTotalDays());
-            existing.setComments(optimaLeaveTrackerVM.getComments());
             return optimaLeaveTrackerRepository.save(existing);
         }
         return null;
@@ -75,15 +75,22 @@ public class OptimaLeaveTrackerServiceImpl implements OptimaLeaveTrackerService 
     }
 
     @Override
-    public Object getParamterList(CustomUserDetails customUserDetails) {
+    public AdvanceSearchList getParamterList(CustomUserDetails customUserDetails) {
         log.info("Getting parameter list for OptimaLeaveTracker");
-        return java.util.Collections.emptyList();
+        return new AdvanceSearchList();
     }
 
     @Override
     public Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails) {
         log.info("Advance search for OptimaLeaveTracker");
         return optimaLeaveTrackerRepository.findAll(pageable);
+    }
+
+    @Override
+    public Object delete(String id, CustomUserDetails customUserDetails) {
+        log.info("Deleting OptimaLeaveTracker: {}", id);
+        optimaLeaveTrackerRepository.deleteById(id);
+        return id;
     }
 
     @Override

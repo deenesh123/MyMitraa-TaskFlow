@@ -1,30 +1,22 @@
 package com.mymitraa.taskflow.api_vm;
 
 import java.io.Serializable;
+import java.util.Date;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * View model for Optima Weekly Update Tracker requests.
- */
 public class OptimaWeeklyUpdateTrackerVM implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private String id;
     private String projectName;
-    private String customer;
-    private String projectManager;
-    private String projectLead;
+    private String updateTitle;
+    private String updateDescription;
+    private Date updateDate;
     private String status;
-    private String overallStatus;
-    private String weekNumber;
-    private String milestonesCompleted;
-    private String keyHighlights;
-    private String challenges;
-    private String nextWeekPlan;
-    private String ragStatus;
-    private String comments;
-    private MultipartFile[] files;
+    private Integer weekNumber;
+    private Integer year;
+    private MultipartFile file;
 
     public OptimaWeeklyUpdateTrackerVM() {
     }
@@ -45,28 +37,28 @@ public class OptimaWeeklyUpdateTrackerVM implements Serializable {
         this.projectName = projectName;
     }
 
-    public String getCustomer() {
-        return customer;
+    public String getUpdateTitle() {
+        return updateTitle;
     }
 
-    public void setCustomer(String customer) {
-        this.customer = customer;
+    public void setUpdateTitle(String updateTitle) {
+        this.updateTitle = updateTitle;
     }
 
-    public String getProjectManager() {
-        return projectManager;
+    public String getUpdateDescription() {
+        return updateDescription;
     }
 
-    public void setProjectManager(String projectManager) {
-        this.projectManager = projectManager;
+    public void setUpdateDescription(String updateDescription) {
+        this.updateDescription = updateDescription;
     }
 
-    public String getProjectLead() {
-        return projectLead;
+    public Date getUpdateDate() {
+        return updateDate;
     }
 
-    public void setProjectLead(String projectLead) {
-        this.projectLead = projectLead;
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
     }
 
     public String getStatus() {
@@ -77,75 +69,27 @@ public class OptimaWeeklyUpdateTrackerVM implements Serializable {
         this.status = status;
     }
 
-    public String getOverallStatus() {
-        return overallStatus;
-    }
-
-    public void setOverallStatus(String overallStatus) {
-        this.overallStatus = overallStatus;
-    }
-
-    public String getWeekNumber() {
+    public Integer getWeekNumber() {
         return weekNumber;
     }
 
-    public void setWeekNumber(String weekNumber) {
+    public void setWeekNumber(Integer weekNumber) {
         this.weekNumber = weekNumber;
     }
 
-    public String getMilestonesCompleted() {
-        return milestonesCompleted;
+    public Integer getYear() {
+        return year;
     }
 
-    public void setMilestonesCompleted(String milestonesCompleted) {
-        this.milestonesCompleted = milestonesCompleted;
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
-    public String getKeyHighlights() {
-        return keyHighlights;
+    public MultipartFile getFile() {
+        return file;
     }
 
-    public void setKeyHighlights(String keyHighlights) {
-        this.keyHighlights = keyHighlights;
-    }
-
-    public String getChallenges() {
-        return challenges;
-    }
-
-    public void setChallenges(String challenges) {
-        this.challenges = challenges;
-    }
-
-    public String getNextWeekPlan() {
-        return nextWeekPlan;
-    }
-
-    public void setNextWeekPlan(String nextWeekPlan) {
-        this.nextWeekPlan = nextWeekPlan;
-    }
-
-    public String getRagStatus() {
-        return ragStatus;
-    }
-
-    public void setRagStatus(String ragStatus) {
-        this.ragStatus = ragStatus;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public MultipartFile[] getFiles() {
-        return files;
-    }
-
-    public void setFiles(MultipartFile[] files) {
-        this.files = files;
+    public void setFile(MultipartFile file) {
+        this.file = file;
     }
 }

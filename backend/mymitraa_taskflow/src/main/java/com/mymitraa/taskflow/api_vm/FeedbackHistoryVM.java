@@ -1,14 +1,10 @@
 package com.mymitraa.taskflow.api_vm;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
-
-import org.springframework.web.multipart.MultipartFile;
 import com.mymitraa.taskflow.api_domain.WorkLogEntry;
 
-/**
- * View Model for Feedback History / Task requests.
- */
 public class FeedbackHistoryVM implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -16,23 +12,41 @@ public class FeedbackHistoryVM implements Serializable {
     private String id;
     private String ticketNumber;
     private String subject;
+    private String comments;
     private String description;
     private String status;
     private String priority;
     private String project;
     private String module;
     private String subModule;
+    private String epic;
     private String customer;
+    private String userStories;
     private String team;
+    private String taskType;
     private String taskOwner;
     private String assignedBy;
-    private String estimatedStartDate;
-    private String estimatedCloseDate;
+    private String classification;
+    private String category;
+    private String categoryDescription;
     private Double estimatedEffort;
     private Double actualEffort;
-    private String comments;
+    private Double productivitySavings;
+    private String whoReported;
+    private String reviewerComments;
+    private String reviewedBy;
+    private Date estimatedStartDate;
+    private Date estimatedCloseDate;
+    private Date actualStartDate;
+    private Date actualCloseDate;
+    private Date dateAssigned;
+    private String fileName;
+    private List<String> attachments;
     private List<WorkLogEntry> workLogEntries;
-    private MultipartFile[] files;
+    private Boolean uploaded;
+    private String taskDescription;
+    private Integer subtaskCount;
+    private Date lastSubtaskUpdate;
 
     public FeedbackHistoryVM() {
     }
@@ -59,6 +73,14 @@ public class FeedbackHistoryVM implements Serializable {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public String getDescription() {
@@ -109,6 +131,14 @@ public class FeedbackHistoryVM implements Serializable {
         this.subModule = subModule;
     }
 
+    public String getEpic() {
+        return epic;
+    }
+
+    public void setEpic(String epic) {
+        this.epic = epic;
+    }
+
     public String getCustomer() {
         return customer;
     }
@@ -117,12 +147,28 @@ public class FeedbackHistoryVM implements Serializable {
         this.customer = customer;
     }
 
+    public String getUserStories() {
+        return userStories;
+    }
+
+    public void setUserStories(String userStories) {
+        this.userStories = userStories;
+    }
+
     public String getTeam() {
         return team;
     }
 
     public void setTeam(String team) {
         this.team = team;
+    }
+
+    public String getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
     }
 
     public String getTaskOwner() {
@@ -141,20 +187,28 @@ public class FeedbackHistoryVM implements Serializable {
         this.assignedBy = assignedBy;
     }
 
-    public String getEstimatedStartDate() {
-        return estimatedStartDate;
+    public String getClassification() {
+        return classification;
     }
 
-    public void setEstimatedStartDate(String estimatedStartDate) {
-        this.estimatedStartDate = estimatedStartDate;
+    public void setClassification(String classification) {
+        this.classification = classification;
     }
 
-    public String getEstimatedCloseDate() {
-        return estimatedCloseDate;
+    public String getCategory() {
+        return category;
     }
 
-    public void setEstimatedCloseDate(String estimatedCloseDate) {
-        this.estimatedCloseDate = estimatedCloseDate;
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getCategoryDescription() {
+        return categoryDescription;
+    }
+
+    public void setCategoryDescription(String categoryDescription) {
+        this.categoryDescription = categoryDescription;
     }
 
     public Double getEstimatedEffort() {
@@ -173,12 +227,92 @@ public class FeedbackHistoryVM implements Serializable {
         this.actualEffort = actualEffort;
     }
 
-    public String getComments() {
-        return comments;
+    public Double getProductivitySavings() {
+        return productivitySavings;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setProductivitySavings(Double productivitySavings) {
+        this.productivitySavings = productivitySavings;
+    }
+
+    public String getWhoReported() {
+        return whoReported;
+    }
+
+    public void setWhoReported(String whoReported) {
+        this.whoReported = whoReported;
+    }
+
+    public String getReviewerComments() {
+        return reviewerComments;
+    }
+
+    public void setReviewerComments(String reviewerComments) {
+        this.reviewerComments = reviewerComments;
+    }
+
+    public String getReviewedBy() {
+        return reviewedBy;
+    }
+
+    public void setReviewedBy(String reviewedBy) {
+        this.reviewedBy = reviewedBy;
+    }
+
+    public Date getEstimatedStartDate() {
+        return estimatedStartDate;
+    }
+
+    public void setEstimatedStartDate(Date estimatedStartDate) {
+        this.estimatedStartDate = estimatedStartDate;
+    }
+
+    public Date getEstimatedCloseDate() {
+        return estimatedCloseDate;
+    }
+
+    public void setEstimatedCloseDate(Date estimatedCloseDate) {
+        this.estimatedCloseDate = estimatedCloseDate;
+    }
+
+    public Date getActualStartDate() {
+        return actualStartDate;
+    }
+
+    public void setActualStartDate(Date actualStartDate) {
+        this.actualStartDate = actualStartDate;
+    }
+
+    public Date getActualCloseDate() {
+        return actualCloseDate;
+    }
+
+    public void setActualCloseDate(Date actualCloseDate) {
+        this.actualCloseDate = actualCloseDate;
+    }
+
+    public Date getDateAssigned() {
+        return dateAssigned;
+    }
+
+    public void setDateAssigned(Date dateAssigned) {
+        this.dateAssigned = dateAssigned;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public List<String> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<String> attachments) {
+        this.attachments = attachments;
     }
 
     public List<WorkLogEntry> getWorkLogEntries() {
@@ -189,11 +323,35 @@ public class FeedbackHistoryVM implements Serializable {
         this.workLogEntries = workLogEntries;
     }
 
-    public MultipartFile[] getFiles() {
-        return files;
+    public Boolean getUploaded() {
+        return uploaded;
     }
 
-    public void setFiles(MultipartFile[] files) {
-        this.files = files;
+    public void setUploaded(Boolean uploaded) {
+        this.uploaded = uploaded;
+    }
+
+    public String getTaskDescription() {
+        return taskDescription;
+    }
+
+    public void setTaskDescription(String taskDescription) {
+        this.taskDescription = taskDescription;
+    }
+
+    public Integer getSubtaskCount() {
+        return subtaskCount;
+    }
+
+    public void setSubtaskCount(Integer subtaskCount) {
+        this.subtaskCount = subtaskCount;
+    }
+
+    public Date getLastSubtaskUpdate() {
+        return lastSubtaskUpdate;
+    }
+
+    public void setLastSubtaskUpdate(Date lastSubtaskUpdate) {
+        this.lastSubtaskUpdate = lastSubtaskUpdate;
     }
 }

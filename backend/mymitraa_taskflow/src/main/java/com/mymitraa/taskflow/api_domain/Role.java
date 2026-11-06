@@ -8,7 +8,7 @@ public class Role extends BaseDomain {
 
     private String name;
 
-    private Set<String> userIds;
+    private Set<User> users;
 
     public String getName() {
         return name;
@@ -18,11 +18,11 @@ public class Role extends BaseDomain {
         this.name = name;
     }
 
-    public Set<String> getUserIds() {
-        return userIds;
+    public Set<User> getUsers() {
+        return users;
     }
 
-    public void setUserIds(Set<String> userIds) {
-        this.userIds = userIds;
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

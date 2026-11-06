@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Standard API response wrapper matching original PM-TOOL / MyMitraa TaskFlow specification.
+ * Standard API response wrapper for MyMitraa TaskFlow REST controllers.
+ * Mirrors the legacy PM-TOOL CustomResponse contract.
  */
 public class CustomResponse implements Serializable {
 
@@ -22,17 +23,40 @@ public class CustomResponse implements Serializable {
         this.metaInfo = new HashMap<>();
     }
 
+    public CustomResponse(String successCode, String successMessage, Object data) {
+        this.successCode = successCode;
+        this.successMessage = successMessage;
+        this.data = data;
+        this.message = successCode;
+        this.metaInfo = new HashMap<>();
+    }
+
     public CustomResponse(String successCode, String successMessage, Object data, Map<String, ?> metaInfo) {
         this.successCode = successCode;
         this.successMessage = successMessage;
         this.data = data;
         this.metaInfo = metaInfo != null ? metaInfo : new HashMap<>();
-        this.code = 200;
         this.message = successCode;
     }
 
-    public CustomResponse(String successCode, String successMessage, Object data) {
-        this(successCode, successMessage, data, new HashMap<>());
+    public CustomResponse(SuccessCode successCode, Object data) {
+        if (successCode != null) {
+            this.successCode = successCode.getSuccessCode();
+            this.successMessage = successCode.getSuccessMessage();
+            this.message = successCode.getSuccessCode();
+        }
+        this.data = data;
+        this.metaInfo = new HashMap<>();
+    }
+
+    public CustomResponse(SuccessCode successCode, Object data, Map<String, ?> metaInfo) {
+        if (successCode != null) {
+            this.successCode = successCode.getSuccessCode();
+            this.successMessage = successCode.getSuccessMessage();
+            this.message = successCode.getSuccessCode();
+        }
+        this.data = data;
+        this.metaInfo = metaInfo != null ? metaInfo : new HashMap<>();
     }
 
     public String getSuccessCode() {
@@ -41,7 +65,6 @@ public class CustomResponse implements Serializable {
 
     public void setSuccessCode(String successCode) {
         this.successCode = successCode;
-        this.message = successCode;
     }
 
     public String getSuccessMessage() {

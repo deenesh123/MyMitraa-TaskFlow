@@ -1,19 +1,23 @@
 package com.mymitraa.taskflow.config;
 
+import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import java.util.Properties;
-
 /**
- * Server-side Zoho Mail SMTP configuration for Spring Boot.
- * Reads ZOHO_SMTP_* credentials from environment variables.
+ * Zoho Mail SMTP Spring Configuration.
+ * Configures JavaMailSender with protected environment variables.
+ * Supports port 465 (SMTPS / SSL) and port 587 (STARTTLS).
  */
 @Configuration
 public class ZohoMailConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(ZohoMailConfig.class);
 
     @Value("${spring.mail.host:smtp.zoho.com}")
     private String host;
@@ -27,25 +31,46 @@ public class ZohoMailConfig {
     @Value("${spring.mail.password:}")
     private String password;
 
+    @Value("${spring.mail.properties.mail.smtp.auth:true}")
+    private boolean auth;
+
+    @Value("${spring.mail.properties.mail.smtp.ssl.enable:true}")
+    private boolean sslEnable;
+
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable:false}")
+    private boolean starttlsEnable;
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host);
         mailSender.setPort(port);
-        mailSender.setUsername(username);
-        mailSender.setPassword(password);
-        mailSender.setDefaultEncoding("UTF-8");
+
+        if (username != null && !username.trim().isEmpty()) {
+            mailSender.setUsername(username.trim());
+        }
+        if (password != null && !password.trim().isEmpty()) {
+            mailSender.setPassword(password.trim());
+        }
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtps");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", port == 465 ? "true" : "false");
-        props.put("mail.smtp.starttls.enable", port == 587 ? "true" : "false");
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", String.valueOf(auth));
         props.put("mail.smtp.connectiontimeout", "5000");
         props.put("mail.smtp.timeout", "5000");
         props.put("mail.smtp.writetimeout", "5000");
-        props.put("mail.debug", "false");
 
+        if (port == 465 || sslEnable) {
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.socketFactory.port", String.valueOf(port));
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            props.put("mail.smtp.socketFactory.fallback", "false");
+        } else if (port == 587 || starttlsEnable) {
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+        }
+
+        log.info("Initialized JavaMailSender for Zoho Mail host: {}, port: {}, ssl: {}", host, port, sslEnable);
         return mailSender;
     }
 }

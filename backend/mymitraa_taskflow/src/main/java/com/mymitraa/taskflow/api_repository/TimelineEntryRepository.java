@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface TimelineEntryRepository extends MongoRepository<TimelineEntry, String> {
 
-    List<TimelineEntry> findByRelatedEntityTypeAndRelatedEntityId(String relatedEntityType, String relatedEntityId);
+    List<TimelineEntry> findByRelatedEntityType(String relatedEntityType);
     List<TimelineEntry> findByEventDateBetween(LocalDateTime start, LocalDateTime end);
 }

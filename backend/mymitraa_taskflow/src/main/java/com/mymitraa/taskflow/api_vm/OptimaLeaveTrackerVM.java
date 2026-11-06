@@ -1,48 +1,25 @@
-package com.mymitraa.taskflow.api_domain;
+package com.mymitraa.taskflow.api_vm;
 
+import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import org.springframework.data.mongodb.core.mapping.Field;
 
-@Entity
-@Table(name = "optima_leave_tracker")
-public class OptimaLeaveTracker {
+public class OptimaLeaveTrackerVM implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
     private String id;
-
-    @Field("employee_name")
     private String employeeName;
-
-    @Field("leave_type")
     private String leaveType;
-
-    @Field("start_date")
     private Date startDate;
-
-    @Field("end_date")
     private Date endDate;
-
-    @Field("status")
     private String status;
-
-    @Field("total_days")
     private Double totalDays;
-
-    @Field("approved_by")
     private String approvedBy;
-
-    @Field("approved_date")
     private Date approvedDate;
+    private String reason;
 
-    @Field("comments")
-    private String comments;
+    public OptimaLeaveTrackerVM() {
+    }
 
     public String getId() {
         return id;
@@ -116,11 +93,11 @@ public class OptimaLeaveTracker {
         this.approvedDate = approvedDate;
     }
 
-    public String getComments() {
-        return comments;
+    public String getReason() {
+        return reason;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

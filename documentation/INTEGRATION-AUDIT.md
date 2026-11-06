@@ -18,7 +18,7 @@
 
 ### Clarification of Development Preview vs Authoritative Production Backend
 - **Development Tooling / Vite Environment**: The AI Studio container runs on Node.js 22. In this development container, `server.ts` alongside `server/db.ts` provides a localized Express mock/preview API backed by `data/mymitraa_taskflow.json`. This enables full interactive React frontend testing, UI validation, and simulated/live Zoho SMTP testing on port 3000.
-- **Production Authoritative Backend**: The production backend is **Java 21 Spring Boot 3.3.4** located in `/backend/mymitraa_taskflow/` with target database **MongoDB** (`mymitraa_taskflow`). The JSON file database in `data/` is strictly a development tool and **must never be used as a production database**.
+- **Production Authoritative Backend**: The production backend is **Java 21 Spring Boot 3.3.4** located in `/backend/mymitraa_taskflow/` with target database **MongoDB** (`mymitraa_taskflow`). The JSON file database in `data/` is strictly a development preview tool and **must never be used as a production database**.
 
 ---
 
@@ -29,16 +29,20 @@ The imported Java backend in `/backend/mymitraa_taskflow/` has undergone complet
 1. **Namespace Migration (`javax.*` to `jakarta.*`)**:
    - `javax.servlet.*` replaced with `jakarta.servlet.*` across all security filters (`JwtAuthenticationFilter.java`, `WebSecurityConfiguration.java`).
    - `javax.validation.*` replaced with `jakarta.validation.*` across controllers and view models (`DropdownManagementVM.java`, `LeaveRequestVM.java`, `MeetingVM.java`, `SearchVM.java`, `TaskVM.java`, `GlobalFileUploadsController.java`).
-   - `javax.crypto.*` maintained from the standard Java SE runtime library (`java.base`).
+   - Standard Java SE runtime libraries (`javax.crypto.SecretKey`, `javax.net.ssl.SSLSocketFactory`) correctly preserved without external container dependencies.
 
 2. **Spring Security 6 Configuration**:
    - Deprecated `@EnableGlobalMethodSecurity(prePostEnabled = true)` eliminated; upgraded to `@EnableMethodSecurity(prePostEnabled = true)` in `MyMitraaTaskFlowApplication.java` and `WebSecurityConfiguration.java`.
    - Security filter chain modernized to Spring Security 6 Lambda DSL (`authorizeHttpRequests()`, `sessionManagement()`, `csrf()`).
-   - Stateless JWT authentication enforced on all `/api/**` endpoints, with public access granted solely to `/api/auth/**` and initial `/api/dropdowns/**`.
+   - Stateless JWT authentication enforced on all `/api/**` endpoints, with public access granted solely to `/api/auth/**`, `/api/dropdowns/**`, and `/actuator/**`.
 
 3. **Package Unification**:
    - Every Java source file in `src/main/java` was migrated from the legacy package (`com.kelltontech.optima`) to the approved package `com.mymitraa.taskflow`.
    - All imports, annotations, and service bindings now strictly target `com.mymitraa.taskflow.*`.
+
+4. **Maven Configuration (`pom.xml`)**:
+   - Standalone `pom.xml` configured for Java 21 (`<release>21</release>`) and Spring Boot 3.3.4.
+   - Includes starters for `spring-boot-starter-web`, `spring-boot-starter-data-mongodb`, `spring-boot-starter-security`, `spring-boot-starter-validation`, `spring-boot-starter-mail`, and `io.jsonwebtoken:jjwt-api:0.12.6`.
 
 ---
 
@@ -48,7 +52,7 @@ The legacy codebase originally mixed JPA annotations (`javax.persistence.Entity`
 
 1. **Entity Mappings to Spring Data MongoDB**:
    - `BaseDomain.java`: Annotated with `@org.springframework.data.annotation.Id private String id`.
-   - `FeedbackHistory.java`: `@Document(collection = "feedback_history")`
+   - `FeedbackHistory.java`: `@Document(collection = "feedback")`
    - `GlobalFileUploads.java`: `@Document(collection = "global_file_uploads")`
    - `OptimaLeaveTracker.java`: `@Document(collection = "optima_leave_tracker")`
    - `OptimaWeeklyUpdateTracker.java`: `@Document(collection = "optima_weekly_update_tracker")`
@@ -67,7 +71,7 @@ The legacy codebase originally mixed JPA annotations (`javax.persistence.Entity`
 
 | Module # | Module Name | Java Controller | Service & Impl | Mongo Repository | Mongo Collection | Status |
 |---|---|---|---|---|---|---|
-| 1 | **Feedback History** | `FeedbackHistoryController` | `FeedbackHistoryService` / `Impl` | `FeedbackHistoryRepository` | `feedback_history` | Implemented |
+| 1 | **Feedback History** | `FeedbackHistoryController` | `FeedbackHistoryService` / `Impl` | `FeedbackHistoryRepository` | `feedback` | Implemented |
 | 2 | **Global File Uploads** | `GlobalFileUploadsController` | `GlobalFileUploadsService` / `Impl` | `GlobalFileUploadsRepository` | `global_file_uploads` | Implemented |
 | 3 | **Optima Leave Tracker** | `OptimaLeaveTrackerController` | `OptimaLeaveTrackerService` / `Impl` | `OptimaLeaveTrackerRepository` | `optima_leave_tracker` | Implemented |
 | 4 | **Optima Weekly Update Tracker** | `OptimaWeeklyUpdateTrackerController` | `OptimaWeeklyUpdateTrackerService` / `Impl` | `OptimaWeeklyUpdateTrackerRepository` | `optima_weekly_update_tracker` | Implemented |

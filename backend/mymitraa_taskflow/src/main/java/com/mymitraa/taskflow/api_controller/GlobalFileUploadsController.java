@@ -35,7 +35,7 @@ import com.mymitraa.taskflow.api_util.StringUtil;
 import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
 import com.mymitraa.taskflow.config.Constants;
 import com.mymitraa.taskflow.security.CustomUserDetails;
-import com.mymitraa.taskflow.web.rest.vm.SearchVM;
+import com.mymitraa.taskflow.api_vm.SearchVM;
 
 @RestController
 @RequestMapping("/api/global_uploads")

@@ -1,9 +1,16 @@
 package com.mymitraa.taskflow.security;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.mymitraa.taskflow.api_domain.User;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public class CustomUserDetails implements UserDetails {
+
+    private static final long serialVersionUID = 1L;
 
     private final User user;
 
@@ -12,13 +19,18 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
     public String getUsername() {
-        return user.getUsername();
+        return user != null ? user.getUsername() : "anonymous";
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return user != null ? user.getPassword() : "";
     }
 
     @Override
@@ -38,10 +50,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isEnabled();
+        return user != null && user.isEnabled();
     }
 
-    // Additional methods to get user information
     public User getUser() {
         return user;
     }
