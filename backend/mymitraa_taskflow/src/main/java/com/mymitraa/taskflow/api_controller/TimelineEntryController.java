@@ -51,7 +51,7 @@ public class TimelineEntryController {
     }
 
     @PutMapping(value = "/getAll")
-    public ResponseEntity<CustomResponse> getAll(@RequestBody(required = false) Object searchVM, Pageable pageable) {
+    public ResponseEntity<CustomResponse> getAll(@RequestBody Object searchVM) {
 
         log.info("get timeline entries");
         Map<String, String> metaInfo = new HashMap<>();
@@ -60,7 +60,7 @@ public class TimelineEntryController {
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("TIMELINE_ENTRIES_FETCHED_SUCCESSFULLY",
                         "Timeline entries fetched successfully",
-                        timelineEntryService.fetchAll(pageable), metaInfo),
+                        timelineEntryService.fetchAll((Pageable) searchVM), metaInfo),
                 HttpStatus.OK);
     }
 

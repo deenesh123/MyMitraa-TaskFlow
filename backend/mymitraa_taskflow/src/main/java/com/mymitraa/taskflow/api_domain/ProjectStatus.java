@@ -1,8 +1,13 @@
 package com.mymitraa.taskflow.api_domain;
 
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-@Document(collection = "project_status")
+@Entity
+@Table(name = "project_status")
 public class ProjectStatus extends BaseDomain {
 
     private String title;

@@ -1,17 +1,29 @@
 package com.mymitraa.taskflow.api_domain;
 
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "optima_weekly_update_tracker")
-public class OptimaWeeklyUpdateTracker {
+public class OptimaWeeklyUpdateTracker implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     private String id;
+
+    @Field("project_id")
+    private String projectId;
 
     @Field("project_name")
     private String projectName;
@@ -22,11 +34,110 @@ public class OptimaWeeklyUpdateTracker {
     @Field("update_description")
     private String updateDescription;
 
-    @Field("update_date")
-    private Date updateDate;
+    @Field("customer_name")
+    private String customerName;
+
+    @Field("customer_geography")
+    private String customerGeography;
+
+    @Field("industry")
+    private String industry;
+
+    @Field("project_status")
+    private String projectStatus;
 
     @Field("status")
     private String status;
+
+    @Field("priority")
+    private String priority;
+
+    @Field("current_status")
+    private String currentStatus;
+
+    @Field("last_week_status")
+    private String lastWeekStatus;
+
+    @Field("current_state")
+    private String currentState;
+
+    @Field("project_summery")
+    private String projectSummery;
+
+    @Field("risk")
+    private String risk;
+
+    @Field("kt_provider")
+    private String ktProvider;
+
+    @Field("code_base")
+    private String codeBase;
+
+    @Field("dev_url")
+    private String devUrl;
+
+    @Field("qa_url")
+    private String qaUrl;
+
+    @Field("la_url")
+    private String laUrl;
+
+    @Field("other_url")
+    private String otherUrl;
+
+    @Field("dev_arrow")
+    private boolean devArrow;
+
+    @Field("qa_arrow")
+    private boolean qaArrow;
+
+    @Field("la_arrow")
+    private boolean laArrow;
+
+    @Field("other_arrow")
+    private boolean otherArrow;
+
+    @Field("documentation")
+    private String documentation;
+
+    @Field("hld_link")
+    private String hldLink;
+
+    @Field("lld_link")
+    private String lldLink;
+
+    @Field("hld_attachment")
+    private String hldAttachment;
+
+    @Field("lld_attachment")
+    private String lldAttachment;
+
+    @Field("total_env")
+    private String totalEnv;
+
+    @Field("ref")
+    private String ref;
+
+    @Field("start_date")
+    private Date startDate;
+
+    @Field("end_date")
+    private Date endDate;
+
+    @Field("project_start_date")
+    private Date projectStartDate;
+
+    @Field("go_live_date")
+    private Date goLiveDate;
+
+    @Field("weekly_start_date")
+    private String weeklyStartDate;
+
+    @Field("weekly_end_date")
+    private String weeklyEndDate;
+
+    @Field("update_date")
+    private Date updateDate;
 
     @Field("updated_by")
     private String updatedBy;
@@ -37,75 +148,42 @@ public class OptimaWeeklyUpdateTracker {
     @Field("year")
     private Integer year;
 
-    public String getId() {
-        return id;
-    }
+    @Field("task_owner")
+    private String taskOwner;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Field("team")
+    private String team;
 
-    public String getProjectName() {
-        return projectName;
-    }
+    @Field("be_developers")
+    private List<String> beDevelopers;
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
+    @Field("fe_developers")
+    private List<String> feDevelopers;
 
-    public String getUpdateTitle() {
-        return updateTitle;
-    }
+    @Field("python_developers")
+    private List<String> pythonDevelopers;
 
-    public void setUpdateTitle(String updateTitle) {
-        this.updateTitle = updateTitle;
-    }
+    @Field("testers")
+    private List<String> testers;
 
-    public String getUpdateDescription() {
-        return updateDescription;
-    }
+    @Field("ux_designers")
+    private List<String> uxDesigners;
 
-    public void setUpdateDescription(String updateDescription) {
-        this.updateDescription = updateDescription;
-    }
+    @Field("shared_resources")
+    private List<String> sharedResources;
 
-    public Date getUpdateDate() {
-        return updateDate;
-    }
+    @Field("delete_flag")
+    private Boolean deleteFlag = false;
 
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
-    }
+    @Field("created_on")
+    private Date createdOn;
 
-    public String getStatus() {
-        return status;
-    }
+    @Field("created_by")
+    private String createdBy;
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    @Field("modified_date_time")
+    private Date modifiedDateTime;
 
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public Integer getWeekNumber() {
-        return weekNumber;
-    }
-
-    public void setWeekNumber(Integer weekNumber) {
-        this.weekNumber = weekNumber;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
+    @Field("modified_by")
+    private String modifiedBy;
 }

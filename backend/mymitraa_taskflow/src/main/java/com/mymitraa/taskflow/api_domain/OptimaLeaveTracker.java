@@ -1,20 +1,28 @@
 package com.mymitraa.taskflow.api_domain;
 
-import java.util.Date;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.Serializable;
+import java.util.Date;
+
 @Document(collection = "optima_leave_tracker")
-public class OptimaLeaveTracker {
+public class OptimaLeaveTracker implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     private String id;
 
+    @Field("name")
+    private String name;
+
     @Field("employee_name")
     private String employeeName;
+
+    @Field("role")
+    private String role;
 
     @Field("leave_type")
     private String leaveType;
@@ -40,6 +48,21 @@ public class OptimaLeaveTracker {
     @Field("comments")
     private String comments;
 
+    @Field("delete_flag")
+    private Boolean deleteFlag = false;
+
+    @Field("created_on")
+    private Date createdOn;
+
+    @Field("created_by")
+    private String createdBy;
+
+    @Field("modified_date_time")
+    private Date modifiedDateTime;
+
+    @Field("modified_by")
+    private String modifiedBy;
+
     public String getId() {
         return id;
     }
@@ -48,12 +71,30 @@ public class OptimaLeaveTracker {
         this.id = id;
     }
 
+    public String getName() {
+        return name != null ? name : employeeName;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        if (this.employeeName == null) this.employeeName = name;
+    }
+
     public String getEmployeeName() {
-        return employeeName;
+        return employeeName != null ? employeeName : name;
     }
 
     public void setEmployeeName(String employeeName) {
         this.employeeName = employeeName;
+        if (this.name == null) this.name = employeeName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getLeaveType() {
@@ -118,5 +159,45 @@ public class OptimaLeaveTracker {
 
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    public Boolean getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Boolean deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getModifiedDateTime() {
+        return modifiedDateTime;
+    }
+
+    public void setModifiedDateTime(Date modifiedDateTime) {
+        this.modifiedDateTime = modifiedDateTime;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

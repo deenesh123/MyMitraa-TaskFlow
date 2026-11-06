@@ -4,7 +4,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ import com.mymitraa.taskflow.api_util.StringUtil;
 import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
 import com.mymitraa.taskflow.config.Constants;
 import com.mymitraa.taskflow.security.CustomUserDetails;
-import com.mymitraa.taskflow.api_vm.SearchVM;
+import com.mymitraa.taskflow.web.rest.vm.SearchVM;
 
 @RestController
 @RequestMapping("/api/global_uploads")

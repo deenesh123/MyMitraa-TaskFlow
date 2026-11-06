@@ -1,13 +1,20 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.DropdownManagement;
 import com.mymitraa.taskflow.api_repository.DropdownManagementRepository;
 import com.mymitraa.taskflow.api_vm.DropdownManagementVM;
+import com.mymitraa.taskflow.config.Constants;
 import com.mymitraa.taskflow.security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -21,11 +28,14 @@ public class DropdownManagementServiceImpl implements DropdownManagementService 
     @Autowired
     private DropdownManagementRepository dropdownManagementRepository;
 
+    @Autowired
+    private MongoOperations mongoOperation;
+
     @Override
     public Object save(DropdownManagement obj, CustomUserDetails customUserDetails) {
-        log.info("Saving DropdownManagement item: {}", obj.getDomainName());
-        obj.setCreatedOn(new Date());
+        log.info("Saving DropdownManagement: {}", obj.getDomainName());
         obj.setDeleteFlag(false);
+        obj.setCreatedOn(new Date());
         if (customUserDetails != null) {
             obj.setCreatedBy(customUserDetails.getUsername());
         }
@@ -34,95 +44,123 @@ public class DropdownManagementServiceImpl implements DropdownManagementService 
 
     @Override
     public Object getById(String id, CustomUserDetails customUserDetails) {
-        log.info("Getting DropdownManagement by id: {}", id);
-        return dropdownManagementRepository.findByDeleteFlagAndId(false, id);
+        log.info("Fetching DropdownManagement by ID: {}", id);
+        return dropdownManagementRepository.findById(id).orElse(null);
     }
 
     @Override
     public Object fetchAll(String username, Object searchVM) {
-        log.info("Fetching all active DropdownManagement items");
-        return dropdownManagementRepository.findAll();
+        log.info("Fetching all DropdownManagement items");
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        query.with(Sort.by(Sort.Direction.ASC, "domain_name", "value"));
+        return mongoOperation.find(query, DropdownManagement.class);
     }
 
     @Override
     public Object getAllWithPagination(String username, Object searchVM, Pageable pageable) {
         log.info("Fetching DropdownManagement items with pagination");
-        return dropdownManagementRepository.findAll(pageable);
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        query.with(pageable);
+        return mongoOperation.find(query, DropdownManagement.class);
     }
 
     @Override
     public Object delete(String id, CustomUserDetails customUserDetails) {
-        log.info("Soft-deleting DropdownManagement item: {}", id);
-        DropdownManagement item = dropdownManagementRepository.findById(id).orElse(null);
-        if (item != null) {
-            item.setDeleteFlag(true);
-            item.setUpdatedOn(new Date());
+        log.info("Deleting DropdownManagement ID: {}", id);
+        DropdownManagement existing = dropdownManagementRepository.findById(id).orElse(null);
+        if (existing != null) {
+            existing.setDeleteFlag(true);
+            existing.setDeletedOn(new Date());
             if (customUserDetails != null) {
-                item.setUpdatedBy(customUserDetails.getUsername());
+                existing.setDeletedBy(customUserDetails.getUsername());
             }
-            dropdownManagementRepository.save(item);
+            dropdownManagementRepository.save(existing);
+            return true;
         }
-        return id;
-    }
-
-    @Override
-    public Object download(DropdownManagementVM obj, CustomUserDetails customUserDetails) {
-        log.info("Downloading DropdownManagement data");
-        return dropdownManagementRepository.findAll();
+        return false;
     }
 
     @Override
     public Object update(String id, DropdownManagementVM obj, CustomUserDetails customUserDetails) {
-        log.info("Updating DropdownManagement item: {}", id);
-        DropdownManagement item = dropdownManagementRepository.findById(id).orElse(null);
-        if (item != null) {
-            item.setDomainName(obj.getDomainName());
-            item.setValue(obj.getValue());
-            item.setSubValue(obj.getSubValue());
-            item.setModule(obj.getModule());
-            item.setSubModule(obj.getSubModule());
-            item.setUpdatedOn(new Date());
+        log.info("Updating DropdownManagement ID: {}", id);
+        DropdownManagement existing = dropdownManagementRepository.findById(id).orElse(null);
+        if (existing != null) {
+            if (obj.getDomainName() != null) existing.setDomainName(obj.getDomainName());
+            if (obj.getValue() != null) existing.setValue(obj.getValue());
+            if (obj.getSubValue() != null) existing.setSubValue(obj.getSubValue());
+            if (obj.getModule() != null) existing.setModule(obj.getModule());
+            if (obj.getSubModule() != null) existing.setSubModule(obj.getSubModule());
+            if (obj.getComments() != null) existing.setComments(obj.getComments());
+            existing.setModifiedDateTime(new Date());
             if (customUserDetails != null) {
-                item.setUpdatedBy(customUserDetails.getUsername());
+                existing.setModifiedBy(customUserDetails.getUsername());
             }
-            return dropdownManagementRepository.save(item);
+            return dropdownManagementRepository.save(existing);
         }
         return null;
     }
 
     @Override
+    public Object download(DropdownManagementVM obj, CustomUserDetails customUserDetails) {
+        log.info("Exporting DropdownManagement data");
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        if (obj != null && obj.getDomainName() != null && !obj.getDomainName().isEmpty()) {
+            query.addCriteria(Criteria.where("domain_name").is(obj.getDomainName()));
+        }
+        return mongoOperation.find(query, DropdownManagement.class);
+    }
+
+    @Override
     public Object getDropdown(DropdownManagement dropdownManagement, CustomUserDetails customUserDetails) {
-        log.info("Querying Dropdown by domain and value");
-        return dropdownManagementRepository.findByDeleteFlagAndDomainNameAndValueOrderByCreatedOnDesc(
-                false, dropdownManagement.getDomainName(), dropdownManagement.getValue());
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        if (dropdownManagement.getDomainName() != null) {
+            query.addCriteria(Criteria.where("domain_name").is(dropdownManagement.getDomainName()));
+        }
+        return mongoOperation.find(query, DropdownManagement.class);
     }
 
     @Override
     public Object getDropdownSubValue(DropdownManagement dropdownManagement, CustomUserDetails customUserDetails) {
-        log.info("Querying Dropdown by domain, value, and subValue");
-        return dropdownManagementRepository.findByDeleteFlagAndDomainNameAndValueAndSubValueOrderByCreatedOnDesc(
-                false, dropdownManagement.getDomainName(), dropdownManagement.getValue(), dropdownManagement.getSubValue());
-    }
-
-    @Override
-    public Object getDropdownSubValueModule(DropdownManagement dropdownManagement, CustomUserDetails customUserDetails) {
-        log.info("Querying Dropdown by domain, value, subValue, and module");
-        return dropdownManagementRepository.findByDeleteFlagAndDomainNameAndValueAndSubValueAndModuleOrderByCreatedOnDesc(
-                false, dropdownManagement.getDomainName(), dropdownManagement.getValue(),
-                dropdownManagement.getSubValue(), dropdownManagement.getModule());
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        if (dropdownManagement.getDomainName() != null) {
+            query.addCriteria(Criteria.where("domain_name").is(dropdownManagement.getDomainName()));
+        }
+        if (dropdownManagement.getValue() != null) {
+            query.addCriteria(Criteria.where("value").is(dropdownManagement.getValue()));
+        }
+        return mongoOperation.find(query, DropdownManagement.class);
     }
 
     @Override
     public Object getDropdownSubValueModuleSubModule(DropdownManagement dropdownManagement, CustomUserDetails customUserDetails) {
-        log.info("Querying Dropdown by domain, value, subValue, module, and subModule");
-        return dropdownManagementRepository.findByDeleteFlagAndDomainNameAndValueAndSubValueAndModuleAndSubModuleOrderByCreatedOnDesc(
-                false, dropdownManagement.getDomainName(), dropdownManagement.getValue(),
-                dropdownManagement.getSubValue(), dropdownManagement.getModule(), dropdownManagement.getSubModule());
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        if (dropdownManagement.getDomainName() != null) query.addCriteria(Criteria.where("domain_name").is(dropdownManagement.getDomainName()));
+        if (dropdownManagement.getModule() != null) query.addCriteria(Criteria.where("module").is(dropdownManagement.getModule()));
+        if (dropdownManagement.getSubModule() != null) query.addCriteria(Criteria.where("sub_module").is(dropdownManagement.getSubModule()));
+        return mongoOperation.find(query, DropdownManagement.class);
     }
 
     @Override
-    public com.mymitraa.taskflow.api_domain.AdvanceSearchList getParamterList(CustomUserDetails customUserDetails) {
-        log.info("Getting dropdown parameter list");
-        return new com.mymitraa.taskflow.api_domain.AdvanceSearchList();
+    public Object getDropdownSubValueModule(DropdownManagement dropdownManagement, CustomUserDetails customUserDetails) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        if (dropdownManagement.getDomainName() != null) query.addCriteria(Criteria.where("domain_name").is(dropdownManagement.getDomainName()));
+        if (dropdownManagement.getModule() != null) query.addCriteria(Criteria.where("module").is(dropdownManagement.getModule()));
+        return mongoOperation.find(query, DropdownManagement.class);
+    }
+
+    @Override
+    public AdvanceSearchList getParamterList(CustomUserDetails customUserDetails) {
+        log.info("Fetching DropdownManagement parameters");
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false).and("tableName").is("DropdownManagement"));
+        AdvanceSearchList list = mongoOperation.findOne(query, AdvanceSearchList.class);
+        return list;
     }
 }

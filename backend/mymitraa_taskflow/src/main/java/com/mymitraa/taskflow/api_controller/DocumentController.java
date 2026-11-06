@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,7 +68,7 @@ public class DocumentController {
     }
 
     @PutMapping(value = "/getAll")
-    public ResponseEntity<CustomResponse> getAll(@RequestBody(required = false) Object searchVM, Pageable pageable) {
+    public ResponseEntity<CustomResponse> getAll(@RequestBody Object searchVM) {
 
         log.info("get documents");
         Map<String, String> metaInfo = new HashMap<>();
@@ -78,7 +77,7 @@ public class DocumentController {
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("DOCUMENTS_FETCHED_SUCCESSFULLY",
                         "Documents fetched successfully",
-                        documentService.fetchAll(pageable), metaInfo),
+                        documentService.fetchAll((Pageable) searchVM), metaInfo),
                 HttpStatus.OK);
     }
 

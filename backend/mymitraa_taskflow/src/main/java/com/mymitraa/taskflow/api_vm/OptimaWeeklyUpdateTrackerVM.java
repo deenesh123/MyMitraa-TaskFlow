@@ -1,95 +1,59 @@
 package com.mymitraa.taskflow.api_vm;
 
-import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
-import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
-public class OptimaWeeklyUpdateTrackerVM implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OptimaWeeklyUpdateTrackerVM {
     private String id;
+    private String projectId;
     private String projectName;
-    private String updateTitle;
-    private String updateDescription;
-    private Date updateDate;
+    private String customerName;
+    private String customerGeography;
+    private String industry;
+    private String projectStatus;
     private String status;
-    private Integer weekNumber;
-    private Integer year;
-    private MultipartFile file;
-
-    public OptimaWeeklyUpdateTrackerVM() {
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public String getUpdateTitle() {
-        return updateTitle;
-    }
-
-    public void setUpdateTitle(String updateTitle) {
-        this.updateTitle = updateTitle;
-    }
-
-    public String getUpdateDescription() {
-        return updateDescription;
-    }
-
-    public void setUpdateDescription(String updateDescription) {
-        this.updateDescription = updateDescription;
-    }
-
-    public Date getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Integer getWeekNumber() {
-        return weekNumber;
-    }
-
-    public void setWeekNumber(Integer weekNumber) {
-        this.weekNumber = weekNumber;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public MultipartFile getFile() {
-        return file;
-    }
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
-    }
+    private String priority;
+    private String currentStatus;
+    private String lastWeekStatus;
+    private String currentState;
+    private String projectSummery;
+    private String risk;
+    private String ktProvider;
+    private String codeBase;
+    private String devUrl;
+    private String qaUrl;
+    private String laUrl;
+    private String otherUrl;
+    private boolean devArrow;
+    private boolean qaArrow;
+    private boolean laArrow;
+    private boolean otherArrow;
+    private String documentation;
+    private String hldLink;
+    private String lldLink;
+    private String hldAttachment;
+    private String lldAttachment;
+    private String totalEnv;
+    private String ref;
+    private Date startDate;
+    private Date endDate;
+    private Date projectStartDate;
+    private Date goLiveDate;
+    private String weeklyStartDate;
+    private String weeklyEndDate;
+    private String taskOwner;
+    private String team;
+    private List<String> beDevelopers;
+    private List<String> feDevelopers;
+    private List<String> pythonDevelopers;
+    private List<String> testers;
+    private List<String> uxDesigners;
+    private List<String> sharedResources;
 }

@@ -1,11 +1,9 @@
 package com.mymitraa.taskflow.api_repository;
 
 import com.mymitraa.taskflow.api_domain.Document;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface DocumentRepository extends MongoRepository<Document, String> {
+public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     Document findByFilename(String filename);
     Document findByUploadedBy(String uploadedBy);

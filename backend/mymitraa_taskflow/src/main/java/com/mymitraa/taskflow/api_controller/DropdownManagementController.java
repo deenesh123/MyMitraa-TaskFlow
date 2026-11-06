@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -134,59 +135,5 @@ public class DropdownManagementController {
         metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getServiceName());
 
         return dropdownManagementService.getParamterList(customUserDetails);
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<CustomResponse> delete(@PathVariable("id") String id,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        log.info("Deleting DropdownManagement Details using id: " + id);
-        Map<String, String> metaInfo = new HashMap<>();
-        metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DROPDOWN_MANAGEMENT_DELETED_SUCCESSFULLY.getServiceName());
-
-        return new ResponseEntity<CustomResponse>(
-                new CustomResponse(SuccessCode.DROPDOWN_MANAGEMENT_DELETED_SUCCESSFULLY.getSuccessCode(),
-                        SuccessCode.DROPDOWN_MANAGEMENT_DELETED_SUCCESSFULLY.getSuccessMessage(),
-                        dropdownManagementService.delete(id, customUserDetails), metaInfo),
-                HttpStatus.OK);
-    }
-
-    @PostMapping("/dropdown")
-    public ResponseEntity<CustomResponse> getDropdown(@RequestBody DropdownManagement dropdownManagement,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Map<String, String> metaInfo = new HashMap<>();
-        metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getServiceName());
-        return new ResponseEntity<>(new CustomResponse(SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessCode(),
-                SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessMessage(),
-                dropdownManagementService.getDropdown(dropdownManagement, customUserDetails), metaInfo), HttpStatus.OK);
-    }
-
-    @PostMapping("/dropdown-subvalue")
-    public ResponseEntity<CustomResponse> getDropdownSubValue(@RequestBody DropdownManagement dropdownManagement,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Map<String, String> metaInfo = new HashMap<>();
-        metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getServiceName());
-        return new ResponseEntity<>(new CustomResponse(SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessCode(),
-                SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessMessage(),
-                dropdownManagementService.getDropdownSubValue(dropdownManagement, customUserDetails), metaInfo), HttpStatus.OK);
-    }
-
-    @PostMapping("/dropdown-subvalue-module")
-    public ResponseEntity<CustomResponse> getDropdownSubValueModule(@RequestBody DropdownManagement dropdownManagement,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Map<String, String> metaInfo = new HashMap<>();
-        metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getServiceName());
-        return new ResponseEntity<>(new CustomResponse(SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessCode(),
-                SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessMessage(),
-                dropdownManagementService.getDropdownSubValueModule(dropdownManagement, customUserDetails), metaInfo), HttpStatus.OK);
-    }
-
-    @PostMapping("/dropdown-subvalue-module-submodule")
-    public ResponseEntity<CustomResponse> getDropdownSubValueModuleSubModule(@RequestBody DropdownManagement dropdownManagement,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Map<String, String> metaInfo = new HashMap<>();
-        metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getServiceName());
-        return new ResponseEntity<>(new CustomResponse(SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessCode(),
-                SuccessCode.DROPDOWN_MANAGEMENT_FETCHED_SUCCESSFULLY.getSuccessMessage(),
-                dropdownManagementService.getDropdownSubValueModuleSubModule(dropdownManagement, customUserDetails), metaInfo), HttpStatus.OK);
     }
 }

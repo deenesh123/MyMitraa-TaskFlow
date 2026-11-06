@@ -1,10 +1,5 @@
 package com.mymitraa.taskflow.api_service;
 
-import java.util.Date;
-import java.util.List;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.FeedbackHistory;
 import com.mymitraa.taskflow.api_domain.WorkLogEntry;
 import com.mymitraa.taskflow.api_vm.AssignTaskVM;
@@ -13,15 +8,18 @@ import com.mymitraa.taskflow.api_vm.EpicVM;
 import com.mymitraa.taskflow.api_vm.FeedbackHistoryVM;
 import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
-import com.mymitraa.taskflow.api_successcode.CustomResponse;
-import com.mymitraa.taskflow.api_successcode.SuccessCode;
 import com.mymitraa.taskflow.security.CustomUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Date;
+import java.util.List;
 
 public interface FeedbackHistoryService {
 
-    FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
+    Object saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
 
-    FeedbackHistory editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
+    Object editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails);
 
     Object getAllFeedback(SearchVM searchVM, Pageable pageable);
 
@@ -31,7 +29,7 @@ public interface FeedbackHistoryService {
 
     Object getFeedbackNumericalCount();
 
-    AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
+    Object getParamterList(CustomUserDetails customUserDetails);
 
     Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails);
 
@@ -65,9 +63,9 @@ public interface FeedbackHistoryService {
 
     Object getRecord(SearchVM searchVM, Pageable pageable);
 
-    Object addWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails);
-
     Object saveWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails);
+
+    Object addWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntries, CustomUserDetails customUserDetails);
 
     Object chronProcessed(CustomUserDetails customUserDetails);
 

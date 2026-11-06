@@ -1,14 +1,7 @@
 package com.mymitraa.taskflow.api_service;
 
-import java.util.Date;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-import com.mymitraa.taskflow.api_domain.FilesDownloadedCountDomain;
-import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
-import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
-import com.mymitraa.taskflow.security.CustomUserDetails;
 
 public interface GlobalFileUploadsService {
 
@@ -42,7 +35,7 @@ public interface GlobalFileUploadsService {
 
     Object automaticUploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails);
 
-    Object chronProcessedWithDateWithOutVfm(CustomUserDetails customUserDetails, Date operationDateTime);
+    Object chronProcessedWithDateWithOutVfm(CustomUserDetails customUserDetails, String operationDateTime);
 
     Object chronProcessedForExtraTable(CustomUserDetails customUserDetails);
 
@@ -60,13 +53,5 @@ public interface GlobalFileUploadsService {
 
     Object removeAboveDataOtherthanImportData(CustomUserDetails customUserDetails, Date operationDateTime);
 
-    Object updateTableData(CustomUserDetails customUserDetails);
-
-    Object toAvoidDuplicatesImportFiles(SearchVM searchVM, CustomUserDetails customUserDetails);
-
-    Object getGlobalImportDropdownLists(CustomUserDetails customUserDetails, Date operationDateTime);
-
-    Object MechanicalIntegrityFileUpload(MultipartFile multipartFile, String category, Date inspectionDate, String description, CustomUserDetails customUserDetails);
-
-    Object getMechanicalIntegrityUploadedFiles(SearchVM dateRangeVM, Pageable pageable);
+    Object automaticProcessWithoutImport(SearchVM searchVM, CustomUserDetails customUserDetails);
 }

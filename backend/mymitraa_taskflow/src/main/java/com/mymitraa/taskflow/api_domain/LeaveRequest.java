@@ -1,9 +1,14 @@
 package com.mymitraa.taskflow.api_domain;
 
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDate;
 
-@Document(collection = "leave_requests")
+@Entity
+@Table(name = "leave_requests")
 public class LeaveRequest extends BaseDomain {
 
     private String leaveType;

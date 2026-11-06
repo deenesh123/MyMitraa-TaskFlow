@@ -1,11 +1,8 @@
 package com.mymitraa.taskflow.api_service;
 
-import com.mymitraa.taskflow.api_domain.FilesDownloadedCountDomain;
 import com.mymitraa.taskflow.api_domain.GlobalFileUploads;
 import com.mymitraa.taskflow.api_repository.GlobalFileUploadsRepository;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
-import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
-import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import java.util.Date;
 import java.util.List;
 
@@ -147,7 +143,7 @@ public class GlobalFileUploadsServiceImpl implements GlobalFileUploadsService {
     }
 
     @Override
-    public Object chronProcessedWithDateWithOutVfm(CustomUserDetails customUserDetails, Date operationDateTime) {
+    public Object chronProcessedWithDateWithOutVfm(CustomUserDetails customUserDetails, String operationDateTime) {
         log.info("Processing chron without VFM with date: {}", operationDateTime);
         return "Chron process completed without VFM";
     }
@@ -199,45 +195,5 @@ public class GlobalFileUploadsServiceImpl implements GlobalFileUploadsService {
     public Object removeAboveDataOtherthanImportData(CustomUserDetails customUserDetails, Date operationDateTime) {
         log.info("Removing above data other than import data with date: {}", operationDateTime);
         return "Data removal completed";
-    }
-
-    @Override
-    public Object updateTableData(CustomUserDetails customUserDetails) {
-        log.info("Updating table data for user: {}", customUserDetails != null ? customUserDetails.getUsername() : "system");
-        return "Table data updated";
-    }
-
-    @Override
-    public Object toAvoidDuplicatesImportFiles(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Avoiding duplicate import files");
-        return "Duplicate validation completed";
-    }
-
-    @Override
-    public Object getGlobalImportDropdownLists(CustomUserDetails customUserDetails, Date operationDateTime) {
-        log.info("Fetching global import dropdown list");
-        return java.util.Collections.emptyList();
-    }
-
-    @Override
-    public Object MechanicalIntegrityFileUpload(MultipartFile multipartFile, String category, Date inspectionDate, String description, CustomUserDetails customUserDetails) {
-        log.info("Uploading mechanical integrity file: {}", multipartFile.getOriginalFilename());
-        GlobalFileUploads upload = new GlobalFileUploads();
-        upload.setCategory(category);
-        upload.setFileName(multipartFile.getOriginalFilename());
-        upload.setOriginalFileName(multipartFile.getOriginalFilename());
-        upload.setOperationDateTime(inspectionDate);
-        upload.setDescription(description);
-        upload.setStatus("UPLOADED");
-        if (customUserDetails != null) {
-            upload.setUploadedBy(customUserDetails.getUsername());
-        }
-        return globalFileUploadsRepository.save(upload);
-    }
-
-    @Override
-    public Object getMechanicalIntegrityUploadedFiles(SearchVM dateRangeVM, Pageable pageable) {
-        log.info("Fetching mechanical integrity uploaded files");
-        return globalFileUploadsRepository.findByStatus("UPLOADED", pageable).getContent();
     }
 }

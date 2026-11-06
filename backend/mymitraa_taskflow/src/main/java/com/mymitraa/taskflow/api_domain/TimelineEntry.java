@@ -1,9 +1,14 @@
 package com.mymitraa.taskflow.api_domain;
 
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
-@Document(collection = "timeline_entries")
+@Entity
+@Table(name = "timeline_entries")
 public class TimelineEntry extends BaseDomain {
 
     private String title;

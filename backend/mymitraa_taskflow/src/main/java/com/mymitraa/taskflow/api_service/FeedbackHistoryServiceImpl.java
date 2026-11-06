@@ -1,443 +1,840 @@
 package com.mymitraa.taskflow.api_service;
 
 import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
+import com.mymitraa.taskflow.api_domain.DropdownManagement;
 import com.mymitraa.taskflow.api_domain.FeedbackHistory;
+import com.mymitraa.taskflow.api_domain.MeetingTimeTracker;
+import com.mymitraa.taskflow.api_domain.OptimaLeaveTracker;
+import com.mymitraa.taskflow.api_domain.TaskOwnerEmail;
 import com.mymitraa.taskflow.api_domain.WorkLogEntry;
+import com.mymitraa.taskflow.api_errors.CustomExceptionCode;
+import com.mymitraa.taskflow.api_errors.RegisteredException;
+import com.mymitraa.taskflow.api_repository.DropdownManagementRepository;
 import com.mymitraa.taskflow.api_repository.FeedbackHistoryRepository;
+import com.mymitraa.taskflow.api_repository.TaskOwnerEmailRepository;
+import com.mymitraa.taskflow.api_util.StringUtil;
 import com.mymitraa.taskflow.api_vm.AssignTaskVM;
 import com.mymitraa.taskflow.api_vm.EffortRecordVM;
 import com.mymitraa.taskflow.api_vm.EpicVM;
 import com.mymitraa.taskflow.api_vm.FeedbackHistoryVM;
 import com.mymitraa.taskflow.api_vm.GlobalFileUploadVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
+import com.mymitraa.taskflow.config.Constants;
 import com.mymitraa.taskflow.security.CustomUserDetails;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.mail.internet.MimeMessage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.lang.reflect.Field;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
 
     private static final Logger log = LoggerFactory.getLogger(FeedbackHistoryServiceImpl.class);
+    private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
+    private static final double MIN_DAILY_EFFORT_HOURS = 8.0;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private MongoOperations mongoOperation;
 
     @Autowired
     private FeedbackHistoryRepository feedbackHistoryRepository;
 
-    @Override
-    public FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
-        log.info("Saving feedback history");
-        FeedbackHistory feedbackHistory = new FeedbackHistory();
-        // Map VM to domain - preserve all fields
-        feedbackHistory.setTicketNumber(feedbackHistoryVM.getTicketNumber());
-        feedbackHistory.setSubject(feedbackHistoryVM.getSubject());
-        feedbackHistory.setComments(feedbackHistoryVM.getComments());
-        feedbackHistory.setDescription(feedbackHistoryVM.getDescription());
-        feedbackHistory.setStatus(feedbackHistoryVM.getStatus());
-        feedbackHistory.setPriority(feedbackHistoryVM.getPriority());
-        feedbackHistory.setProject(feedbackHistoryVM.getProject());
-        feedbackHistory.setModule(feedbackHistoryVM.getModule());
-        feedbackHistory.setSubModule(feedbackHistoryVM.getSubModule());
-        feedbackHistory.setEpic(feedbackHistoryVM.getEpic());
-        feedbackHistory.setCustomer(feedbackHistoryVM.getCustomer());
-        feedbackHistory.setUserStories(feedbackHistoryVM.getUserStories());
-        feedbackHistory.setTeam(feedbackHistoryVM.getTeam());
-        feedbackHistory.setTaskType(feedbackHistoryVM.getTaskType());
-        feedbackHistory.setTaskOwner(feedbackHistoryVM.getTaskOwner());
-        feedbackHistory.setAssignedBy(feedbackHistoryVM.getAssignedBy());
-        feedbackHistory.setClassification(feedbackHistoryVM.getClassification());
-        feedbackHistory.setCategory(feedbackHistoryVM.getCategory());
-        feedbackHistory.setCategoryDescription(feedbackHistoryVM.getCategoryDescription());
-        feedbackHistory.setEstimatedEffort(feedbackHistoryVM.getEstimatedEffort());
-        feedbackHistory.setActualEffort(feedbackHistoryVM.getActualEffort());
-        feedbackHistory.setProductivitySavings(feedbackHistoryVM.getProductivitySavings());
-        feedbackHistory.setWhoReported(feedbackHistoryVM.getWhoReported());
-        feedbackHistory.setReviewerComments(feedbackHistoryVM.getReviewerComments());
-        feedbackHistory.setReviewedBy(feedbackHistoryVM.getReviewedBy());
-        feedbackHistory.setEstimatedStartDate(feedbackHistoryVM.getEstimatedStartDate());
-        feedbackHistory.setEstimatedCloseDate(feedbackHistoryVM.getEstimatedCloseDate());
-        feedbackHistory.setActualStartDate(feedbackHistoryVM.getActualStartDate());
-        feedbackHistory.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
-        feedbackHistory.setDateAssigned(feedbackHistoryVM.getDateAssigned());
-        feedbackHistory.setFileName(feedbackHistoryVM.getFileName());
-        feedbackHistory.setAttachments(feedbackHistoryVM.getAttachments());
-        feedbackHistory.setWorkLogEntries(feedbackHistoryVM.getWorkLogEntries());
-        feedbackHistory.setUploaded(feedbackHistoryVM.getUploaded());
-        feedbackHistory.setTaskDescription(feedbackHistoryVM.getTaskDescription());
-        feedbackHistory.setSubtaskCount(feedbackHistoryVM.getSubtaskCount());
-        feedbackHistory.setLastSubtaskUpdate(feedbackHistoryVM.getLastSubtaskUpdate());
-        feedbackHistory.setInstance(feedbackHistoryVM.getInstance());
-        feedbackHistory.setProjectCategory(feedbackHistoryVM.getProjectCategory());
-        feedbackHistory.setCoding(feedbackHistoryVM.getCoding());
-        feedbackHistory.setAiTool(feedbackHistoryVM.getAiTool());
-        feedbackHistory.setInternalMeeting(feedbackHistoryVM.getInternalMeeting());
-        feedbackHistory.setProduct(feedbackHistoryVM.getProduct());
+    @Autowired
+    private TaskOwnerEmailRepository taskOwnerEmailRepository;
 
-        return feedbackHistoryRepository.save(feedbackHistory);
+    @Autowired
+    private DropdownManagementRepository dropdownManagementRepository;
+
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
+
+    @Value("${spring.upload-path:/tmp/mymitraa_uploads}")
+    private String uploadFolder;
+
+    @Value("${spring.history-uploads:history_uploads}")
+    private String historyUploads;
+
+    @Value("${mymitraa.mail.from-email:notifications@mymitraa.com}")
+    private String fromEmail;
+
+    @Override
+    public Object saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
+        String methodName = "saveFeedback";
+        log.info("{} {} {}", this.getClass(), methodName, Constants.START);
+
+        List<String> attachmentNames = new ArrayList<>();
+        FeedbackHistory feedbackHistory = new FeedbackHistory();
+        Double coding = 0.0;
+        Double aiTool = 0.0;
+        Double meeting = 0.0;
+
+        try {
+            feedbackHistory.setComments(feedbackHistoryVM.getComments());
+            feedbackHistory.setSubject(feedbackHistoryVM.getSubject());
+            feedbackHistory.setStatus(Constants.FEEDBACK_STATUS_OPEN);
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedEffort())) {
+                feedbackHistory.setEstimatedEffort(feedbackHistoryVM.getEstimatedEffort());
+            }
+
+            if (feedbackHistoryVM.getEstimatedStartDate() != null) {
+                feedbackHistory.setEstimatedStartDate(feedbackHistoryVM.getEstimatedStartDate());
+            } else {
+                feedbackHistory.setEstimatedStartDate(new Date());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getTeam())) {
+                feedbackHistory.setTeam(feedbackHistoryVM.getTeam());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getTaskOwner())) {
+                feedbackHistory.setTaskOwner(feedbackHistoryVM.getTaskOwner());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getTaskType())) {
+                feedbackHistory.setTaskType(feedbackHistoryVM.getTaskType());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getDescription())) {
+                feedbackHistory.setDescription(feedbackHistoryVM.getDescription());
+            }
+
+            if (feedbackHistoryVM.getActualStartDate() != null) {
+                feedbackHistory.setActualStartDate(feedbackHistoryVM.getActualStartDate());
+            } else {
+                feedbackHistory.setActualStartDate(new Date());
+            }
+
+            if (feedbackHistoryVM.getActualCloseDate() != null) {
+                feedbackHistory.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getPriority())) {
+                feedbackHistory.setPriority(feedbackHistoryVM.getPriority());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getEpic())) {
+                feedbackHistory.setEpic(feedbackHistoryVM.getEpic());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getCustomer())) {
+                feedbackHistory.setCustomer(feedbackHistoryVM.getCustomer());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getModule())) {
+                feedbackHistory.setModule(feedbackHistoryVM.getModule());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getProject())) {
+                feedbackHistory.setProject(feedbackHistoryVM.getProject());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getSubModule())) {
+                feedbackHistory.setSubModule(feedbackHistoryVM.getSubModule());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getUserStories())) {
+                feedbackHistory.setUserStories(feedbackHistoryVM.getUserStories());
+            }
+
+            if (feedbackHistoryVM.getEstimatedCloseDate() != null) {
+                feedbackHistory.setEstimatedCloseDate(feedbackHistoryVM.getEstimatedCloseDate());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getFileName())) {
+                feedbackHistory.setFileName(feedbackHistoryVM.getFileName());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getClassification())) {
+                feedbackHistory.setClassification(feedbackHistoryVM.getClassification());
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getProduct())) {
+                feedbackHistory.setProduct(feedbackHistoryVM.getProduct());
+            }
+
+            if (feedbackHistoryVM.getCoding() != null) {
+                feedbackHistory.setCoding(feedbackHistoryVM.getCoding());
+                coding = feedbackHistoryVM.getCoding();
+            }
+
+            if (feedbackHistoryVM.getAiTool() != null) {
+                feedbackHistory.setAiTool(feedbackHistoryVM.getAiTool());
+                aiTool = feedbackHistoryVM.getAiTool();
+            }
+
+            if (feedbackHistoryVM.getInternalMeeting() != null) {
+                feedbackHistory.setInternalMeeting(feedbackHistoryVM.getInternalMeeting());
+                meeting = feedbackHistoryVM.getInternalMeeting();
+            }
+
+            Double effort = coding + aiTool + meeting;
+            if (feedbackHistoryVM.getCoding() != null || feedbackHistoryVM.getAiTool() != null || feedbackHistoryVM.getInternalMeeting() != null) {
+                feedbackHistory.setEstimatedEffort(effort);
+            }
+
+            // Generate sequential ticket number: PROJECTKEY-001
+            if (StringUtil.haveValue(feedbackHistoryVM.getProject())) {
+                String name = feedbackHistoryVM.getProject().toUpperCase();
+                String projectKey = name.replaceAll("\\s+", "");
+
+                Query query = new Query();
+                query.addCriteria(Criteria.where("project").is(feedbackHistoryVM.getProject()));
+                query.with(Sort.by(Sort.Direction.DESC, Constants.CREATED_ON));
+                query.limit(1);
+
+                FeedbackHistory latestTicket = mongoTemplate.findOne(query, FeedbackHistory.class);
+                int nextSequence = 1;
+                if (latestTicket != null && StringUtil.haveValue(latestTicket.getTicketNumber())) {
+                    String latestTicketNumber = latestTicket.getTicketNumber();
+                    String[] parts = latestTicketNumber.split("-");
+                    if (parts.length >= 2 && StringUtil.isNumeric(parts[parts.length - 1])) {
+                        nextSequence = Integer.parseInt(parts[parts.length - 1]) + 1;
+                    }
+                }
+
+                String newTicketNumber = String.format("%s-%03d", projectKey, nextSequence);
+                feedbackHistory.setTicketNumber(newTicketNumber);
+            }
+
+            feedbackHistory.setCreatedOn(new Date());
+            feedbackHistory.setDeleteFlag(false);
+            if (customUserDetails != null) {
+                feedbackHistory.setCreatedBy(customUserDetails.getUsername());
+            }
+
+            FeedbackHistory saved = feedbackHistoryRepository.save(feedbackHistory);
+            log.info("{} {} {}", this.getClass(), methodName, Constants.END);
+            return saved;
+        } catch (Exception ex) {
+            log.error("Exception in saveFeedback: {}", ex.getMessage(), ex);
+            throw new RuntimeException("Exception occurred while saving feedback: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
-    public FeedbackHistory editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
-        log.info("Editing feedback history");
-        return saveFeedback(feedbackHistoryVM, customUserDetails);
+    public Object editFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
+        String methodName = "editFeedback";
+        log.info("{} {} {}", this.getClass(), methodName, Constants.START);
+
+        try {
+            String feedbackId = feedbackHistoryVM.getId();
+            if (feedbackId == null || feedbackId.isEmpty()) {
+                throw new IllegalArgumentException("Feedback ID is required");
+            }
+
+            FeedbackHistory feedbackHistory = feedbackHistoryRepository.findById(feedbackId).orElse(null);
+            if (feedbackHistory == null) {
+                throw new IllegalArgumentException("Data not found for feedback ID: " + feedbackId);
+            }
+
+            Double coding = feedbackHistory.getCoding() != null ? feedbackHistory.getCoding() : 0.0;
+            Double aiTool = feedbackHistory.getAiTool() != null ? feedbackHistory.getAiTool() : 0.0;
+            Double meeting = feedbackHistory.getInternalMeeting() != null ? feedbackHistory.getInternalMeeting() : 0.0;
+
+            if (feedbackHistory.getUploaded() != null && feedbackHistory.getUploaded()) {
+                feedbackHistory.setStatus("Not Yet Started");
+            }
+
+            if (StringUtil.haveValue(feedbackHistoryVM.getComments())) {
+                feedbackHistory.setComments(feedbackHistoryVM.getComments());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getDescription())) {
+                feedbackHistory.setDescription(feedbackHistoryVM.getDescription());
+            }
+            if (feedbackHistoryVM.getActualCloseDate() != null) {
+                feedbackHistory.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getStatus())) {
+                feedbackHistory.setStatus(feedbackHistoryVM.getStatus());
+                if (feedbackHistoryVM.getActualCloseDate() == null && "Closed".equalsIgnoreCase(feedbackHistoryVM.getStatus())) {
+                    feedbackHistory.setActualCloseDate(new Date());
+                }
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getSubject())) {
+                feedbackHistory.setSubject(feedbackHistoryVM.getSubject());
+            }
+            if (feedbackHistoryVM.getActualStartDate() != null) {
+                feedbackHistory.setActualStartDate(feedbackHistoryVM.getActualStartDate());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getSubModule())) {
+                feedbackHistory.setSubModule(feedbackHistoryVM.getSubModule());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getPriority())) {
+                feedbackHistory.setPriority(feedbackHistoryVM.getPriority());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getCustomer())) {
+                feedbackHistory.setCustomer(feedbackHistoryVM.getCustomer());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getProject())) {
+                feedbackHistory.setProject(feedbackHistoryVM.getProject());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getModule())) {
+                feedbackHistory.setModule(feedbackHistoryVM.getModule());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getEpic())) {
+                feedbackHistory.setEpic(feedbackHistoryVM.getEpic());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getUserStories())) {
+                feedbackHistory.setUserStories(feedbackHistoryVM.getUserStories());
+            }
+            if (feedbackHistoryVM.getEstimatedStartDate() != null) {
+                feedbackHistory.setEstimatedStartDate(feedbackHistoryVM.getEstimatedStartDate());
+            }
+            if (feedbackHistoryVM.getEstimatedCloseDate() != null) {
+                feedbackHistory.setEstimatedCloseDate(feedbackHistoryVM.getEstimatedCloseDate());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getTeam())) {
+                feedbackHistory.setTeam(feedbackHistoryVM.getTeam());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getTaskOwner())) {
+                feedbackHistory.setTaskOwner(feedbackHistoryVM.getTaskOwner());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getTaskDescription())) {
+                feedbackHistory.setTaskDescription(feedbackHistoryVM.getTaskDescription());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getTaskType())) {
+                feedbackHistory.setTaskType(feedbackHistoryVM.getTaskType());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getAssignedBy())) {
+                feedbackHistory.setAssignedBy(feedbackHistoryVM.getAssignedBy());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getClassification())) {
+                feedbackHistory.setClassification(feedbackHistoryVM.getClassification());
+            }
+            if (StringUtil.haveValue(feedbackHistoryVM.getCategory())) {
+                feedbackHistory.setCategory(feedbackHistoryVM.getCategory());
+            }
+
+            if (feedbackHistoryVM.getCoding() != null) {
+                feedbackHistory.setCoding(feedbackHistoryVM.getCoding());
+                coding = feedbackHistoryVM.getCoding();
+            }
+            if (feedbackHistoryVM.getAiTool() != null) {
+                feedbackHistory.setAiTool(feedbackHistoryVM.getAiTool());
+                aiTool = feedbackHistoryVM.getAiTool();
+            }
+            if (feedbackHistoryVM.getInternalMeeting() != null) {
+                feedbackHistory.setInternalMeeting(feedbackHistoryVM.getInternalMeeting());
+                meeting = feedbackHistoryVM.getInternalMeeting();
+            }
+
+            if (feedbackHistoryVM.getCoding() != null || feedbackHistoryVM.getAiTool() != null || feedbackHistoryVM.getInternalMeeting() != null) {
+                feedbackHistory.setEstimatedEffort(coding + aiTool + meeting);
+            } else if (feedbackHistoryVM.getEstimatedEffort() != null) {
+                feedbackHistory.setEstimatedEffort(feedbackHistoryVM.getEstimatedEffort());
+            }
+
+            feedbackHistory.setModifiedDateTime(new Date());
+            if (customUserDetails != null) {
+                feedbackHistory.setModifiedBy(customUserDetails.getUsername());
+            }
+
+            return feedbackHistoryRepository.save(feedbackHistory);
+        } catch (Exception ex) {
+            log.error("Exception in editFeedback: {}", ex.getMessage(), ex);
+            throw new RuntimeException("Exception occurred while editing feedback: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
     public Object getAllFeedback(SearchVM searchVM, Pageable pageable) {
-        log.info("Getting all feedback with search: {}", searchVM.getSearch());
-        String search = searchVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByTicketNumberContainingOrSubjectContainingOrCommentsContaining(
-                    search, search, search);
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+
+        if (searchVM != null) {
+            if (StringUtil.haveValue(searchVM.getProject())) {
+                query.addCriteria(Criteria.where("project").is(searchVM.getProject()));
+            }
+            if (StringUtil.haveValue(searchVM.getStatus())) {
+                query.addCriteria(Criteria.where("status").is(searchVM.getStatus()));
+            }
+            if (StringUtil.haveValue(searchVM.getTask_owner())) {
+                query.addCriteria(Criteria.where("task_owner").is(searchVM.getTask_owner()));
+            }
+            if (StringUtil.haveValue(searchVM.getTeam())) {
+                query.addCriteria(Criteria.where("team").is(searchVM.getTeam()));
+            }
         }
-        Page<FeedbackHistory> all = feedbackHistoryRepository.findAll(pageable);
-        return all.getContent();
+
+        query.with(Sort.by(Sort.Direction.DESC, "actual_start_date"));
+        if (pageable != null) {
+            query.with(pageable);
+        }
+        return mongoTemplate.find(query, FeedbackHistory.class);
     }
 
     @Override
     public Object getFeedbackById(String feedbackId) {
-        log.info("Getting feedback by id: {}", feedbackId);
         return feedbackHistoryRepository.findById(feedbackId).orElse(null);
     }
 
     @Override
     public Object deleteFeedbackById(String feedbackId) {
-        log.info("Deleting feedback by id: {}", feedbackId);
-        FeedbackHistory feedback = feedbackHistoryRepository.findById(feedbackId).orElse(null);
-        if (feedback != null) {
-            feedbackHistoryRepository.delete(feedback);
-            return "Deleted successfully";
+        FeedbackHistory existing = feedbackHistoryRepository.findById(feedbackId).orElse(null);
+        if (existing != null) {
+            existing.setDeleteFlag(true);
+            existing.setDeletedOn(new Date());
+            feedbackHistoryRepository.save(existing);
+            return true;
         }
-        return "Feedback not found";
+        return false;
     }
 
     @Override
     public Object getFeedbackNumericalCount() {
-        log.info("Getting feedback numerical count");
-        Long count = feedbackHistoryRepository.count();
-        return count;
+        List<FeedbackHistory> feedbacks = feedbackHistoryRepository.findAll().stream()
+                .filter(f -> !Boolean.TRUE.equals(f.getDeleteFlag()))
+                .collect(Collectors.toList());
+
+        Map<String, Object> countMap = new HashMap<>();
+        countMap.put("total", feedbacks.size());
+        countMap.put("open", feedbacks.stream().filter(f -> "Open".equalsIgnoreCase(f.getStatus())).count());
+        countMap.put("in_progress", feedbacks.stream().filter(f -> "In Progress".equalsIgnoreCase(f.getStatus())).count());
+        countMap.put("closed", feedbacks.stream().filter(f -> "Closed".equalsIgnoreCase(f.getStatus())).count());
+        countMap.put("on_hold", feedbacks.stream().filter(f -> "On Hold".equalsIgnoreCase(f.getStatus())).count());
+
+        return countMap;
     }
 
     @Override
-    public AdvanceSearchList getParamterList(CustomUserDetails customUserDetails) {
-        log.info("Getting parameter list");
-        return AdvanceSearchList.builder()
-                .ticketNumbers(findAllTicketNumbers())
-                .statuses(findAllStatuses())
-                .projects(findAllProjects())
-                .build();
+    public Object getParamterList(CustomUserDetails customUserDetails) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false).and("tableName").is("FeedbackHistory"));
+        return mongoOperation.findOne(query, AdvanceSearchList.class);
     }
 
     @Override
     public Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails) {
-        log.info("Advancing search for feedback");
-        String search = searchVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByTicketNumberContainingOrSubjectContaining(
-                    search, search);
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+
+        if (searchVM != null) {
+            if (StringUtil.haveValue(searchVM.getStatus())) {
+                query.addCriteria(Criteria.where("status").is(searchVM.getStatus()));
+            }
+            if (StringUtil.haveValue(searchVM.getParameter()) && StringUtil.haveValue(searchVM.getParametervalue())) {
+                query.addCriteria(Criteria.where(searchVM.getParameter()).regex(searchVM.getParametervalue(), "i"));
+            }
         }
-        Page<FeedbackHistory> all = feedbackHistoryRepository.findAll(pageable);
-        return all.getContent();
+        query.with(Sort.by(Sort.Direction.DESC, Constants.MODIFIED_DATE_TIME));
+        if (pageable != null) {
+            query.with(pageable);
+        }
+        return mongoOperation.find(query, FeedbackHistory.class);
     }
 
     @Override
     public Object subTaskAdvanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails) {
-        log.info("Subtask advance search");
-        String search = searchVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByEpicContainingOrSubModuleContaining(search, search);
-        }
-        return feedbackHistoryRepository.findAll(pageable);
+        return advanceSearch(searchVM, pageable, customUserDetails);
     }
 
     @Override
     public Object getSearchableSubtaskFields(CustomUserDetails customUserDetails) {
-        log.info("Getting searchable subtask fields");
-        return java.util.Map.of(
-                "modules", findAllModules(),
-                "statuses", findAllStatuses(),
-                "projects", findAllProjects());
+        List<Map<String, String>> fields = new ArrayList<>();
+        fields.add(Map.of("value", "subject", "label", "Subject"));
+        fields.add(Map.of("value", "taskOwner", "label", "Task Owner"));
+        fields.add(Map.of("value", "status", "label", "Status"));
+        fields.add(Map.of("value", "priority", "label", "Priority"));
+        fields.add(Map.of("value", "project", "label", "Project"));
+        fields.add(Map.of("value", "team", "label", "Team"));
+        return fields;
     }
 
     @Override
     public Object deleteFile(String ticketNumber) {
-        log.info("Deleting file with ticket number: {}", ticketNumber);
-        FeedbackHistory feedback = feedbackHistoryRepository.findByTicketNumber(ticketNumber);
-        if (feedback != null) {
-            feedback.setUploaded(false);
-            feedbackHistoryRepository.save(feedback);
-            return "File deletion recorded";
+        FeedbackHistory task = feedbackHistoryRepository.findByTicketNumber(ticketNumber);
+        if (task != null) {
+            task.setAttachments(new ArrayList<>());
+            feedbackHistoryRepository.save(task);
+            return true;
         }
-        return "File not found";
+        return false;
     }
 
     @Override
     public Object assignTask(AssignTaskVM assignTaskVM, CustomUserDetails customUserDetails) {
-        log.info("Assigning task: {}", assignTaskVM.getTaskTitle());
-        FeedbackHistory feedback = new FeedbackHistory();
-        feedback.setTicketNumber(assignTaskVM.getTicketNumber());
-        feedback.setTaskOwner(assignTaskVM.getAssignee());
-        feedback.setSubModule("TASK_ASSIGNED");
-        return feedbackHistoryRepository.save(feedback);
+        String taskId = assignTaskVM.getTaskId();
+        FeedbackHistory task = feedbackHistoryRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            throw new IllegalArgumentException("Task not found for ID: " + taskId);
+        }
+
+        task.setStatus(Constants.FEEDBACK_STATUS_IN_PROGRESS);
+        if (StringUtil.haveValue(assignTaskVM.getTaskOwner())) task.setTaskOwner(assignTaskVM.getTaskOwner());
+        if (StringUtil.haveValue(assignTaskVM.getTeam())) task.setTeam(assignTaskVM.getTeam());
+        if (StringUtil.haveValue(assignTaskVM.getPriority())) task.setPriority(assignTaskVM.getPriority());
+        if (assignTaskVM.getEstimatedStartDate() != null) task.setEstimatedStartDate(assignTaskVM.getEstimatedStartDate());
+        if (assignTaskVM.getActualStartDate() != null) {
+            task.setActualStartDate(assignTaskVM.getActualStartDate());
+        } else {
+            task.setActualStartDate(new Date());
+        }
+        task.setDateAssigned(new Date());
+        if (customUserDetails != null) {
+            task.setAssignedBy(customUserDetails.getUsername());
+        }
+
+        return feedbackHistoryRepository.save(task);
     }
 
     @Override
     public Object taskClosed(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
-        log.info("Closing task: {}", feedbackHistoryVM.getTicketNumber());
-        FeedbackHistory feedback = feedbackHistoryRepository.findByTicketNumber(feedbackHistoryVM.getTicketNumber());
-        if (feedback != null) {
-            feedback.setStatus("CLOSED");
-            feedback.setSubModule("TASK_CLOSED");
-            feedbackHistoryRepository.save(feedback);
-            return "Task closed successfully";
+        String taskId = feedbackHistoryVM.getId();
+        FeedbackHistory task = feedbackHistoryRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            throw new IllegalArgumentException("Task not found: " + taskId);
         }
-        return "Feedback not found";
+
+        Double actualEffort = feedbackHistoryVM.getActualEffort();
+        boolean hasWorkLogs = task.getWorkLogEntries() != null && !task.getWorkLogEntries().isEmpty();
+
+        if (actualEffort != null || hasWorkLogs) {
+            task.setStatus(Constants.FEEDBACK_STATUS_CLOSED);
+        }
+        if (actualEffort != null) {
+            task.setActualEffort(actualEffort);
+            if (task.getEstimatedEffort() != null) {
+                task.setProductivitySavings(task.getEstimatedEffort() - actualEffort);
+            }
+        }
+        if (feedbackHistoryVM.getActualCloseDate() != null) {
+            task.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
+        } else {
+            task.setActualCloseDate(new Date());
+        }
+        if (StringUtil.haveValue(feedbackHistoryVM.getReviewerComments())) {
+            task.setReviewerComments(feedbackHistoryVM.getReviewerComments());
+        }
+        if (StringUtil.haveValue(feedbackHistoryVM.getReviewedBy())) {
+            task.setReviewedBy(feedbackHistoryVM.getReviewedBy());
+        }
+
+        return feedbackHistoryRepository.save(task);
     }
 
     @Override
     public Object addSubTask(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
-        log.info("Adding subtask for: {}", feedbackHistoryVM.getTicketNumber());
-        FeedbackHistory feedback = feedbackHistoryRepository.findByTicketNumber(feedbackHistoryVM.getTicketNumber());
-        if (feedback != null) {
-            feedback.setSubModule(feedbackHistoryVM.getSubModule());
-            feedback.setSubtaskCount(feedbackHistoryVM.getSubtaskCount() != null
-                    ? feedbackHistoryVM.getSubtaskCount() + 1 : 1);
-            feedbackHistoryRepository.save(feedback);
-            return "Subtask added successfully";
-        }
-        return "Feedback not found";
+        return saveFeedback(feedbackHistoryVM, customUserDetails);
     }
 
     @Override
     public Object updateSubTask(EpicVM epicVM, String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails) {
-        log.info("Updating subtask for: {}", feedbackHistoryId);
-        FeedbackHistory feedback = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
-        if (feedback != null) {
-            feedback.setEpic(epicVM.getEpic());
-            feedback.setSubModule(epicVM.getSubModule());
-            feedbackHistoryRepository.save(feedback);
-            return "Subtask updated successfully";
+        FeedbackHistory task = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
+        if (task != null) {
+            task.setEpic(epicVM.getEpic());
+            task.setSubModule(epicVM.getSubModule());
+            task.setModifiedDateTime(new Date());
+            return feedbackHistoryRepository.save(task);
         }
-        return "Feedback not found";
-    }
-
-    @Override
-    public Object deleteSubTask(String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails) {
-        log.info("Deleting subtask for: {} with epic: {}", feedbackHistoryId, epicId);
-        FeedbackHistory feedback = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
-        if (feedback != null) {
-            feedback.setEpic(null);
-            feedback.setSubModule(null);
-            feedbackHistoryRepository.save(feedback);
-            return "Subtask deleted successfully";
-        }
-        return "Feedback not found";
-    }
-
-    @Override
-    public Object getUploadedFiles(SearchVM dateRangeVM, Pageable pageable) {
-        log.info("Getting uploaded files with date range: {}", dateRangeVM.getSearch());
-        String search = dateRangeVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByFileNameContainingAndUploadedTrue(search);
-        }
-        return feedbackHistoryRepository.findByUploadedTrue(pageable);
-    }
-
-    @Override
-    public Object getAllTicketNumbers(CustomUserDetails customUserDetails) {
-        log.info("Getting all ticket numbers");
-        return feedbackHistoryRepository.findAllTicketNumbers();
-    }
-
-    @Override
-    public Object getDailyTaskTracker(EffortRecordVM effortRecordVM, CustomUserDetails customUserDetails) {
-        log.info("Getting daily task tracker");
-        String search = effortRecordVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByTicketNumberContainingOrSubjectContaining(search, search);
-        }
-        return feedbackHistoryRepository.findAll();
-    }
-
-    @Override
-    public Object dashboard(EffortRecordVM effortRecordVM, CustomUserDetails customUserDetails) {
-        log.info("Getting dashboard data");
-        String search = effortRecordVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByProjectContaining(search);
-        }
-        return feedbackHistoryRepository.findAll();
-    }
-
-    @Override
-    public Object uploadFile(MultipartFile file, CustomUserDetails customUserDetails) {
-        log.info("Uploading file: {}", file.getOriginalFilename());
-        // In a real implementation, would save file to storage
-        return "File upload recorded: " + file.getOriginalFilename();
-    }
-
-    @Override
-    public Object uploadFileByTicketNumber(String ticketNumber, MultipartFile file, CustomUserDetails customUserDetails) {
-        log.info("Uploading file by ticket number: {}", ticketNumber);
-        FeedbackHistory feedback = feedbackHistoryRepository.findByTicketNumber(ticketNumber);
-        if (feedback != null) {
-            feedback.setFileName(file.getOriginalFilename());
-            feedback.setAttachments(java.util.Collections.singletonList(file.getOriginalFilename()));
-            feedbackHistoryRepository.save(feedback);
-            return "File uploaded successfully";
-        }
-        return "Feedback not found";
-    }
-
-    @Override
-    public Object getRecord(SearchVM searchVM, Pageable pageable) {
-        log.info("Getting record with search: {}", searchVM.getSearch());
-        String search = searchVM.getSearch();
-        if (search != null && !search.isEmpty()) {
-            return feedbackHistoryRepository.findByTicketNumberContainingOrSubjectContaining(search, search);
-        }
-        return feedbackHistoryRepository.findAll(pageable);
-    }
-
-    @Override
-    public Object addWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails) {
-        return saveWorklogHours(feedbackHistoryId, epicId, workLogEntry, customUserDetails);
-    }
-
-    @Override
-    public Object saveWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails) {
-        log.info("Saving work log hours for: {}", feedbackHistoryId);
-        FeedbackHistory feedback = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
-        if (feedback != null) {
-            feedback.setWorkLogEntries(workLogEntry);
-            feedbackHistoryRepository.save(feedback);
-            return "Work log hours saved successfully";
-        }
-        return "Feedback not found";
-    }
-
-    @Override
-    public Object chronProcessed(CustomUserDetails customUserDetails) {
-        log.info("Processing chron");
-        return "Chron process completed";
-    }
-
-    @Override
-    public Object chronProcessedWithDate(CustomUserDetails customUserDetails, String operationDateTime) {
-        log.info("Processing chron with date: {}", operationDateTime);
-        return "Chron process completed with date: " + operationDateTime;
-    }
-
-    @Override
-    public Object chronProcessedWithDateWithOutVfm(CustomUserDetails customUserDetails, String operationDateTime) {
-        log.info("Processing chron without VFM with date: {}", operationDateTime);
-        return "Chron process completed without VFM";
-    }
-
-    @Override
-    public Object chronProcessedForExtraTable(CustomUserDetails customUserDetails) {
-        log.info("Processing chron for extra table");
-        return "Chron process for extra table completed";
-    }
-
-    @Override
-    public Object toAvoidDuplicatesImportFiles(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Avoiding duplicates in import files");
-        return "Duplicate check completed";
-    }
-
-    @Override
-    public Object getGlobalImportDropdownLists(CustomUserDetails customUserDetails, Date operationDateTime) {
-        log.info("Getting global import dropdown lists");
-        return java.util.Collections.emptyList();
-    }
-
-    @Override
-    public Object MechanicalIntegrityFileUpload(MultipartFile multipartFile, String category, Date inspectionDate, String description, CustomUserDetails customUserDetails) {
-        log.info("Mechanical integrity file upload: {}", multipartFile.getOriginalFilename());
-        return "Mechanical integrity file uploaded: " + multipartFile.getOriginalFilename();
-    }
-
-    @Override
-    public Object getMechanicalIntegrityUploadedFiles(CustomUserDetails customUserDetails, SearchVM dateRangeVM, Pageable pageable) {
-        log.info("Getting mechanical integrity uploaded files");
-        return java.util.Collections.emptyList();
-    }
-
-    @Override
-    public Object updateTempleteFile(CustomUserDetails customUserDetails, String id, GlobalFileUploadVM globalFileUploadVM) {
-        log.info("Updating template file: {}", id);
-        return "Template file updated";
-    }
-
-    @Override
-    public Object automaticProcess(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Running automatic process");
-        return "Automatic process completed";
-    }
-
-    @Override
-    public Object automaticUploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails) {
-        log.info("Automatic upload file: {}", multipartFile.getOriginalFilename());
-        return "Automatic upload completed: " + multipartFile.getOriginalFilename();
-    }
-
-    @Override
-    public Object automaticProcessWithoutImport(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Running automatic process without import");
-        return "Automatic process without import completed";
-    }
-
-    @Override
-    public Object getLatestApprovedDate(CustomUserDetails customUserDetails) {
-        log.info("Getting latest approved date");
         return null;
     }
 
     @Override
+    public Object deleteSubTask(String feedbackHistoryId, String epicId, CustomUserDetails customUserDetails) {
+        return deleteFeedbackById(feedbackHistoryId);
+    }
+
+    @Override
+    public Object getUploadedFiles(SearchVM dateRangeVM, Pageable pageable) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false).and("attachments").ne(Collections.emptyList()));
+        query.with(Sort.by(Sort.Direction.DESC, Constants.MODIFIED_DATE_TIME));
+        if (pageable != null) {
+            query.with(pageable);
+        }
+        return mongoTemplate.find(query, FeedbackHistory.class);
+    }
+
+    @Override
+    public Object getAllTicketNumbers(CustomUserDetails customUserDetails) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        query.fields().include("ticket_number");
+
+        List<FeedbackHistory> list = mongoTemplate.find(query, FeedbackHistory.class);
+        return list.stream()
+                .map(FeedbackHistory::getTicketNumber)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Object getDailyTaskTracker(EffortRecordVM effortRecordVM, CustomUserDetails customUserDetails) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        query.with(Sort.by(Sort.Direction.DESC, Constants.MODIFIED_DATE_TIME));
+
+        List<FeedbackHistory> feedbackList = mongoTemplate.find(query, FeedbackHistory.class);
+        List<Map<String, Object>> records = new ArrayList<>();
+
+        for (FeedbackHistory f : feedbackList) {
+            if (f.getActualEffort() != null && f.getActualEffort() > 0) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("taskOwner", f.getTaskOwner() != null ? f.getTaskOwner() : "Unassigned");
+                map.put("project", f.getProject() != null ? f.getProject() : "General");
+                map.put("team", f.getTeam() != null ? f.getTeam() : "Engineering");
+                map.put("date", f.getActualStartDate() != null ? f.getActualStartDate().toString() : new Date().toString());
+                map.put("totalEffort", f.getActualEffort());
+                map.put("totalTaskEffort", f.getActualEffort());
+                map.put("totalMeetingTime", 0.0);
+                records.add(map);
+            }
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        data.put("list", records);
+        data.put("totalActualEffort", records.stream().mapToDouble(r -> ((Number) r.get("totalEffort")).doubleValue()).sum());
+        response.put("data", data);
+        return response;
+    }
+
+    @Override
+    public Object dashboard(EffortRecordVM effortRecordVM, CustomUserDetails customUserDetails) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(Constants.DELETE_FLAG).is(false));
+        List<FeedbackHistory> list = mongoTemplate.find(query, FeedbackHistory.class);
+
+        Map<String, Long> statusOverview = list.stream()
+                .filter(f -> f.getStatus() != null)
+                .collect(Collectors.groupingBy(FeedbackHistory::getStatus, Collectors.counting()));
+
+        Map<String, Long> priorityBreakdown = list.stream()
+                .filter(f -> f.getPriority() != null)
+                .collect(Collectors.groupingBy(FeedbackHistory::getPriority, Collectors.counting()));
+
+        Map<String, Long> typeBreakdown = list.stream()
+                .filter(f -> f.getTaskType() != null)
+                .collect(Collectors.groupingBy(FeedbackHistory::getTaskType, Collectors.counting()));
+
+        Map<String, Long> teamWorkload = list.stream()
+                .filter(f -> f.getTaskOwner() != null)
+                .collect(Collectors.groupingBy(FeedbackHistory::getTaskOwner, Collectors.counting()));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("statusOverview", statusOverview);
+        result.put("priorityBreakdown", priorityBreakdown);
+        result.put("typeBreakdown", typeBreakdown);
+        result.put("teamWorkload", teamWorkload);
+        result.put("totalWorkItems", list.size());
+        return result;
+    }
+
+    @Override
+    public Object uploadFile(MultipartFile file, CustomUserDetails customUserDetails) {
+        log.info("Processing bulk Excel task upload: {}", file.getOriginalFilename());
+        List<FeedbackHistory> list = new ArrayList<>();
+        try {
+            Workbook workbook = WorkbookFactory.create(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                FeedbackHistory item = new FeedbackHistory();
+                item.setSubject(getCellValue(row.getCell(0)));
+                item.setProject(getCellValue(row.getCell(1)));
+                item.setTaskOwner(getCellValue(row.getCell(2)));
+                item.setStatus("Open");
+                item.setCreatedOn(new Date());
+                item.setDeleteFlag(false);
+                list.add(item);
+            }
+            workbook.close();
+            if (!list.isEmpty()) {
+                mongoTemplate.insertAll(list);
+            }
+            return list;
+        } catch (Exception ex) {
+            log.error("Excel upload error: {}", ex.getMessage(), ex);
+            throw new RuntimeException("Error reading Excel file: " + ex.getMessage(), ex);
+        }
+    }
+
+    private String getCellValue(Cell cell) {
+        if (cell == null) return "";
+        return cell.toString().trim();
+    }
+
+    @Override
+    public Object uploadFileByTicketNumber(String ticketNumber, MultipartFile file, CustomUserDetails customUserDetails) {
+        FeedbackHistory task = feedbackHistoryRepository.findByTicketNumber(ticketNumber);
+        if (task == null) {
+            throw new IllegalArgumentException("Task not found for ticket: " + ticketNumber);
+        }
+
+        String fileName = file.getOriginalFilename();
+        List<String> attachments = task.getAttachments() != null ? new ArrayList<>(task.getAttachments()) : new ArrayList<>();
+        attachments.add(fileName);
+        task.setAttachments(attachments);
+        task.setFileName(fileName);
+        task.setUploaded(true);
+
+        return feedbackHistoryRepository.save(task);
+    }
+
+    @Override
+    public Object getRecord(SearchVM searchVM, Pageable pageable) {
+        return getAllFeedback(searchVM, pageable);
+    }
+
+    @Override
+    public Object saveWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntry, CustomUserDetails customUserDetails) {
+        return addWorklogHours(feedbackHistoryId, epicId, workLogEntry, customUserDetails);
+    }
+
+    @Override
+    public Object addWorklogHours(String feedbackHistoryId, String epicId, List<WorkLogEntry> workLogEntries, CustomUserDetails customUserDetails) {
+        FeedbackHistory task = feedbackHistoryRepository.findById(feedbackHistoryId).orElse(null);
+        if (task == null) {
+            throw new IllegalArgumentException("Task not found for ID: " + feedbackHistoryId);
+        }
+
+        List<WorkLogEntry> existing = task.getWorkLogEntries() != null ? new ArrayList<>(task.getWorkLogEntries()) : new ArrayList<>();
+        existing.addAll(workLogEntries);
+        task.setWorkLogEntries(existing);
+
+        double totalEffort = existing.stream().mapToDouble(WorkLogEntry::getHours).sum();
+        task.setActualEffort(totalEffort);
+
+        return feedbackHistoryRepository.save(task);
+    }
+
+    @Override
+    public Object chronProcessed(CustomUserDetails customUserDetails) {
+        return "Chron processed successfully";
+    }
+
+    @Override
+    public Object chronProcessedWithDate(CustomUserDetails customUserDetails, String operationDateTime) {
+        return "Chron processed for date: " + operationDateTime;
+    }
+
+    @Override
+    public Object chronProcessedWithDateWithOutVfm(CustomUserDetails customUserDetails, String operationDateTime) {
+        return "Chron processed without VFM for date: " + operationDateTime;
+    }
+
+    @Override
+    public Object chronProcessedForExtraTable(CustomUserDetails customUserDetails) {
+        return "Chron processed for extra tables";
+    }
+
+    @Override
+    public Object toAvoidDuplicatesImportFiles(SearchVM searchVM, CustomUserDetails customUserDetails) {
+        return true;
+    }
+
+    @Override
+    public Object getGlobalImportDropdownLists(CustomUserDetails customUserDetails, Date operationDateTime) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Object MechanicalIntegrityFileUpload(MultipartFile multipartFile, String category, Date inspectionDate, String description, CustomUserDetails customUserDetails) {
+        return "Mechanical integrity upload completed: " + multipartFile.getOriginalFilename();
+    }
+
+    @Override
+    public Object getMechanicalIntegrityUploadedFiles(CustomUserDetails customUserDetails, SearchVM dateRangeVM, Pageable pageable) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Object updateTempleteFile(CustomUserDetails customUserDetails, String id, GlobalFileUploadVM globalFileUploadVM) {
+        return "Template updated: " + id;
+    }
+
+    @Override
+    public Object automaticProcess(SearchVM searchVM, CustomUserDetails customUserDetails) {
+        return "Automatic process executed";
+    }
+
+    @Override
+    public Object automaticUploadFile(MultipartFile multipartFile, String category, Date operationDateTime, CustomUserDetails customUserDetails) {
+        return "Automatic upload processed";
+    }
+
+    @Override
+    public Object automaticProcessWithoutImport(SearchVM searchVM, CustomUserDetails customUserDetails) {
+        return "Automatic process without import executed";
+    }
+
+    @Override
+    public Object getLatestApprovedDate(CustomUserDetails customUserDetails) {
+        return new Date();
+    }
+
+    @Override
     public Object createExcel(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Creating Excel report");
-        return "Excel report created";
+        return "Excel created";
     }
 
     @Override
     public Object updatePlantImport12Data(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Updating import 12 data");
-        return "Import 12 data updated";
+        return "Import 12 updated";
     }
 
     @Override
     public Object removeAboveDataOtherthanImportData(CustomUserDetails customUserDetails, Date operationDateTime) {
-        log.info("Removing above data other than import data");
-        return "Data removal completed";
+        return "Data cleanup completed";
     }
 
     @Override
     public Object removeDataBaseData(SearchVM searchVM, CustomUserDetails customUserDetails) {
-        log.info("Removing database data");
         return "Database data removed";
-    }
-
-    private List<String> findAllTicketNumbers() {
-        return java.util.Collections.emptyList();
-    }
-
-    private List<String> findAllStatuses() {
-        return java.util.Collections.emptyList();
-    }
-
-    private List<String> findAllProjects() {
-        return java.util.Collections.emptyList();
-    }
-
-    private List<String> findAllModules() {
-        return java.util.Collections.emptyList();
     }
 }

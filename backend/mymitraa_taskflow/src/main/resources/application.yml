@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /
 
@@ -8,9 +8,13 @@ spring:
     name: mymitraa-taskflow
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/mymitraa_taskflow}
+      uri: ${MONGODB_URI:mongodb://${MONGODB_USER:admin}:${MONGODB_PASSWORD:password}@${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/${MONGODB_DATABASE:mymitraa_taskflow}?authSource=admin}
       database: ${MONGODB_DATABASE:mymitraa_taskflow}
-      auto-index-creation: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      enabled: true
   mail:
     host: ${ZOHO_SMTP_HOST:smtp.zoho.com}
     port: ${ZOHO_SMTP_PORT:465}
@@ -20,32 +24,23 @@ spring:
       mail:
         smtp:
           auth: true
-          ssl:
-            enable: true
           starttls:
             enable: false
-            required: false
+          ssl:
+            enable: true
+            trust: "*"
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
 
-app:
-  jwt:
-    secret: ${JWT_SECRET:MyMitraaTaskFlowSecureJwtSecretKeyForTokenSigning2026}
-    expiration: ${JWT_EXPIRATION:86400000}
+  upload-path: ${UPLOAD_PATH:/tmp/mymitraa_uploads}
+  history-uploads: history_uploads
+
+mymitraa:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2}
+      expiration-ms: ${JWT_EXPIRATION:86400000} # 24 hours
   mail:
     from-email: ${ZOHO_FROM_EMAIL:notifications@mymitraa.com}
-    from-name: ${ZOHO_FROM_NAME:MyMitraa TaskFlow}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
+    from-name: ${ZOHO_FROM_NAME:MY MiTRAA TaskFlow}

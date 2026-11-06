@@ -1,7 +1,7 @@
 package com.mymitraa.taskflow.api_vm;
 
 import java.io.Serializable;
-import jakarta.validation.constraints.Size;
+import javax.validation.constraints.Size;
 
 public class SearchVM implements Serializable {
 

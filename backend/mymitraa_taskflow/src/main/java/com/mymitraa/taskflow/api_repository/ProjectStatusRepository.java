@@ -1,11 +1,9 @@
 package com.mymitraa.taskflow.api_repository;
 
 import com.mymitraa.taskflow.api_domain.ProjectStatus;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface ProjectStatusRepository extends MongoRepository<ProjectStatus, String> {
+public interface ProjectStatusRepository extends JpaRepository<ProjectStatus, Long> {
 
     ProjectStatus findByStatus(String status);
 }

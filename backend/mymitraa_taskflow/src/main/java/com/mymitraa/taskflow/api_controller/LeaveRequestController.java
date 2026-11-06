@@ -65,7 +65,7 @@ public class LeaveRequestController {
     }
 
     @PutMapping(value = "/getAll")
-    public ResponseEntity<CustomResponse> getAll(@RequestBody(required = false) Object searchVM, Pageable pageable, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<CustomResponse> getAll(@RequestBody Object searchVM, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         log.info("get leave requests");
         Map<String, String> metaInfo = new HashMap<>();
@@ -74,7 +74,7 @@ public class LeaveRequestController {
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("LEAVE_REQUESTS_FETCHED_SUCCESSFULLY",
                         "Leave requests fetched successfully",
-                        leaveRequestService.fetchAll(customUserDetails.getUsername(), pageable), metaInfo),
+                        leaveRequestService.fetchAll(customUserDetails.getUsername(), (Pageable) searchVM), metaInfo),
                 HttpStatus.OK);
     }
 

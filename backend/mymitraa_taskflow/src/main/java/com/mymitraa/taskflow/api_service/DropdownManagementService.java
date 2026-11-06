@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
 
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
+
 public interface DropdownManagementService {
 
     Object save(DropdownManagement obj, CustomUserDetails customUserDetails);
@@ -33,5 +35,5 @@ public interface DropdownManagementService {
     Object getDropdownSubValueModule(DropdownManagement dropdownManagement,
             CustomUserDetails customUserDetails);
 
-    com.mymitraa.taskflow.api_domain.AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
+    AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
 }

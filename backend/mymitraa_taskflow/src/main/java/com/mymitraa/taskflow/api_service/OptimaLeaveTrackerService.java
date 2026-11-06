@@ -1,6 +1,5 @@
 package com.mymitraa.taskflow.api_service;
 
-import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.OptimaLeaveTracker;
 import com.mymitraa.taskflow.api_vm.OptimaLeaveTrackerVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
@@ -17,15 +16,15 @@ public interface OptimaLeaveTrackerService {
 
     Object getAllWithPagination(String username, SearchVM searchVM, Pageable pageable);
 
+    Object delete(String id, CustomUserDetails customUserDetails);
+
     Object update(String id, OptimaLeaveTrackerVM optimaLeaveTrackerVM, CustomUserDetails customUserDetails);
 
     Object download(OptimaLeaveTrackerVM optimaLeaveTrackerVm, CustomUserDetails customUserDetails);
 
-    AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
+    Object getParamterList(CustomUserDetails customUserDetails);
 
     Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails);
-
-    Object delete(String id, CustomUserDetails customUserDetails);
 
     Object dashboard(OptimaLeaveTrackerVM optimaLeaveTrackerVm, CustomUserDetails customUserDetails);
 }

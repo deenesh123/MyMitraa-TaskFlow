@@ -64,7 +64,7 @@ public class TaskController {
     }
 
     @PutMapping(value = "/getAll")
-    public ResponseEntity<CustomResponse> getAll(@RequestBody(required = false) Object searchVM, Pageable pageable, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<CustomResponse> getAll(@RequestBody Object searchVM, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         log.info("get tasks");
         Map<String, String> metaInfo = new HashMap<>();
@@ -73,7 +73,7 @@ public class TaskController {
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("TASKS_FETCHED_SUCCESSFULLY",
                         "Tasks fetched successfully",
-                        taskService.fetchAll(customUserDetails.getUsername(), pageable), metaInfo),
+                        taskService.fetchAll(customUserDetails.getUsername(), (Pageable) searchVM), metaInfo),
                 HttpStatus.OK);
     }
 
