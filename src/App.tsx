@@ -21,6 +21,7 @@ import { ApiClient } from './api/client';
 
 import { AuthPage } from './pages/auth/AuthPage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
+import { EmailZohoManagement } from './pages/email/EmailZohoManagement';
 import { CURRENT_USER } from './api/mockData';
 import { UserAccount } from './api/types';
 import { ThemeProvider } from './context/ThemeContext';
@@ -109,6 +110,8 @@ export default function App() {
         return <DropdownManagement />;
       case '/users/user-management':
         return <UserManagementPage />;
+      case '/admin/email-zoho':
+        return <EmailZohoManagement />;
       case '/task-tracker':
         return <TaskTrackerPage />;
       case '/help-support':

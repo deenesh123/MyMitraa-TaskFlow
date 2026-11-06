@@ -1,0 +1,51 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: MyMitraa TaskFlow
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/mymitraa_taskflow}
+      database: ${MONGODB_DATABASE:mymitraa_taskflow}
+      auto-index-creation: true
+  mail:
+    host: ${ZOHO_SMTP_HOST:smtp.zoho.com}
+    port: ${ZOHO_SMTP_PORT:465}
+    username: ${ZOHO_SMTP_USER:}
+    password: ${ZOHO_SMTP_PASSWORD:}
+    protocol: smtps
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          starttls:
+            enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+mymitraa:
+  mail:
+    from-email: ${ZOHO_FROM_EMAIL:notifications@mymitraa.com}
+    from-name: ${ZOHO_FROM_NAME:MyMitraa TaskFlow}
+  jwt:
+    secret: ${JWT_SECRET:mymitraa-taskflow-jwt-super-secret-key-32chars-minimum}
+    expiration: ${JWT_EXPIRATION:86400}
+  upload:
+    path: ${FILE_UPLOAD_PATH:/tmp/mymitraa_uploads}
+
+logging:
+  level:
+    root: INFO
+    com.mymitraa.taskflow: DEBUG
+    org.springframework.data.mongodb: INFO

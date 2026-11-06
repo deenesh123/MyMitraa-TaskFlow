@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck, Sun, Moon, Sparkles } from 'lucide-react';
+import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck, Sun, Moon, Sparkles, Mail } from 'lucide-react';
 import { CURRENT_USER } from '../../api/mockData';
 import { UserAccount } from '../../api/types';
 import { useToast } from '../common/Toast';
@@ -238,6 +238,23 @@ export const TopBar: React.FC<TopBarProps> = ({
                 </div>
                 <span className="text-[9px] font-bold bg-[#A3D801]/30 text-emerald-800 px-1.5 py-0.5 rounded-full">
                   Admin
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  onNavigate('/admin/email-zoho');
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-slate-700 hover:bg-[#7B3AEC]/10 hover:text-[#7B3AEC] rounded-2xl transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Mail className="w-3.5 h-3.5 text-[#00A6FC]" />
+                  <span>Zoho Mail &amp; SMTP</span>
+                </div>
+                <span className="text-[9px] font-bold bg-[#00A6FC]/20 text-[#00A6FC] px-1.5 py-0.5 rounded-full">
+                  Config
                 </span>
               </button>
 

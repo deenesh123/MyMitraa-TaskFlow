@@ -244,3 +244,36 @@ export interface UserAccount extends BaseDomain {
   last_login?: string;
   created_date: string;
 }
+
+export interface EmailConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  from: string;
+  isConfigured: boolean;
+  hasPassword?: boolean;
+}
+
+export interface EmailLogEntry {
+  id: string;
+  timestamp: string;
+  to: string;
+  subject: string;
+  category: 'TASK_OWNER' | 'WEEKLY_REPORT' | 'LEAVE_STATUS' | 'TEST' | 'SYSTEM';
+  status: 'SENT' | 'SIMULATED' | 'FAILED';
+  details?: string;
+  error?: string;
+}
+
+export interface TaskOwnerEmailPayload {
+  task_id?: string;
+  owner_name?: string;
+  owner_email?: string;
+  assigned_by?: string;
+  subject?: string;
+  description?: string;
+  priority?: string;
+  eta?: string;
+}
+

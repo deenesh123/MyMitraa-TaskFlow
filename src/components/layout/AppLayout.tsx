@@ -4,6 +4,7 @@ import { TopBar } from './TopBar';
 import { SearchModal } from './SearchModal';
 
 import { UserAccount } from '../../api/types';
+import { CURRENT_USER } from '../../api/mockData';
 import { useAppTheme } from '../../context/ThemeContext';
 
 interface AppLayoutProps {
@@ -19,7 +20,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   currentRoute,
   onNavigate,
   openTasksCount = 24,
-  currentUser,
+  currentUser = CURRENT_USER,
   onSignOut,
   children
 }) => {

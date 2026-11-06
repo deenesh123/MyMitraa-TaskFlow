@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings2,
   Shield,
+  Mail,
   HelpCircle,
   ChevronLeft,
   ChevronRight,
@@ -78,6 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { title: 'Reports', route: '/task-dashboard', icon: BarChart3 },
         { title: 'User Management', route: '/users/user-management', icon: Shield, badge: 'Admin' },
+        { title: 'Zoho Mail & SMTP', route: '/admin/email-zoho', icon: Mail, badge: 'Zoho' },
         { title: 'Dropdown Management', route: '/users/dropdown-management', icon: Settings2 },
       ]
     }
