@@ -17,6 +17,7 @@ import {
   NumericalCount,
   WorkLogEntry,
   UserAccount,
+  Subtask,
 } from './types';
 
 import {
@@ -35,6 +36,7 @@ import {
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 export const API_MODE = (import.meta.env.VITE_API_MODE || (import.meta.env.PROD ? 'production' : 'preview')).toLowerCase();
 export const isProduction = API_MODE === 'production';
+export const enableMockFallback = import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true';
 
 // Central in-memory state initialized with seed data (used for offline preview & testing)
 class DataStore {
@@ -559,6 +561,90 @@ export const ApiClient = {
           return {
             code: 200,
             message: 'TASK_DELETED_SUCCESSFULLY',
+            data: dataStore.tasks.length < initialLen,
+          };
+        }
+      );
+    },
+
+    // Subtask operations
+    async addSubtask(taskId: string, subtaskData: Omit<FeedbackHistory, 'id' | 'actual_effort' | 'subtask_count' | 'work_log_entries' | 'last_subtask_update'>): Promise<CustomResponse<FeedbackHistory>> {
+      return apiFetch<FeedbackHistory>(
+        '/api/feedback/add_subtask',
+        {
+          method: 'POST',
+          body: JSON.stringify({ ...subtaskData, parentFeedbackHistoryId: taskId }),
+        },
+        async () => {
+          await delay();
+          const task = dataStore.tasks.find(t => t.id === taskId || t.ticket_number === taskId);
+          if (!task) throw new Error('Task not found');
+
+          const newSubtask: FeedbackHistory = {
+            ...subtaskData,
+            id: `subtask-${Date.now()}`,
+            ticket_number: `${task.ticket_number}-SUB-${Math.floor(100 + Math.random() * 900)}`,
+            subtask_count: (task.subtask_count || 0) + 1,
+            last_subtask_update: new Date().toString(),
+            parentFeedbackHistoryId: taskId,
+            work_log_entries: [],
+          };
+          dataStore.tasks = dataStore.tasks.map(t =>
+            t.id === taskId || t.ticket_number === taskId ? { ...task, ...newSubtask } : t
+          );
+          // Recalculate subtask_count
+          const updatedTask = dataStore.tasks.find(t => t.id === taskId || t.ticket_number === taskId)!;
+          updatedTask.subtask_count = dataStore.tasks.filter(t => t.parentFeedbackHistoryId === taskId).length;
+          return {
+            code: 200,
+            message: 'SUBTASK_ADDED_SUCCESSFULLY',
+            data: updatedTask,
+          };
+        }
+      );
+    },
+
+    async updateSubtask(subtaskId: string, updates: Partial<FeedbackHistory>): Promise<CustomResponse<FeedbackHistory>> {
+      return apiFetch<FeedbackHistory>(
+        `/api/feedback/update_subtask/${subtaskId}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(updates),
+        },
+        async () => {
+          await delay();
+          // Try to find subtask in local store by matching against ticket_number patterns
+          const initialLen = dataStore.tasks.length;
+          let updatedTask = dataStore.tasks.find(t => t.id === subtaskId || t.ticket_number === subtaskId);
+
+          if (updatedTask) {
+            const merged = { ...updatedTask, ...updates };
+            updatedTask = { ...merged };
+            dataStore.tasks = dataStore.tasks.map(t =>
+              t.id === subtaskId || t.ticket_number === subtaskId ? merged : t
+            );
+          }
+
+          return {
+            code: 200,
+            message: 'SUBTASK_UPDATED_SUCCESSFULLY',
+            data: updatedTask,
+          };
+        }
+      );
+    },
+
+    async deleteSubtask(subtaskId: string, epicId: string): Promise<CustomResponse<boolean>> {
+      return apiFetch<boolean>(
+        `/api/feedback/delete_subtask/${subtaskId}/${epicId}`,
+        { method: 'DELETE' },
+        async () => {
+          await delay();
+          const initialLen = dataStore.tasks.length;
+          dataStore.tasks = dataStore.tasks.filter(t => !(t.id === subtaskId || t.ticket_number === subtaskId || t.ticket_number === `${epicId}-SUB`));
+          return {
+            code: 200,
+            message: 'SUBTASK_DELETED_SUCCESSFULLY',
             data: dataStore.tasks.length < initialLen,
           };
         }

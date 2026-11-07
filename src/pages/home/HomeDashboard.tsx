@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ApiClient } from '../../api/client';
 import { FeedbackHistory, MeetingTimeTracker, OptimaLeaveTracker, NumericalCount } from '../../api/types';
+import { PROJECTS, TEAMS, MODULES, CUSTOMERS } from '../../api/mockData';
 import { MascotPenguin } from '../../components/mascot/MascotPenguin';
 import { DateRangeBox } from '../../components/common/DateRangeBox';
 import { StatusBadge } from '../../components/common/StatusBadge';
@@ -25,9 +26,8 @@ import { Modal } from '../../components/common/Modal';
 import { useToast } from '../../components/common/Toast';
 import { Skeleton } from '../../components/common/Skeleton';
 import { MascotEmpty } from '../../components/common/MascotEmpty';
-import { TEAMS, PROJECTS, CUSTOMERS, MODULES } from '../../api/mockData';
-import { useAppTheme } from '../../context/ThemeContext';
 import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
+import { useAppTheme } from '../../context/ThemeContext';
 
 interface HomeDashboardProps {
   onNavigate: (route: string) => void;
@@ -77,29 +77,36 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
   const [newTaskPriority, setNewTaskPriority] = useState<'Critical P0' | 'Urgent P1' | 'Normal P2' | 'Low P3'>('Normal P2');
   const [newTaskEffort, setNewTaskEffort] = useState(16);
 
-  // Load KPI counts
+  // Load KPI counts from REAL backend
   useEffect(() => {
     setLoadingKpi(true);
     ApiClient.tasks.getNumericalCount()
-      .then(res => setCounts(res.data))
-      .catch(() => showToast('Error', 'Failed to load KPI metrics', 'error'))
+      .then(res => {
+        setCounts(res.data);
+        // Show toast for production backend connection
+        if (!import.meta.env.VITE_API_MODE || import.meta.env.VITE_API_MODE !== 'preview') {
+          showToast('Success', 'KPI metrics loaded from backend', 'success');
+        }
+      })
+      .catch(() => showToast('Error', 'Failed to load KPI metrics from backend', 'error'))
       .finally(() => setLoadingKpi(false));
 
+    // Load people alert from REAL backend
     ApiClient.tasks.getPeopleNotFillingTasks()
       .then(res => setPeopleAlert(res.data))
-      .catch(() => {});
+      .catch(() => showToast('Error', 'Failed to load people alert from backend', 'error'));
   }, [startDate, endDate]);
 
-  // Load My Tasks
+  // Load My Tasks from REAL backend
   useEffect(() => {
     setLoadingTasks(true);
     ApiClient.tasks.getAll()
       .then(res => setTasks(res.data))
-      .catch(() => showToast('Error', 'Failed to load tasks', 'error'))
+      .catch(() => showToast('Error', 'Failed to load tasks from backend', 'error'))
       .finally(() => setLoadingTasks(false));
   }, []);
 
-  // Load Upcoming Schedule
+  // Load Upcoming Schedule from REAL backend
   useEffect(() => {
     setLoadingSchedule(true);
     Promise.all([
@@ -110,7 +117,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
         setMeetings(mRes.data);
         setLeaves(lRes.data);
       })
-      .catch(() => showToast('Error', 'Failed to load schedule', 'error'))
+      .catch(() => showToast('Error', 'Failed to load schedule from backend', 'error'))
       .finally(() => setLoadingSchedule(false));
   }, []);
 
@@ -125,7 +132,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
     });
   };
 
-  // Submit New Task
+  // Submit New Task - sends to REAL backend
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskSubject.trim()) {
@@ -235,7 +242,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
             </div>
 
             {/* Headline */}
-            <h2 className={`text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight ${
+            <h2 className={`text-2xl lg:text-3xl font-extrabold tracking-tight ${
               isGlass ? 'text-white' : 'text-[#191627]'
             }`}>
               Stay Organised.<br />
@@ -258,8 +265,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
                   isGlass
                     ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-extrabold hover:brightness-110 shadow-amber-500/30'
                     : 'bg-[#191627] hover:bg-[#28243c] active:bg-[#100e1a] text-white'
-                }`}
-              >
+                }`}>
                 <span>Create New Task</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -319,46 +325,46 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
                     fill="transparent"
                     className="transition-all duration-700 ease-out"
                   />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-black text-[#191627] font-mono tracking-tight">
+                      {progressPercent}%
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">Done</span>
+                  </div>
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-[#191627] font-mono tracking-tight">
-                    {progressPercent}%
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-medium">Done</span>
+
+                {/* Stats detail */}
+                <div className="space-y-2 text-left">
+                  <div>
+                    <div className="inline-flex items-center gap-1 text-xs font-bold text-[#4D6B00] bg-[#A3D801]/20 px-2 py-0.5 rounded-full font-mono">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      <span>+12%</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5">from last week</p>
+                  </div>
+                  <div className="pt-1 border-t border-slate-100 text-xs">
+                    <span className="font-mono font-bold text-slate-800">{counts.closed}</span>
+                    <span className="text-slate-400"> of </span>
+                    <span className="font-mono font-bold text-slate-800">{counts.total}</span>
+                    <span className="text-slate-500 block text-[11px]">tasks completed</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Stats detail */}
-              <div className="space-y-2 text-left">
-                <div>
-                  <div className="inline-flex items-center gap-1 text-xs font-bold text-[#4D6B00] bg-[#A3D801]/20 px-2 py-0.5 rounded-full font-mono">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>+12%</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">from last week</p>
-                </div>
-                <div className="pt-1 border-t border-slate-100 text-xs">
-                  <span className="font-mono font-bold text-slate-800">{counts.closed}</span>
-                  <span className="text-slate-400"> of </span>
-                  <span className="font-mono font-bold text-slate-800">{counts.total}</span>
-                  <span className="text-slate-500 block text-[11px]">tasks completed</span>
-                </div>
+              {/* Quick link */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-500">Current sprint target: 75%</span>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('/task-dashboard')}
+                  className="text-[#7B3AEC] hover:text-[#5c28b5] font-semibold flex items-center gap-1"
+                >
+                  <span>View Report</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           )}
-
-          {/* Quick link */}
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-500">Current sprint target: 75%</span>
-            <button
-              type="button"
-              onClick={() => onNavigate('/task-dashboard')}
-              className="text-[#7B3AEC] hover:text-[#5c28b5] font-semibold flex items-center gap-1"
-            >
-              <span>View Report</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
       </div>
 
@@ -764,7 +770,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
               {progressPercent >= 50 ? "You're on track!" : "Needs attention"}
             </h4>
             <p className="text-xs text-white/85 mt-0.5 max-w-xl">
-              Keep going! You&apos;ve completed {progressPercent}% of total tasks for this period ({counts.closed} of {counts.total}).
+              Keep going! You've completed {progressPercent}% of total tasks for this period ({counts.closed} of {counts.total}).
             </p>
             {/* Horizontal Fill Bar */}
             <div className="w-64 sm:w-80 h-2 bg-black/25 rounded-full mt-3 overflow-hidden">
@@ -868,7 +874,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
                 <select
                   value={newTaskTeam}
                   onChange={e => setNewTaskTeam(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#7B3AEC]"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus-border-[#7B3AEC]"
                 >
                   {TEAMS.map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -926,7 +932,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center gap-1.5 px-6 py-2 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center gap-1.5 px-6 py-2 bg-[#191627] hover:bg-[#28243c] text-white rounded-full text-xs font-semibold transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 <span>Save Task</span>

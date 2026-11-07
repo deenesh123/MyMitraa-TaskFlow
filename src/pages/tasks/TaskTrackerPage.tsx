@@ -35,16 +35,23 @@ export const TaskTrackerPage: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Modals state
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [workLogModalTask, setWorkLogModalTask] = useState<FeedbackHistory | null>(null);
-  const [detailModalTask, setDetailModalTask] = useState<FeedbackHistory | null>(null);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  // Subtask modals state
+  const [createSubtaskModalOpen, setCreateSubtaskModalOpen] = useState(false);
+  const [updateSubtaskModalOpen, setUpdateSubtaskModalOpen] = useState(false);
+  const [deleteSubtaskTargetId, setDeleteSubtaskTargetId] = useState<string | null>(null);
+  const [deleteSubtaskEpicId, setDeleteSubtaskEpicId] = useState<string | null>(null);
+  const [selectedSubtaskForUpdate, setSelectedSubtaskForUpdate] = useState<FeedbackHistory | null>(null);
 
   // Work Log form inputs
   const [logDate, setLogDate] = useState('28-Oct-2026');
   const [logHours, setLogHours] = useState(4);
   const [logDescription, setLogDescription] = useState('');
+
+  // Modal state
+  const [workLogModalTask, setWorkLogModalTask] = useState<FeedbackHistory | null>(null);
+  const [detailModalTask, setDetailModalTask] = useState<FeedbackHistory | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // Create Task form inputs
   const [newSubject, setNewSubject] = useState('');
@@ -56,8 +63,10 @@ export const TaskTrackerPage: React.FC = () => {
   const [newCloseDate, setNewCloseDate] = useState('28-Oct-2026');
   const [newDesc, setNewDesc] = useState('');
 
+  // Subtask tracking
+  const [epicIdForSubtask, setEpicIdForSubtask] = useState<string | null>(null);
+
   const loadTasks = () => {
-    setLoading(true);
     ApiClient.tasks.getAll({
       project: selectedProject !== 'All' ? selectedProject : undefined,
       team: selectedTeam !== 'All' ? selectedTeam : undefined,
@@ -69,6 +78,10 @@ export const TaskTrackerPage: React.FC = () => {
       .catch(() => showToast('Error', 'Failed to load task records', 'error'))
       .finally(() => setLoading(false));
   };
+
+  useEffect(() => {
+    loadTasks();
+  }, [selectedProject, selectedTeam, selectedStatus, selectedPriority]);
 
   useEffect(() => {
     loadTasks();
@@ -153,6 +166,100 @@ export const TaskTrackerPage: React.FC = () => {
       showToast('Deleted', 'Task record removed successfully');
       setDeleteTargetId(null);
     });
+  };
+
+  // Subtask operations
+  const handleAddSubtask = async (taskId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSubject.trim()) {
+      showToast('Validation Error', 'Subtask subject cannot be empty', 'error');
+      return;
+    }
+
+    try {
+      const result = await ApiClient.tasks.addSubtask(taskId, {
+        subject: newSubject,
+        description: newDesc || '',
+        status: 'Open',
+        priority: newPriority,
+        project: selectedProject,
+        team: selectedTeam,
+        customer: CUSTOMERS[0],
+        task_owner: 'Deenesh Sabat',
+        estimated_start_date: newStartDate,
+        estimated_close_date: newCloseDate,
+        epic: epicIdForSubtask || undefined,
+      });
+
+      if (result.code === 200) {
+        setTasks(prev => prev.map(t => t.id === taskId || t.ticket_number === taskId ? result.data : t));
+        setCreateSubtaskModalOpen(false);
+        setNewSubject('');
+        setNewDesc('');
+        showToast('Subtask Added', `Subtask added successfully to task`);
+      } else {
+        showToast('Error', result.message || 'Failed to add subtask', 'error');
+      }
+    } catch (err: any) {
+      showToast('Error', err.message || 'Failed to add subtask', 'error');
+    }
+  };
+
+  const handleUpdateSubtask = async (subtaskId: string) => {
+    if (!selectedSubtaskForUpdate) return;
+
+    try {
+      const result = await ApiClient.tasks.updateSubtask(subtaskId, {
+        subject: selectedSubtaskForUpdate.subject,
+        description: selectedSubtaskForUpdate.description,
+        status: selectedSubtaskForUpdate.status,
+        priority: selectedSubtaskForUpdate.priority,
+      });
+
+      if (result.code === 200) {
+        setTasks(prev => prev.map(t => t.id === subtaskId || t.ticket_number === subtaskId ? result.data : t));
+        setUpdateSubtaskModalOpen(false);
+        setSelectedSubtaskForUpdate(null);
+        showToast('Subtask Updated', 'Subtask updated successfully');
+      } else {
+        showToast('Error', result.message || 'Failed to update subtask', 'error');
+      }
+    } catch (err: any) {
+      showToast('Error', err.message || 'Failed to update subtask', 'error');
+    }
+  };
+
+  const handleDeleteSubtask = async (subtaskId: string, epicId: string) => {
+    if (!subtaskId) return;
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this subtask?'
+    );
+    if (!confirmed) return;
+
+    try {
+      const result = await ApiClient.tasks.deleteSubtask(subtaskId, epicId);
+      if (result.code === 200) {
+        setTasks(prev => prev.filter(t => !(t.id === subtaskId || t.ticket_number === subtaskId)));
+        setDeleteSubtaskTargetId(null);
+        setDeleteSubtaskEpicId(null);
+        showToast('Subtask Deleted', 'Subtask removed successfully');
+      } else {
+        showToast('Error', result.message || 'Failed to delete subtask', 'error');
+      }
+    } catch (err: any) {
+      showToast('Error', err.message || 'Failed to delete subtask', 'error');
+    }
+  };
+
+  const handleOpenCreateSubtaskModal = (taskId: string, epicId: string) => {
+    setEpicIdForSubtask(epicId);
+    setCreateSubtaskModalOpen(true);
+  };
+
+  const handleOpenUpdateSubtaskModal = (subtask: FeedbackHistory) => {
+    setSelectedSubtaskForUpdate(subtask);
+    setUpdateSubtaskModalOpen(true);
   };
 
   // Table columns

@@ -78,6 +78,31 @@ export interface FeedbackHistory extends BaseDomain {
   uploaded?: boolean;
   subtask_count: number;
   last_subtask_update?: string;
+  parentFeedbackHistoryId?: string;
+}
+
+export interface Subtask extends BaseDomain {
+  subtaskId: string;
+  ticketNumber: string;
+  parentTicketNumber: string;
+  parentFeedbackHistoryId: string;
+  epic?: string;
+  priority?: string;
+  customer?: string;
+  subject?: string;
+  description?: string;
+  status?: 'Open' | 'In Progress' | 'Closed' | 'On Hold';
+  project?: string;
+  module?: string;
+  team?: string;
+  task_owner?: string;
+  estimated_start_date?: string;
+  estimated_close_date?: string;
+  actual_start_date?: string;
+  actual_close_date?: string;
+  estimated_effort?: number;
+  actual_effort?: number;
+  work_log_entries?: WorkLogEntry[];
 }
 
 export interface MeetingTimeTracker extends BaseDomain {
@@ -276,4 +301,3 @@ export interface TaskOwnerEmailPayload {
   priority?: string;
   eta?: string;
 }
-
