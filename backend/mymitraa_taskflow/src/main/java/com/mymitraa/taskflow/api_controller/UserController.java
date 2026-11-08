@@ -5,6 +5,9 @@ import com.mymitraa.taskflow.api_repository.UserRepository;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +23,16 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private boolean isCallerSuperAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_SUPER_ADMIN") ||
+                               a.getAuthority().equalsIgnoreCase("Super Admin"));
+    }
+
     @GetMapping({"", "/getAll"})
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'HR_MANAGER')")
     public ResponseEntity<CustomResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
         users.forEach(u -> u.setPassword(null));
@@ -28,6 +40,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'HR_MANAGER')")
     public ResponseEntity<CustomResponse> getUserById(@PathVariable("id") String id) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
@@ -40,7 +53,13 @@ public class UserController {
     }
 
     @PostMapping("/save")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<CustomResponse> saveUser(@RequestBody User user) {
+        if ("Super Admin".equalsIgnoreCase(user.getRole()) && !isCallerSuperAdmin()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(new CustomResponse(403, "Only Super Admin can provision Super Admin accounts", null));
+        }
+
         if (user.getEmail() != null && userRepository.findByEmail(user.getEmail().trim()).isPresent()) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
                     .body(new CustomResponse(400, "User already exists with email: " + user.getEmail(), null));
@@ -71,6 +90,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<CustomResponse> updateUser(@PathVariable("id") String id, @RequestBody User update) {
         Optional<User> existingOpt = userRepository.findById(id);
         if (existingOpt.isEmpty()) {
@@ -78,6 +98,18 @@ public class UserController {
                     .body(new CustomResponse(404, "USER_NOT_FOUND", null));
         }
         User existing = existingOpt.get();
+
+        // Security check: Admin cannot modify Super Admin privileges or accounts
+        boolean callerIsSuperAdmin = isCallerSuperAdmin();
+        if ("Super Admin".equalsIgnoreCase(existing.getRole()) && !callerIsSuperAdmin) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(new CustomResponse(403, "Admins cannot modify Super Admin accounts", null));
+        }
+
+        if (update.getRole() != null && "Super Admin".equalsIgnoreCase(update.getRole()) && !callerIsSuperAdmin) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(new CustomResponse(403, "Only Super Admin can assign the Super Admin role", null));
+        }
 
         if (update.getEmail() != null && !update.getEmail().equalsIgnoreCase(existing.getEmail())) {
             if (userRepository.findByEmail(update.getEmail().trim()).isPresent()) {
@@ -102,12 +134,26 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<CustomResponse> deleteUser(@PathVariable("id") String id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return ResponseEntity.ok(new CustomResponse(200, "USER_DELETED", true));
+        Optional<User> existingOpt = userRepository.findById(id);
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND)
+                    .body(new CustomResponse(404, "USER_NOT_FOUND", false));
         }
-        return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND)
-                .body(new CustomResponse(404, "USER_NOT_FOUND", false));
+        User existing = existingOpt.get();
+
+        if ("Super Admin".equalsIgnoreCase(existing.getRole())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(new CustomResponse(403, "Super Admin accounts cannot be deleted", false));
+        }
+
+        if ("Admin".equalsIgnoreCase(existing.getRole()) && !isCallerSuperAdmin()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(new CustomResponse(403, "Only Super Admin can delete Admin accounts", false));
+        }
+
+        userRepository.deleteById(id);
+        return ResponseEntity.ok(new CustomResponse(200, "USER_DELETED", true));
     }
 }

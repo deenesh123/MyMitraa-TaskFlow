@@ -1,7 +1,7 @@
 package com.mymitraa.taskflow.api_controller;
 
 import com.mymitraa.taskflow.api_domain.AuditLog;
-import com.mymitraa.taskflow.api_mv.CustomResponse;
+import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_repository.AuditLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class AuditLogController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
-    public ResponseEntity<CustomResponse<List<AuditLog>>> getAllLogs(
+    public ResponseEntity<CustomResponse> getAllLogs(
             @RequestParam(required = false) String module,
             @RequestParam(required = false) String outcome) {
         
@@ -36,24 +36,18 @@ public class AuditLogController {
             logs = auditLogRepository.findAll();
         }
 
-        CustomResponse<List<AuditLog>> response = new CustomResponse<>();
-        response.setCode(200);
-        response.setMessage("AUDIT_LOGS_FETCHED_SUCCESSFULLY");
-        response.setData(logs);
+        CustomResponse response = new CustomResponse(200, "AUDIT_LOGS_FETCHED_SUCCESSFULLY", logs);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<CustomResponse<AuditLog>> createAuditLog(@RequestBody AuditLog log) {
+    public ResponseEntity<CustomResponse> createAuditLog(@RequestBody AuditLog log) {
         if (log.getTimestamp() == null || log.getTimestamp().trim().isEmpty()) {
             log.setTimestamp(LocalDateTime.now().format(FORMATTER));
         }
         AuditLog saved = auditLogRepository.save(log);
 
-        CustomResponse<AuditLog> response = new CustomResponse<>();
-        response.setCode(200);
-        response.setMessage("AUDIT_LOG_RECORDED");
-        response.setData(saved);
+        CustomResponse response = new CustomResponse(200, "AUDIT_LOG_RECORDED", saved);
         return ResponseEntity.ok(response);
     }
 }

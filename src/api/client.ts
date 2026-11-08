@@ -1626,6 +1626,73 @@ export const ApiClient = {
           };
         }
       );
+    },
+
+    async updateRolePermissions(roleName: string, permissions: string[]): Promise<CustomResponse<any>> {
+      return apiFetch<any>(
+        `/api/roles/${encodeURIComponent(roleName)}/permissions`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(permissions),
+        },
+        async () => {
+          await delay(20);
+          return {
+            code: 200,
+            message: 'ROLE_PERMISSIONS_UPDATED_SUCCESSFULLY',
+            data: { role: roleName, permissions },
+          };
+        }
+      );
+    },
+
+    async assignRole(userId: string, roleName: string): Promise<CustomResponse<any>> {
+      return apiFetch<any>(
+        '/api/roles/assign',
+        {
+          method: 'POST',
+          body: JSON.stringify({ userId, roleName }),
+        },
+        async () => {
+          await delay(30);
+          const idx = dataStore.users.findIndex(u => u.id === userId);
+          if (idx !== -1) {
+            dataStore.users[idx].role = roleName as any;
+          }
+          return {
+            code: 200,
+            message: 'ROLE_ASSIGNED_SUCCESSFULLY',
+            data: { userId, roleName },
+          };
+        }
+      );
+    },
+
+    async getPermissions(): Promise<CustomResponse<string[]>> {
+      return apiFetch<string[]>(
+        '/api/permissions',
+        { method: 'GET' },
+        async () => {
+          await delay(20);
+          return {
+            code: 200,
+            message: 'PERMISSIONS_FETCHED_SUCCESSFULLY',
+            data: [
+              'users.view', 'users.create', 'users.update', 'users.delete', 'users.assign_role',
+              'roles.manage', 'permissions.manage',
+              'projects.view', 'projects.create', 'projects.update', 'projects.delete',
+              'tasks.view', 'tasks.create', 'tasks.assign', 'tasks.update', 'tasks.delete',
+              'sales.leads.view', 'sales.leads.create', 'sales.leads.update', 'sales.leads.delete', 'sales.reports.view',
+              'qa.tests.view', 'qa.tests.create', 'qa.tests.execute', 'qa.bugs.view', 'qa.bugs.create', 'qa.bugs.update',
+              'hr.employees.view', 'hr.employees.manage', 'hr.leave.view', 'hr.leave.apply', 'hr.leave.approve', 'hr.attendance.manage',
+              'meetings.view', 'meetings.manage',
+              'reports.view', 'reports.export',
+              'documents.upload', 'documents.download',
+              'audit.view', 'settings.manage', 'email.manage'
+            ],
+          };
+        }
+      );
     }
   }
 };

@@ -412,14 +412,18 @@ export const UserManagementPage: React.FC = () => {
             <option value="All">All Roles</option>
             <option value="Super Admin">Super Admin</option>
             <option value="Admin">Admin</option>
-            <option value="Production Engineer">Production Engineer</option>
+            <option value="Project Manager">Project Manager</option>
+            <option value="Developer">Developer</option>
+            <option value="Sales Executive">Sales Executive</option>
+            <option value="Sales Manager">Sales Manager</option>
+            <option value="QA Tester">QA Tester</option>
+            <option value="HR Manager">HR Manager</option>
+            <option value="Employee">Employee</option>
+            <option value="Client">Client</option>
             <option value="Lead Architect">Lead Architect</option>
             <option value="Senior Backend Engineer">Senior Backend Engineer</option>
             <option value="Frontend Engineer">Frontend Engineer</option>
-            <option value="Product Manager">Product Manager</option>
-            <option value="QA Engineer">QA Engineer</option>
             <option value="UI / UX Designer">UI / UX Designer</option>
-            <option value="Python Developer">Python Developer</option>
             <option value="DevOps Engineer">DevOps Engineer</option>
           </select>
         </div>
@@ -513,17 +517,22 @@ export const UserManagementPage: React.FC = () => {
                   onChange={e => setFormRole(e.target.value as UserRole)}
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#7B3AEC]"
                 >
-                  <option value="Production Engineer">Production Engineer</option>
+                  <option value="Super Admin">Super Admin</option>
                   <option value="Admin">Admin</option>
+                  <option value="Project Manager">Project Manager</option>
+                  <option value="Developer">Developer</option>
+                  <option value="Sales Executive">Sales Executive</option>
+                  <option value="Sales Manager">Sales Manager</option>
+                  <option value="QA Tester">QA Tester</option>
+                  <option value="HR Manager">HR Manager</option>
+                  <option value="Employee">Employee</option>
+                  <option value="Client">Client</option>
+                  <option value="Production Engineer">Production Engineer</option>
                   <option value="Lead Architect">Lead Architect</option>
                   <option value="Senior Backend Engineer">Senior Backend Engineer</option>
                   <option value="Frontend Engineer">Frontend Engineer</option>
-                  <option value="Product Manager">Product Manager</option>
-                  <option value="QA Engineer">QA Engineer</option>
                   <option value="UI / UX Designer">UI / UX Designer</option>
-                  <option value="Python Developer">Python Developer</option>
                   <option value="DevOps Engineer">DevOps Engineer</option>
-                  <option value="Super Admin">Super Admin</option>
                 </select>
               </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type MascotPose = 'hero-clipboard' | 'sidebar-peek' | 'celebrating' | 'confused-empty' | 'waving';
+export type MascotPose = 'hero-clipboard' | 'sidebar-peek' | 'celebrating' | 'confused-empty' | 'waving' | 'sleeping';
 
 interface MascotPenguinProps {
   pose?: MascotPose;
@@ -129,6 +129,43 @@ export const MascotPenguin: React.FC<MascotPenguinProps> = ({
           {/* Feet */}
           <ellipse cx="40" cy="88" rx="7" ry="3.5" fill="#FB923C" />
           <ellipse cx="60" cy="88" rx="7" ry="3.5" fill="#FB923C" />
+        </svg>
+      </div>
+    );
+  }
+
+  if (pose === 'sleeping') {
+    return (
+      <div className={`relative flex items-center justify-center ${className}`}>
+        <svg
+          width={width || 90}
+          height={height || 90}
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Zzz sleeping bubbles */}
+          <text x="68" y="28" fontSize="14" fontWeight="bold" fill="#7B3AEC" opacity="0.85">Z</text>
+          <text x="76" y="20" fontSize="11" fontWeight="bold" fill="#D946EF" opacity="0.75">z</text>
+          <text x="82" y="14" fontSize="9" fontWeight="bold" fill="#A3D801" opacity="0.65">z</text>
+          {/* Body */}
+          <ellipse cx="50" cy="58" rx="30" ry="30" fill="#191627" />
+          {/* White Belly */}
+          <ellipse cx="50" cy="63" rx="20" ry="21" fill="#FFFFFF" />
+          {/* Peaceful closed curved eyes */}
+          <path d="M38 50C40 53 44 53 46 50" stroke="#191627" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M54 50C56 53 60 53 62 50" stroke="#191627" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Cheeks */}
+          <ellipse cx="36" cy="53" rx="4" ry="2.5" fill="#FDA4AF" opacity="0.8" />
+          <ellipse cx="64" cy="53" rx="4" ry="2.5" fill="#FDA4AF" opacity="0.8" />
+          {/* Beak resting */}
+          <path d="M46 54C46 54 50 53 54 54C53 57 51 59 50 59C49 59 47 57 46 54Z" fill="#FB923C" />
+          {/* Resting flippers */}
+          <ellipse cx="28" cy="62" rx="6" ry="12" transform="rotate(10 28 62)" fill="#191627" />
+          <ellipse cx="72" cy="62" rx="6" ry="12" transform="rotate(-10 72 62)" fill="#191627" />
+          {/* Feet */}
+          <ellipse cx="42" cy="88" rx="7" ry="3.5" fill="#FB923C" />
+          <ellipse cx="58" cy="88" rx="7" ry="3.5" fill="#FB923C" />
         </svg>
       </div>
     );
