@@ -1,10 +1,7 @@
 package com.mymitraa.taskflow.api_service;
 
 import com.mymitraa.taskflow.api_domain.ProjectStatus;
-import com.mymitraa.taskflow.api_repository.ProjectStatusRepository;
 import org.springframework.data.domain.Pageable;
-import com.mymitraa.taskflow.api_successcode.CustomResponse;
-import com.mymitraa.taskflow.api_successcode.SuccessCode;
 
 public interface ProjectStatusService {
 
@@ -12,9 +9,9 @@ public interface ProjectStatusService {
 
     Object fetchAll(Pageable pageable);
 
-    Object getById(Long id);
+    Object getById(String id);
 
     Object update(ProjectStatus obj);
 
-    Object delete(Long id);
+    Object delete(String id);
 }

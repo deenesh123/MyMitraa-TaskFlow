@@ -163,7 +163,7 @@ export interface OptimaWeeklyUpdateTracker extends BaseDomain {
   testers: string[];
   fe_developers: string[];
   be_developers: string[];
-  python_developers: string[];
+  python_developers?: string[];
   ux_designers: string[];
   shared_resources: string[];
   totalEnv: number;

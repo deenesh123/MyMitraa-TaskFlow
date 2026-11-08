@@ -140,7 +140,7 @@ public class OptimaLeaveTrackerController {
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put(Constants.SERVICE_NAME, SuccessCode.OPTIMA_LEAVE_TRACKER_FETCHED_SUCCESSFULLY.getServiceName());
 
-        return optimaLeaveTrackerService.getParamterList(customUserDetails);
+        return (AdvanceSearchList) optimaLeaveTrackerService.getParamterList(customUserDetails);
     }
 
     @PutMapping(value = "/advance_search")

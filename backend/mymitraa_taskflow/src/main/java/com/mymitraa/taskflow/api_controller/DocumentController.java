@@ -1,5 +1,6 @@
 package com.mymitraa.taskflow.api_controller;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -15,12 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_domain.Document;
-import com.mymitraa.taskflow.api_repository.DocumentRepository;
 import com.mymitraa.taskflow.api_service.DocumentService;
 
 @RestController
@@ -43,7 +44,7 @@ public class DocumentController {
         document.setFilename(file.getOriginalFilename());
         document.setOriginalName(file.getOriginalFilename());
         document.setFileType(file.getContentType());
-        document.setUploadDate(java.time.LocalDateTime.now());
+        document.setUploadDate(new Date());
         document.setStatus("UPLOADED");
 
         return new ResponseEntity<CustomResponse>(
@@ -54,7 +55,7 @@ public class DocumentController {
     }
 
     @GetMapping(value = "/get/{id}")
-    public ResponseEntity<CustomResponse> getById(@PathVariable("id") Long id) {
+    public ResponseEntity<CustomResponse> getById(@PathVariable("id") String id) {
 
         log.info("get document by id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();
@@ -74,15 +75,16 @@ public class DocumentController {
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put("SERVICE_NAME", "DOCUMENTS_FETCHED_SUCCESSFULLY");
 
+        Pageable pageable = searchVM instanceof Pageable ? (Pageable) searchVM : null;
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("DOCUMENTS_FETCHED_SUCCESSFULLY",
                         "Documents fetched successfully",
-                        documentService.fetchAll((Pageable) searchVM), metaInfo),
+                        documentService.fetchAll(pageable), metaInfo),
                 HttpStatus.OK);
     }
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<CustomResponse> update(@PathVariable("id") Long id,
+    public ResponseEntity<CustomResponse> update(@PathVariable("id") String id,
             @RequestBody Document document) {
 
         log.info("updating document with id: {}", id);
@@ -97,7 +99,7 @@ public class DocumentController {
     }
 
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<CustomResponse> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<CustomResponse> delete(@PathVariable("id") String id) {
 
         log.info("deleting document with id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();

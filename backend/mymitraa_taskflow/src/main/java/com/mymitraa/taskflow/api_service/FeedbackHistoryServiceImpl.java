@@ -110,6 +110,41 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
     @Value("${mymitraa.mail.from-email:notifications@mymitraa.com}")
     private String fromEmail;
 
+    private static Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+        String trimmed = dateStr.trim();
+        String[] formats = new String[] {
+            "dd-MMM-yyyy",
+            "yyyy-MM-dd",
+            "dd/MM/yyyy",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "EEE MMM dd HH:mm:ss zzz yyyy"
+        };
+        for (String format : formats) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.ENGLISH);
+                sdf.setLenient(false);
+                return sdf.parse(trimmed);
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    private static Double parseDouble(String str) {
+        if (str == null || str.trim().isEmpty()) {
+            return 0.0;
+        }
+        try {
+            return Double.parseDouble(str.trim());
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
     @Override
     public FeedbackHistory saveFeedback(FeedbackHistoryVM feedbackHistoryVM, CustomUserDetails customUserDetails) {
         String methodName = "saveFeedback";
@@ -127,11 +162,12 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
             feedbackHistory.setStatus(Constants.FEEDBACK_STATUS_OPEN);
 
             if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedEffort())) {
-                feedbackHistory.setEstimatedEffort(feedbackHistoryVM.getEstimatedEffort());
+                feedbackHistory.setEstimatedEffort(parseDouble(feedbackHistoryVM.getEstimatedEffort()));
             }
 
-            if (feedbackHistoryVM.getEstimatedStartDate() != null) {
-                feedbackHistory.setEstimatedStartDate(feedbackHistoryVM.getEstimatedStartDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedStartDate())) {
+                Date d = parseDate(feedbackHistoryVM.getEstimatedStartDate());
+                feedbackHistory.setEstimatedStartDate(d != null ? d : new Date());
             } else {
                 feedbackHistory.setEstimatedStartDate(new Date());
             }
@@ -152,14 +188,15 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
                 feedbackHistory.setDescription(feedbackHistoryVM.getDescription());
             }
 
-            if (feedbackHistoryVM.getActualStartDate() != null) {
-                feedbackHistory.setActualStartDate(feedbackHistoryVM.getActualStartDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getActualStartDate())) {
+                Date d = parseDate(feedbackHistoryVM.getActualStartDate());
+                feedbackHistory.setActualStartDate(d != null ? d : new Date());
             } else {
                 feedbackHistory.setActualStartDate(new Date());
             }
 
-            if (feedbackHistoryVM.getActualCloseDate() != null) {
-                feedbackHistory.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getActualCloseDate())) {
+                feedbackHistory.setActualCloseDate(parseDate(feedbackHistoryVM.getActualCloseDate()));
             }
 
             if (StringUtil.haveValue(feedbackHistoryVM.getPriority())) {
@@ -190,8 +227,8 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
                 feedbackHistory.setUserStories(feedbackHistoryVM.getUserStories());
             }
 
-            if (feedbackHistoryVM.getEstimatedCloseDate() != null) {
-                feedbackHistory.setEstimatedCloseDate(feedbackHistoryVM.getEstimatedCloseDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedCloseDate())) {
+                feedbackHistory.setEstimatedCloseDate(parseDate(feedbackHistoryVM.getEstimatedCloseDate()));
             }
 
             if (StringUtil.haveValue(feedbackHistoryVM.getFileName())) {
@@ -295,20 +332,20 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
             if (StringUtil.haveValue(feedbackHistoryVM.getDescription())) {
                 feedbackHistory.setDescription(feedbackHistoryVM.getDescription());
             }
-            if (feedbackHistoryVM.getActualCloseDate() != null) {
-                feedbackHistory.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getActualCloseDate())) {
+                feedbackHistory.setActualCloseDate(parseDate(feedbackHistoryVM.getActualCloseDate()));
             }
             if (StringUtil.haveValue(feedbackHistoryVM.getStatus())) {
                 feedbackHistory.setStatus(feedbackHistoryVM.getStatus());
-                if (feedbackHistoryVM.getActualCloseDate() == null && "Closed".equalsIgnoreCase(feedbackHistoryVM.getStatus())) {
+                if (!StringUtil.haveValue(feedbackHistoryVM.getActualCloseDate()) && "Closed".equalsIgnoreCase(feedbackHistoryVM.getStatus())) {
                     feedbackHistory.setActualCloseDate(new Date());
                 }
             }
             if (StringUtil.haveValue(feedbackHistoryVM.getSubject())) {
                 feedbackHistory.setSubject(feedbackHistoryVM.getSubject());
             }
-            if (feedbackHistoryVM.getActualStartDate() != null) {
-                feedbackHistory.setActualStartDate(feedbackHistoryVM.getActualStartDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getActualStartDate())) {
+                feedbackHistory.setActualStartDate(parseDate(feedbackHistoryVM.getActualStartDate()));
             }
             if (StringUtil.haveValue(feedbackHistoryVM.getSubModule())) {
                 feedbackHistory.setSubModule(feedbackHistoryVM.getSubModule());
@@ -331,11 +368,11 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
             if (StringUtil.haveValue(feedbackHistoryVM.getUserStories())) {
                 feedbackHistory.setUserStories(feedbackHistoryVM.getUserStories());
             }
-            if (feedbackHistoryVM.getEstimatedStartDate() != null) {
-                feedbackHistory.setEstimatedStartDate(feedbackHistoryVM.getEstimatedStartDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedStartDate())) {
+                feedbackHistory.setEstimatedStartDate(parseDate(feedbackHistoryVM.getEstimatedStartDate()));
             }
-            if (feedbackHistoryVM.getEstimatedCloseDate() != null) {
-                feedbackHistory.setEstimatedCloseDate(feedbackHistoryVM.getEstimatedCloseDate());
+            if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedCloseDate())) {
+                feedbackHistory.setEstimatedCloseDate(parseDate(feedbackHistoryVM.getEstimatedCloseDate()));
             }
             if (StringUtil.haveValue(feedbackHistoryVM.getTeam())) {
                 feedbackHistory.setTeam(feedbackHistoryVM.getTeam());
@@ -374,8 +411,8 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
 
             if (feedbackHistoryVM.getCoding() != null || feedbackHistoryVM.getAiTool() != null || feedbackHistoryVM.getInternalMeeting() != null) {
                 feedbackHistory.setEstimatedEffort(coding + aiTool + meeting);
-            } else if (feedbackHistoryVM.getEstimatedEffort() != null) {
-                feedbackHistory.setEstimatedEffort(feedbackHistoryVM.getEstimatedEffort());
+            } else if (StringUtil.haveValue(feedbackHistoryVM.getEstimatedEffort())) {
+                feedbackHistory.setEstimatedEffort(parseDouble(feedbackHistoryVM.getEstimatedEffort()));
             }
 
             feedbackHistory.setModifiedDateTime(new Date());
@@ -517,9 +554,11 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
         if (StringUtil.haveValue(assignTaskVM.getTaskOwner())) task.setTaskOwner(assignTaskVM.getTaskOwner());
         if (StringUtil.haveValue(assignTaskVM.getTeam())) task.setTeam(assignTaskVM.getTeam());
         if (StringUtil.haveValue(assignTaskVM.getPriority())) task.setPriority(assignTaskVM.getPriority());
-        if (assignTaskVM.getEstimatedStartDate() != null) task.setEstimatedStartDate(assignTaskVM.getEstimatedStartDate());
-        if (assignTaskVM.getActualStartDate() != null) {
-            task.setActualStartDate(assignTaskVM.getActualStartDate());
+        if (StringUtil.haveValue(assignTaskVM.getEstimatedStartDate())) {
+            task.setEstimatedStartDate(parseDate(assignTaskVM.getEstimatedStartDate()));
+        }
+        if (StringUtil.haveValue(assignTaskVM.getActualStartDate())) {
+            task.setActualStartDate(parseDate(assignTaskVM.getActualStartDate()));
         } else {
             task.setActualStartDate(new Date());
         }
@@ -551,8 +590,8 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
                 task.setProductivitySavings(task.getEstimatedEffort() - actualEffort);
             }
         }
-        if (feedbackHistoryVM.getActualCloseDate() != null) {
-            task.setActualCloseDate(feedbackHistoryVM.getActualCloseDate());
+        if (StringUtil.haveValue(feedbackHistoryVM.getActualCloseDate())) {
+            task.setActualCloseDate(parseDate(feedbackHistoryVM.getActualCloseDate()));
         } else {
             task.setActualCloseDate(new Date());
         }

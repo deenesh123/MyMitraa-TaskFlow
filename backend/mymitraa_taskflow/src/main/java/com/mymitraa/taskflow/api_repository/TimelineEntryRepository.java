@@ -1,10 +1,12 @@
 package com.mymitraa.taskflow.api_repository;
 
 import com.mymitraa.taskflow.api_domain.TimelineEntry;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Date;
+import java.util.List;
 
-public interface TimelineEntryRepository extends JpaRepository<TimelineEntry, Long> {
+public interface TimelineEntryRepository extends MongoRepository<TimelineEntry, String> {
 
-    java.util.List<TimelineEntry> findByRelatedEntityTypeAndRelatedEntityType(String relatedEntityType, Long relatedEntityId);
-    java.util.List<TimelineEntry> findByEventDateBetween(LocalDateTime start, LocalDateTime end);
+    List<TimelineEntry> findByRelatedEntityTypeAndRelatedEntityId(String relatedEntityType, String relatedEntityId);
+    List<TimelineEntry> findByEventDateBetween(Date start, Date end);
 }

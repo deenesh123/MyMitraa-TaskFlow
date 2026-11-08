@@ -28,11 +28,18 @@ public class WebSecurityConfiguration {
     private static final Logger log = LoggerFactory.getLogger(WebSecurityConfiguration.class);
 
     @Autowired
+    @org.springframework.context.annotation.Lazy
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public org.springframework.security.authentication.AuthenticationManager authenticationManager(
+            org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
@@ -43,7 +50,8 @@ public class WebSecurityConfiguration {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/dropdowns/**").permitAll()
+                .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/api/dropdowns/**", "/api/dropdown_management/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )

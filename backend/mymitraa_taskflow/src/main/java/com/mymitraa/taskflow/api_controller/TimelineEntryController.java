@@ -1,6 +1,9 @@
 package com.mymitraa.taskflow.api_controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_domain.TimelineEntry;
-import com.mymitraa.taskflow.api_repository.TimelineEntryRepository;
 import com.mymitraa.taskflow.api_service.TimelineEntryService;
 
 @RestController
@@ -37,7 +39,7 @@ public class TimelineEntryController {
     }
 
     @GetMapping(value = "/get/{id}")
-    public ResponseEntity<CustomResponse> getById(@PathVariable("id") Long id) {
+    public ResponseEntity<CustomResponse> getById(@PathVariable("id") String id) {
 
         log.info("get timeline entry by id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();
@@ -57,21 +59,23 @@ public class TimelineEntryController {
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put("SERVICE_NAME", "TIMELINE_ENTRIES_FETCHED_SUCCESSFULLY");
 
+        Pageable pageable = searchVM instanceof Pageable ? (Pageable) searchVM : null;
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("TIMELINE_ENTRIES_FETCHED_SUCCESSFULLY",
                         "Timeline entries fetched successfully",
-                        timelineEntryService.fetchAll((Pageable) searchVM), metaInfo),
+                        timelineEntryService.fetchAll(pageable), metaInfo),
                 HttpStatus.OK);
     }
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<CustomResponse> update(@PathVariable("id") Long id,
+    public ResponseEntity<CustomResponse> update(@PathVariable("id") String id,
             @RequestBody TimelineEntry timelineEntry) {
 
         log.info("updating timeline entry with id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put("SERVICE_NAME", "TIMELINE_ENTRY_UPDATED_SUCCESSFULLY");
 
+        timelineEntry.setId(id);
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("TIMELINE_ENTRY_UPDATED_SUCCESSFULLY",
                         "Timeline entry updated successfully",
@@ -80,7 +84,7 @@ public class TimelineEntryController {
     }
 
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<CustomResponse> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<CustomResponse> delete(@PathVariable("id") String id) {
 
         log.info("deleting timeline entry with id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();
@@ -96,7 +100,7 @@ public class TimelineEntryController {
     @GetMapping(value = "/by-entity/{entityType}/{entityId}")
     public ResponseEntity<CustomResponse> fetchByEntity(
             @PathVariable("entityType") String entityType,
-            @PathVariable("entityId") Long entityId) {
+            @PathVariable("entityId") String entityId) {
 
         log.info("get timeline entries by entity: {} / {}", entityType, entityId);
         Map<String, String> metaInfo = new HashMap<>();
@@ -118,12 +122,22 @@ public class TimelineEntryController {
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put("SERVICE_NAME", "TIMELINE_ENTRIES_FETCHED_SUCCESSFULLY");
 
+        Date startDate = parseDate(start);
+        Date endDate = parseDate(end);
+
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("TIMELINE_ENTRIES_FETCHED_SUCCESSFULLY",
                         "Timeline entries fetched by date range",
-                        timelineEntryService.fetchByDateRange(
-                                java.time.LocalDateTime.parse(start),
-                                java.time.LocalDateTime.parse(end)), metaInfo),
+                        timelineEntryService.fetchByDateRange(startDate, endDate), metaInfo),
                 HttpStatus.OK);
+    }
+
+    private static Date parseDate(String s) {
+        if (s == null || s.trim().isEmpty()) return new Date();
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(s.trim());
+        } catch (Exception e) {
+            return new Date();
+        }
     }
 }

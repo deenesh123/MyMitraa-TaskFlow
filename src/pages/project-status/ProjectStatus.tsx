@@ -261,7 +261,7 @@ export const ProjectStatus: React.FC = () => {
                     <div>
                       <span className="text-[11px] text-slate-400 block font-medium">Python Developers:</span>
                       <div className="flex flex-wrap gap-1 mt-0.5">
-                        {update.python_developers.map((p, i) => (
+                        {(update.python_developers || []).map((p, i) => (
                           <span key={i} className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px]">
                             {p}
                           </span>

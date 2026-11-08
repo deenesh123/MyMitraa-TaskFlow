@@ -1,9 +1,11 @@
 package com.mymitraa.taskflow.api_repository;
 
 import com.mymitraa.taskflow.api_domain.Meeting;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.List;
 
-public interface MeetingRepository extends JpaRepository<Meeting, Long> {
+public interface MeetingRepository extends MongoRepository<Meeting, String> {
 
-    Meeting findByTitle(String title);
+    List<Meeting> findByTitle(String title);
+    List<Meeting> findByOwner(String owner);
 }

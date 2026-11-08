@@ -568,7 +568,7 @@ export const ApiClient = {
     },
 
     // Subtask operations
-    async addSubtask(taskId: string, subtaskData: Omit<FeedbackHistory, 'id' | 'actual_effort' | 'subtask_count' | 'work_log_entries' | 'last_subtask_update'>): Promise<CustomResponse<FeedbackHistory>> {
+    async addSubtask(taskId: string, subtaskData: Partial<FeedbackHistory> & { subject: string }): Promise<CustomResponse<FeedbackHistory>> {
       return apiFetch<FeedbackHistory>(
         '/api/feedback/add_subtask',
         {
@@ -581,9 +581,21 @@ export const ApiClient = {
           if (!task) throw new Error('Task not found');
 
           const newSubtask: FeedbackHistory = {
-            ...subtaskData,
             id: `subtask-${Date.now()}`,
             ticket_number: `${task.ticket_number}-SUB-${Math.floor(100 + Math.random() * 900)}`,
+            description: '',
+            status: 'Open',
+            priority: 'Normal P2',
+            project: task.project,
+            module: task.module || 'Task Tracker',
+            customer: task.customer,
+            team: task.team,
+            task_owner: task.task_owner,
+            estimated_start_date: new Date().toISOString().split('T')[0],
+            estimated_close_date: new Date().toISOString().split('T')[0],
+            estimated_effort: 0,
+            actual_effort: 0,
+            ...subtaskData,
             subtask_count: (task.subtask_count || 0) + 1,
             last_subtask_update: new Date().toString(),
             parentFeedbackHistoryId: taskId,
@@ -614,16 +626,17 @@ export const ApiClient = {
         async () => {
           await delay();
           // Try to find subtask in local store by matching against ticket_number patterns
-          const initialLen = dataStore.tasks.length;
           let updatedTask = dataStore.tasks.find(t => t.id === subtaskId || t.ticket_number === subtaskId);
 
-          if (updatedTask) {
-            const merged = { ...updatedTask, ...updates };
-            updatedTask = { ...merged };
-            dataStore.tasks = dataStore.tasks.map(t =>
-              t.id === subtaskId || t.ticket_number === subtaskId ? merged : t
-            );
+          if (!updatedTask) {
+            throw new Error(`Subtask not found: ${subtaskId}`);
           }
+
+          const merged = { ...updatedTask, ...updates };
+          updatedTask = { ...merged };
+          dataStore.tasks = dataStore.tasks.map(t =>
+            t.id === subtaskId || t.ticket_number === subtaskId ? merged : t
+          );
 
           return {
             code: 200,

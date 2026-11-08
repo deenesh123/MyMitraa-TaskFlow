@@ -43,7 +43,16 @@ public class FeedbackHistoryVM implements Serializable {
     private Double coding;
     private Double aiTool;
     private Double internalMeeting;
+    private Double actualEffort;
     private List<MultipartFile> attachment;
+
+    public Double getActualEffort() {
+        return actualEffort;
+    }
+
+    public void setActualEffort(Double actualEffort) {
+        this.actualEffort = actualEffort;
+    }
 
     public String getId() {
         return id;

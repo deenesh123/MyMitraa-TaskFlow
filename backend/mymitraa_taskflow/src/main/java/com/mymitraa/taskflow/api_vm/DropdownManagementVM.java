@@ -23,6 +23,9 @@ public class DropdownManagementVM implements Serializable {
 
     private String category;
     private String description;
+    private String module;
+    private String subModule;
+    private String comments;
 
     public DropdownManagementVM() {
     }
@@ -73,5 +76,29 @@ public class DropdownManagementVM implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    public String getSubModule() {
+        return subModule;
+    }
+
+    public void setSubModule(String subModule) {
+        this.subModule = subModule;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }

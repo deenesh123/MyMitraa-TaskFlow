@@ -19,6 +19,15 @@ public class AssignTaskVM implements Serializable {
     private String actualStartDate;
     private String whoReported;
     private String epicId;
+    private String priority;
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
 
     public String getTaskId() {
         return taskId;

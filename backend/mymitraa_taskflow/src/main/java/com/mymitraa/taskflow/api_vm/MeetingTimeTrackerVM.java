@@ -16,10 +16,28 @@ public class MeetingTimeTrackerVM implements Serializable {
     private Double totalTime;
     private Date date;
     private String meetingDate;
-    private String meetingLink;
     private String comments;
+    private String meetingLink;
+    private String title;
+    private String description;
     private String sortName;
     private String sortType;
+
+    public String getTitle() {
+        return title != null ? title : project;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description != null ? description : comments;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getId() {
         return id;

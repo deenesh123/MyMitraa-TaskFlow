@@ -26,7 +26,7 @@ import com.mymitraa.taskflow.api_domain.MeetingTimeTracker;
 import com.mymitraa.taskflow.api_service.MeetingTimeTrackerService;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
-import com.mymitraa.taskflow.api_vl.MeetingTimeTrackerVM;
+import com.mymitraa.taskflow.api_vm.MeetingTimeTrackerVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.config.Constants;
 import com.mymitraa.taskflow.security.CustomUserDetails;

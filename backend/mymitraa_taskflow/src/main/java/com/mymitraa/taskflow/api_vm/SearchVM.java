@@ -29,6 +29,10 @@ public class SearchVM implements Serializable {
     private String customerGeography;
     private String projectStatus;
     private String priority;
+    private String project;
+    private String customer;
+    private String task_owner;
+    private String team;
     private boolean enablePagination = true;
 
     public String getSearch() {
@@ -181,5 +185,37 @@ public class SearchVM implements Serializable {
 
     public void setEnablePagination(boolean enablePagination) {
         this.enablePagination = enablePagination;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+
+    public String getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+
+    public String getTask_owner() {
+        return task_owner;
+    }
+
+    public void setTask_owner(String task_owner) {
+        this.task_owner = task_owner;
+    }
+
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
     }
 }

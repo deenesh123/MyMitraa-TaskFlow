@@ -6,19 +6,21 @@ import org.springframework.data.domain.Pageable;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
 
+import java.util.Date;
+
 public interface TimelineEntryService {
 
     Object save(TimelineEntry obj);
 
     Object fetchAll(Pageable pageable);
 
-    Object getById(Long id);
+    Object getById(String id);
 
     Object update(TimelineEntry obj);
 
-    Object delete(Long id);
+    Object delete(String id);
 
-    Object fetchByRelatedEntity(String entityType, Long entityId);
+    Object fetchByRelatedEntity(String entityType, String entityId);
 
-    Object fetchByDateRange(LocalDateTime start, LocalDateTime end);
+    Object fetchByDateRange(Date start, Date end);
 }

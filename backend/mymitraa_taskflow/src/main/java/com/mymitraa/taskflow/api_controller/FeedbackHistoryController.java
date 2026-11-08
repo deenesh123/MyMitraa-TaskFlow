@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +28,9 @@ import com.mymitraa.taskflow.api_domain.WorkLogEntry;
 import com.mymitraa.taskflow.api_service.FeedbackHistoryService;
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_successcode.SuccessCode;
+import com.mymitraa.taskflow.api_vm.AssignTaskVM;
+import com.mymitraa.taskflow.api_vm.EpicVM;
+import com.mymitraa.taskflow.api_vm.EffortRecordVM;
 import com.mymitraa.taskflow.api_vm.FeedbackHistoryVM;
 import com.mymitraa.taskflow.api_vm.SearchVM;
 import com.mymitraa.taskflow.config.Constants;
@@ -109,7 +113,7 @@ public class FeedbackHistoryController {
 
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put(Constants.SERVICE_NAME, SuccessCode.DAILY_TASK_TRACKER_FETCHED_SUCCESSFULLY.getServiceName());
-        return feedbackHistoryService.getParamterList(customUserDetails);
+        return (AdvanceSearchList) feedbackHistoryService.getParamterList(customUserDetails);
     }
 
     @PutMapping(value = "/advance_search")

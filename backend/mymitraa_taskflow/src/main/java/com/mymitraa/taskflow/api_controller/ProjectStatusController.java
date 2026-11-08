@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mymitraa.taskflow.api_successcode.CustomResponse;
 import com.mymitraa.taskflow.api_domain.ProjectStatus;
-import com.mymitraa.taskflow.api_repository.ProjectStatusRepository;
 import com.mymitraa.taskflow.api_service.ProjectStatusService;
 
 @RestController
@@ -45,7 +44,7 @@ public class ProjectStatusController {
     }
 
     @GetMapping(value = "/get/{id}")
-    public ResponseEntity<CustomResponse> getById(@PathVariable("id") Long id) {
+    public ResponseEntity<CustomResponse> getById(@PathVariable("id") String id) {
 
         log.info("get project status by id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();
@@ -65,21 +64,23 @@ public class ProjectStatusController {
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put("SERVICE_NAME", "PROJECT_STATUSES_FETCHED_SUCCESSFULLY");
 
+        Pageable pageable = searchVM instanceof Pageable ? (Pageable) searchVM : null;
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("PROJECT_STATUSES_FETCHED_SUCCESSFULLY",
                         "Project statuses fetched successfully",
-                        projectStatusService.fetchAll((Pageable) searchVM), metaInfo),
+                        projectStatusService.fetchAll(pageable), metaInfo),
                 HttpStatus.OK);
     }
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<CustomResponse> update(@PathVariable("id") Long id,
+    public ResponseEntity<CustomResponse> update(@PathVariable("id") String id,
             @RequestBody ProjectStatus projectStatus) {
 
         log.info("updating project status with id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();
         metaInfo.put("SERVICE_NAME", "PROJECT_STATUS_UPDATED_SUCCESSFULLY");
 
+        projectStatus.setId(id);
         return new ResponseEntity<CustomResponse>(
                 new CustomResponse("PROJECT_STATUS_UPDATED_SUCCESSFULLY",
                         "Project status updated successfully",
@@ -88,7 +89,7 @@ public class ProjectStatusController {
     }
 
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<CustomResponse> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<CustomResponse> delete(@PathVariable("id") String id) {
 
         log.info("deleting project status with id: {}", id);
         Map<String, String> metaInfo = new HashMap<>();

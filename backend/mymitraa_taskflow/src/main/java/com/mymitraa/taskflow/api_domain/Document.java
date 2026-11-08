@@ -1,10 +1,9 @@
 package com.mymitraa.taskflow.api_domain;
 
-import org.springframework.data.mongodb.core.mapping.Document;
 import java.io.Serializable;
 import java.util.Date;
 
-@Document(collection = "documents")
+@org.springframework.data.mongodb.core.mapping.Document(collection = "documents")
 public class Document extends BaseDomain implements Serializable {
 
     private static final long serialVersionUID = 1L;

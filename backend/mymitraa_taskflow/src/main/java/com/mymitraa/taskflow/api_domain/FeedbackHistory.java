@@ -11,7 +11,7 @@ public class FeedbackHistory extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
+    @Field("feedback_history_id")
     private String feedbackHistoryId;
 
     @Field("ticket_number")
@@ -145,11 +145,20 @@ public class FeedbackHistory extends BaseDomain {
 
     // Getters and setters for all fields
     public String getFeedbackHistoryId() {
-        return feedbackHistoryId;
+        return getId() != null ? getId() : feedbackHistoryId;
     }
 
     public void setFeedbackHistoryId(String feedbackHistoryId) {
         this.feedbackHistoryId = feedbackHistoryId;
+        if (getId() == null) {
+            setId(feedbackHistoryId);
+        }
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
+        this.feedbackHistoryId = id;
     }
 
     public String getTicketNumber() {

@@ -1,20 +1,31 @@
 package com.mymitraa.taskflow.api_service;
 
+import com.mymitraa.taskflow.api_domain.AdvanceSearchList;
 import com.mymitraa.taskflow.api_domain.MeetingTimeTracker;
-import com.mymitraa.taskflow.api_repository.MeetingTimeTrackerRepository;
+import com.mymitraa.taskflow.api_vm.MeetingTimeTrackerVM;
+import com.mymitraa.taskflow.api_vm.SearchVM;
+import com.mymitraa.taskflow.security.CustomUserDetails;
 import org.springframework.data.domain.Pageable;
-import com.mymitraa.taskflow.api_successcode.CustomResponse;
-import com.mymitraa.taskflow.api_successcode.SuccessCode;
 
 public interface MeetingTimeTrackerService {
 
-    Object save(MeetingTimeTracker obj);
+    Object save(MeetingTimeTracker meetingTimeTracker, CustomUserDetails customUserDetails);
 
-    Object fetchAll(Pageable pageable);
+    Object getById(String id, CustomUserDetails customUserDetails);
 
-    Object getById(Long id);
+    Object fetchAll(String username, SearchVM searchVM);
 
-    Object update(MeetingTimeTracker obj);
+    Object getAllWithPagination(String username, SearchVM searchVM, Pageable pageable);
 
-    Object delete(Long id);
+    Object update(String id, MeetingTimeTrackerVM meetingTimeTrackerVM, CustomUserDetails customUserDetails);
+
+    Object delete(String id, CustomUserDetails customUserDetails);
+
+    Object download(MeetingTimeTrackerVM meetingTimeTrackerVm, CustomUserDetails customUserDetails);
+
+    AdvanceSearchList getParamterList(CustomUserDetails customUserDetails);
+
+    Object advanceSearch(SearchVM searchVM, Pageable pageable, CustomUserDetails customUserDetails);
+
+    Object dashboard(MeetingTimeTrackerVM meetingTimeTrackerVm, CustomUserDetails customUserDetails);
 }

@@ -11,8 +11,65 @@ public class User extends BaseDomain {
     private String password;
     private String email;
     private String name;
+    private String role;
+    private String team;
+    private String status = "Active";
+    private String avatar;
+    private String createdDate;
+    private String lastLogin;
     private boolean enabled = true;
     private Set<String> roles = new HashSet<>();
+
+    public String getRole() {
+        return role != null ? role : (roles != null && !roles.isEmpty() ? roles.iterator().next() : "Engineer");
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+        if (role != null) {
+            this.roles.add(role);
+        }
+    }
+
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
+    }
+
+    public String getStatus() {
+        return status != null ? status : "Active";
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getCreated_date() {
+        return createdDate;
+    }
+
+    public void setCreated_date(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getLast_login() {
+        return lastLogin;
+    }
+
+    public void setLast_login(String lastLogin) {
+        this.lastLogin = lastLogin;
+    }
 
     public String getUsername() {
         return username;

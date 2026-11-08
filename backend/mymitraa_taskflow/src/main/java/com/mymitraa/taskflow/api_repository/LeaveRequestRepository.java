@@ -1,9 +1,11 @@
 package com.mymitraa.taskflow.api_repository;
 
 import com.mymitraa.taskflow.api_domain.LeaveRequest;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.List;
 
-public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long> {
+public interface LeaveRequestRepository extends MongoRepository<LeaveRequest, String> {
 
-    LeaveRequest findByLeaveType(String leaveType);
+    List<LeaveRequest> findByLeaveType(String leaveType);
+    List<LeaveRequest> findByRequestedBy(String requestedBy);
 }
