@@ -80,7 +80,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
         }
       }
 
-      const res = await ApiClient.auth.login(lookupIdentifier);
+      const res = await ApiClient.auth.login(lookupIdentifier, password);
       setAuthenticatedUser(res.data);
 
       // Trigger the glassy verification success transition matching the video
@@ -130,7 +130,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
         signUpFullName.trim(),
         signUpEmail.trim(),
         signUpRole,
-        signUpDepartment
+        signUpDepartment,
+        signUpPassword
       );
       setAuthenticatedUser(res.data);
       setTimeout(() => {

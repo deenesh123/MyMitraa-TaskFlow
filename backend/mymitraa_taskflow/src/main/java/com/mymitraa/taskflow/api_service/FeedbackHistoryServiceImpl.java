@@ -483,6 +483,11 @@ public class FeedbackHistoryServiceImpl implements FeedbackHistoryService {
         countMap.put("in_progress", feedbacks.stream().filter(f -> "In Progress".equalsIgnoreCase(f.getStatus())).count());
         countMap.put("closed", feedbacks.stream().filter(f -> "Closed".equalsIgnoreCase(f.getStatus())).count());
         countMap.put("on_hold", feedbacks.stream().filter(f -> "On Hold".equalsIgnoreCase(f.getStatus())).count());
+        long overdue = feedbacks.stream()
+                .filter(f -> ("Open".equalsIgnoreCase(f.getStatus()) || "In Progress".equalsIgnoreCase(f.getStatus()))
+                        && f.getEstimatedCloseDate() != null && f.getEstimatedCloseDate().before(new Date()))
+                .count();
+        countMap.put("overdue", overdue);
 
         return countMap;
     }

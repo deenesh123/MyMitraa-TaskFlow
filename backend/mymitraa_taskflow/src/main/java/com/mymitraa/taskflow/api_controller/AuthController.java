@@ -32,33 +32,30 @@ public class AuthController {
     public ResponseEntity<CustomResponse> login(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String username = payload.get("username");
-        String identifier = email != null && !email.trim().isEmpty() ? email.trim() : (username != null ? username.trim() : "admin@mymitraa.com");
+        String password = payload.get("password");
+        String identifier = email != null && !email.trim().isEmpty() ? email.trim() : (username != null ? username.trim() : null);
+
+        if (identifier == null || password == null || password.trim().isEmpty()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(new CustomResponse(401, "Both identifier (email or username) and password are required for login"));
+        }
 
         User user = userRepository.findByEmail(identifier).orElse(null);
         if (user == null) {
             user = userRepository.findByUsername(identifier);
         }
 
-        if (user == null) {
-            // Auto-provision initial user if not present
-            user = new User();
-            user.setEmail(identifier);
-            user.setUsername(identifier.contains("@") ? identifier.split("@")[0] : identifier);
-            user.setName(identifier.split("@")[0].replace(".", " ").toUpperCase());
-            user.setRole("Super Admin");
-            user.setTeam("Management");
-            user.setStatus("Active");
-            user.setAvatar(user.getName().substring(0, Math.min(2, user.getName().length())));
-            user.setCreated_date("04-Nov-2026");
-            user.setPassword(passwordEncoder.encode("Password@123"));
-            try {
-                user = userRepository.save(user);
-            } catch (Exception ignored) {
-                // In case DB is not yet running
-            }
+        if (user == null || user.getPassword() == null || !passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(new CustomResponse(401, "Invalid username/email or password"));
         }
 
-        user.setLast_login("Just now");
+        if (!"Active".equalsIgnoreCase(user.getStatus()) || !user.isEnabled()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(new CustomResponse(403, "Account is deactivated or disabled. Please contact administrator."));
+        }
+
+        user.setLast_login(new java.text.SimpleDateFormat("dd-MMM-yyyy HH:mm").format(new Date()));
         try {
             userRepository.save(user);
         } catch (Exception ignored) {}
@@ -71,45 +68,67 @@ public class AuthController {
         Map<String, String> meta = new HashMap<>();
         meta.put("token", token);
 
+        User safeUser = sanitizeUser(user);
+
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(new CustomResponse("200", "LOGIN_SUCCESS", user, meta));
+                .body(new CustomResponse("200", "LOGIN_SUCCESS", safeUser, meta));
     }
 
     @PostMapping("/register")
     public ResponseEntity<CustomResponse> register(@RequestBody Map<String, String> payload) {
-        String name = payload.getOrDefault("name", "New User");
-        String email = payload.getOrDefault("email", "user@mymitraa.com");
+        String name = payload.get("name");
+        String email = payload.get("email");
+        String username = payload.get("username");
+        String password = payload.get("password");
         String role = payload.getOrDefault("role", "Engineer");
         String team = payload.getOrDefault("team", "Technology");
-        String password = payload.getOrDefault("password", "Password@123");
 
-        User user = userRepository.findByEmail(email).orElse(null);
-        if (user != null) {
-            return ResponseEntity.ok(new CustomResponse("400", "USER_ALREADY_EXISTS", user));
+        if (name == null || name.trim().isEmpty() || email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(new CustomResponse(400, "Name, email, and password are required for registration"));
         }
 
-        user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setUsername(email.contains("@") ? email.split("@")[0] : email);
+        if (password.trim().length() < 6) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(new CustomResponse(400, "Password must be at least 6 characters long"));
+        }
+
+        if (userRepository.findByEmail(email.trim()).isPresent()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(new CustomResponse(400, "User already exists with email: " + email));
+        }
+
+        String actualUsername = username != null && !username.trim().isEmpty()
+                ? username.trim()
+                : (email.contains("@") ? email.split("@")[0] : email);
+
+        if (userRepository.findByUsername(actualUsername) != null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(new CustomResponse(400, "Username already taken: " + actualUsername));
+        }
+
+        User user = new User();
+        user.setName(name.trim());
+        user.setEmail(email.trim());
+        user.setUsername(actualUsername);
         user.setRole(role);
         user.setTeam(team);
         user.setStatus("Active");
+        user.setEnabled(true);
+
         String avatar = Arrays.stream(name.split(" "))
                 .filter(s -> !s.isEmpty())
                 .map(s -> s.substring(0, 1).toUpperCase())
                 .reduce("", (a, b) -> a + b);
         user.setAvatar(avatar.isEmpty() ? "U" : (avatar.length() > 2 ? avatar.substring(0, 2) : avatar));
-        user.setCreated_date("04-Nov-2026");
+        user.setCreated_date(new java.text.SimpleDateFormat("dd-MMM-yyyy").format(new Date()));
         user.setLast_login("Just now");
         user.setPassword(passwordEncoder.encode(password));
 
-        try {
-            user = userRepository.save(user);
-        } catch (Exception ignored) {}
+        User saved = userRepository.save(user);
 
-        return ResponseEntity.ok(new CustomResponse("200", "REGISTRATION_SUCCESS", user));
+        return ResponseEntity.ok(new CustomResponse("200", "REGISTRATION_SUCCESS", sanitizeUser(saved)));
     }
 
     @GetMapping("/current")
@@ -125,34 +144,69 @@ public class AuthController {
             }
         }
 
-        if (user == null) {
-            List<User> all = Collections.emptyList();
-            try {
-                all = userRepository.findAll();
-            } catch (Exception ignored) {}
-
-            if (!all.isEmpty()) {
-                user = all.get(0);
-            } else {
-                user = new User();
-                user.setId("usr-default");
-                user.setName("Deenesh Sabat");
-                user.setEmail("deenesh123@gmail.com");
-                user.setRole("Super Admin");
-                user.setTeam("Management");
-                user.setStatus("Active");
-                user.setAvatar("DS");
-                user.setCreated_date("04-Nov-2026");
-                user.setLast_login("Just now");
-            }
+        if (user != null) {
+            return ResponseEntity.ok(new CustomResponse("200", "CURRENT_USER_FETCHED", sanitizeUser(user)));
         }
 
-        return ResponseEntity.ok(new CustomResponse("200", "CURRENT_USER_FETCHED", user));
+        return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                .body(new CustomResponse(401, "No authenticated session found"));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<CustomResponse> changePassword(@RequestBody Map<String, String> payload) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(new CustomResponse(401, "Authentication required"));
+        }
+
+        String currentPassword = payload.get("currentPassword");
+        String newPassword = payload.get("newPassword");
+
+        if (currentPassword == null || newPassword == null || newPassword.trim().length() < 6) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(new CustomResponse(400, "New password must be at least 6 characters long"));
+        }
+
+        String identifier = auth.getName();
+        User user = userRepository.findByUsername(identifier);
+        if (user == null) {
+            user = userRepository.findByEmail(identifier).orElse(null);
+        }
+
+        if (user == null || user.getPassword() == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                    .body(new CustomResponse(400, "Current password does not match"));
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword.trim()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new CustomResponse("200", "PASSWORD_CHANGED_SUCCESSFULLY", true));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<CustomResponse> logout() {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new CustomResponse("200", "LOGGED_OUT_SUCCESSFULLY", true));
+    }
+
+    private User sanitizeUser(User user) {
+        if (user == null) return null;
+        User safe = new User();
+        safe.setId(user.getId());
+        safe.setUsername(user.getUsername());
+        safe.setEmail(user.getEmail());
+        safe.setName(user.getName());
+        safe.setRole(user.getRole());
+        safe.setRoles(user.getRoles());
+        safe.setTeam(user.getTeam());
+        safe.setStatus(user.getStatus());
+        safe.setAvatar(user.getAvatar());
+        safe.setCreated_date(user.getCreated_date());
+        safe.setLast_login(user.getLast_login());
+        safe.setEnabled(user.isEnabled());
+        safe.setPassword(null); // Never expose password hash
+        return safe;
     }
 }

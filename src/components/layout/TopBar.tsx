@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck, Sun, Moon, Sparkles, Mail } from 'lucide-react';
-import { CURRENT_USER } from '../../api/mockData';
+import { Search, Bell, ChevronDown, KeyRound, LogOut, Check, SlidersHorizontal, Shield, UserCheck, Sun, Moon, Sparkles, Mail, ShieldCheck } from 'lucide-react';
+import { CURRENT_USER, INITIAL_USERS } from '../../api/mockData';
 import { UserAccount } from '../../api/types';
 import { useToast } from '../common/Toast';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -10,21 +10,25 @@ interface TopBarProps {
   onNavigate: (route: string) => void;
   currentUser?: UserAccount;
   onSignOut?: () => void;
+  onSwitchUser?: (user: UserAccount) => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
   onOpenSearch,
   onNavigate,
   currentUser = CURRENT_USER,
-  onSignOut
+  onSignOut,
+  onSwitchUser
 }) => {
   const { theme, setTheme, isGlass } = useAppTheme();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [unreadCount, setUnreadCount] = useState(3);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const roleMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
@@ -38,6 +42,9 @@ export const TopBar: React.FC<TopBarProps> = ({
     function handleClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
+      }
+      if (roleMenuRef.current && !roleMenuRef.current.contains(e.target as Node)) {
+        setRoleMenuOpen(false);
       }
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotificationOpen(false);
@@ -97,8 +104,63 @@ export const TopBar: React.FC<TopBarProps> = ({
         </button>
       </div>
 
-      {/* Right Action Icons: Global Theme Switcher + Notification Bell + User Avatar Dropdown */}
+      {/* Right Action Icons: Role Switcher + Global Theme Switcher + Notification Bell + User Avatar Dropdown */}
       <div className="flex items-center gap-3">
+        {/* Role Demo Switcher */}
+        <div className="relative" ref={roleMenuRef}>
+          <button
+            type="button"
+            onClick={() => setRoleMenuOpen(!roleMenuOpen)}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+              isGlass
+                ? 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                : 'bg-[#7B3AEC]/10 border-[#7B3AEC]/25 text-[#7B3AEC] hover:bg-[#7B3AEC]/20'
+            }`}
+            title="Switch Persona / Role for Demo & Evaluation"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Role:</span>
+            <span>{currentUser.role}</span>
+            <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+          </button>
+          {roleMenuOpen && (
+            <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-3xl shadow-xl p-2 z-50">
+              <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Preview 10 Roles</p>
+                <p className="text-[10px] text-slate-500">Test role-specific views &amp; permissions</p>
+              </div>
+              <div className="max-h-72 overflow-y-auto space-y-0.5">
+                {INITIAL_USERS.map(u => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setRoleMenuOpen(false);
+                      if (onSwitchUser) {
+                        onSwitchUser(u);
+                        showToast('Role Switched', `Active persona: ${u.name} (${u.role})`, 'info');
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-left text-xs transition-colors cursor-pointer ${
+                      currentUser.role === u.role
+                        ? 'bg-[#7B3AEC] text-white font-bold'
+                        : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div>
+                      <p className="leading-tight font-semibold">{u.role}</p>
+                      <p className={`text-[10px] ${currentUser.role === u.role ? 'text-white/80' : 'text-slate-400'}`}>
+                        {u.name}
+                      </p>
+                    </div>
+                    {currentUser.role === u.role && <Check className="w-3.5 h-3.5" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* GLOBAL GLASSMORPHISM THEME TOGGLE (User can select for the whole screen) */}
         <div className={`flex items-center p-0.5 rounded-full border transition-all ${
           isGlass ? 'bg-black/60 border-white/20' : 'bg-slate-100 border-slate-200'

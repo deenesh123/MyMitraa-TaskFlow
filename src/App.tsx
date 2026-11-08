@@ -22,9 +22,16 @@ import { ApiClient } from './api/client';
 import { AuthPage } from './pages/auth/AuthPage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { EmailZohoManagement } from './pages/email/EmailZohoManagement';
+import { ProjectManagementPage } from './pages/projects/ProjectManagementPage';
+import { SalesCrmPage } from './pages/sales/SalesCrmPage';
+import { QaBugTrackerPage } from './pages/qa/QaBugTrackerPage';
+import { AuditLogsPage } from './pages/admin/AuditLogsPage';
+import { RolesPermissionsPage } from './pages/admin/RolesPermissionsPage';
 import { CURRENT_USER } from './api/mockData';
 import { UserAccount } from './api/types';
 import { ThemeProvider } from './context/ThemeContext';
+import { canAccessRoute } from './utils/rbac';
+import { ShieldAlert } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<UserAccount>(() => {
@@ -64,6 +71,11 @@ export default function App() {
     localStorage.setItem('mitraa_is_auth', 'false');
   };
 
+  const handleSwitchUser = (user: UserAccount) => {
+    setCurrentUser(user);
+    ApiClient.auth.setCurrentUser(user);
+  };
+
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
@@ -89,9 +101,39 @@ export default function App() {
 
   // Render current page component
   const renderPage = () => {
+    // Route authorization check
+    if (!canAccessRoute(currentUser as any, currentRoute)) {
+      return (
+        <div className="p-12 text-center max-w-lg mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mx-auto">
+            <ShieldAlert className="w-7 h-7 text-amber-600" />
+          </div>
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Access Denied (HTTP 403)</h2>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              Your active role <span className="font-bold text-[#7B3AEC]">{currentUser.role}</span> does not possess the permissions required to view <code className="font-mono bg-slate-100 px-1 py-0.5 rounded text-[11px]">{currentRoute}</code>.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleNavigate('/')}
+            className="px-6 py-2 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      );
+    }
+
     switch (currentRoute) {
       case '/':
-        return <HomeDashboard onNavigate={handleNavigate} />;
+        return <HomeDashboard onNavigate={handleNavigate} currentUser={currentUser} />;
+      case '/projects':
+        return <ProjectManagementPage currentUser={currentUser} />;
+      case '/sales-crm':
+        return <SalesCrmPage currentUser={currentUser} />;
+      case '/qa-bugs':
+        return <QaBugTrackerPage currentUser={currentUser} />;
       case '/task-dashboard':
         return <ReportsPage />;
       case '/meeting-tracker':
@@ -110,6 +152,10 @@ export default function App() {
         return <DropdownManagement />;
       case '/users/user-management':
         return <UserManagementPage />;
+      case '/admin/roles-permissions':
+        return <RolesPermissionsPage />;
+      case '/admin/audit-logs':
+        return <AuditLogsPage currentUser={currentUser} />;
       case '/admin/email-zoho':
         return <EmailZohoManagement />;
       case '/task-tracker':
@@ -123,7 +169,7 @@ export default function App() {
           />
         );
       default:
-        return <HomeDashboard onNavigate={handleNavigate} />;
+        return <HomeDashboard onNavigate={handleNavigate} currentUser={currentUser} />;
     }
   };
 
@@ -139,6 +185,7 @@ export default function App() {
             openTasksCount={openTasksCount}
             currentUser={currentUser}
             onSignOut={handleSignOut}
+            onSwitchUser={handleSwitchUser}
           >
             {renderPage()}
           </AppLayout>

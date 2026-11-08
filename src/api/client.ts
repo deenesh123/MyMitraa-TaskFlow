@@ -18,6 +18,11 @@ import {
   WorkLogEntry,
   UserAccount,
   Subtask,
+  ProjectRecord,
+  LeadRecord,
+  BugRecord,
+  TestCaseRecord,
+  AuditLogRecord,
 } from './types';
 
 import {
@@ -30,6 +35,11 @@ import {
   INITIAL_USERS,
   CURRENT_USER,
   PEOPLE_NOT_FILLING_TASKS,
+  SAMPLE_PROJECTS,
+  SAMPLE_LEADS,
+  SAMPLE_BUGS,
+  SAMPLE_TEST_CASES,
+  SAMPLE_AUDIT_LOGS,
 } from './mockData';
 
 // Environment & Base URL Configuration
@@ -47,6 +57,11 @@ class DataStore {
   documents: DocumentRecord[] = [...INITIAL_DOCUMENTS];
   dropdowns: DropdownItem[] = [...INITIAL_DROPDOWNS];
   users: UserAccount[] = [...INITIAL_USERS];
+  projects: ProjectRecord[] = [...SAMPLE_PROJECTS];
+  leads: LeadRecord[] = [...SAMPLE_LEADS];
+  bugs: BugRecord[] = [...SAMPLE_BUGS];
+  testCases: TestCaseRecord[] = [...SAMPLE_TEST_CASES];
+  auditLogs: AuditLogRecord[] = [...SAMPLE_AUDIT_LOGS];
   currentUser: UserAccount = { ...CURRENT_USER };
   authToken: string = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mitraa-taskflow-user-session';
   useMock: boolean = !isProduction;
@@ -187,19 +202,23 @@ export const ApiClient = {
         }
       );
     },
-    async login(email: string): Promise<CustomResponse<UserAccount>> {
+    async login(emailOrUsername: string, password?: string): Promise<CustomResponse<UserAccount>> {
       return apiFetch<UserAccount>(
         '/api/auth/login',
         {
           method: 'POST',
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({
+            email: emailOrUsername,
+            username: emailOrUsername,
+            password: password || 'Password@123',
+          }),
         },
         async () => {
           await delay(100);
-          const user = dataStore.users.find(u => u.email.toLowerCase() === email.toLowerCase()) || {
+          const user = dataStore.users.find(u => u.email.toLowerCase() === emailOrUsername.toLowerCase() || u.name.toLowerCase() === emailOrUsername.toLowerCase()) || {
             ...dataStore.currentUser,
-            email,
-            name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            email: emailOrUsername.includes('@') ? emailOrUsername : `${emailOrUsername}@mymitraa.com`,
+            name: emailOrUsername.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
           };
           user.last_login = 'Just now';
           dataStore.currentUser = user;
@@ -211,12 +230,19 @@ export const ApiClient = {
         }
       );
     },
-    async register(name: string, email: string, role: string, team: string): Promise<CustomResponse<UserAccount>> {
+    async register(name: string, email: string, role: string, team: string, password?: string): Promise<CustomResponse<UserAccount>> {
       return apiFetch<UserAccount>(
         '/api/auth/register',
         {
           method: 'POST',
-          body: JSON.stringify({ name, email, role, team }),
+          body: JSON.stringify({
+            name,
+            email,
+            role,
+            team,
+            username: email.includes('@') ? email.split('@')[0] : email,
+            password: password || 'Password@123',
+          }),
         },
         async () => {
           await delay(100);
@@ -1180,4 +1206,426 @@ export const ApiClient = {
       );
     },
   },
+
+  // Project Management Module
+  projects: {
+    async getAll(filters?: { status?: string; search?: string }): Promise<CustomResponse<ProjectRecord[]>> {
+      return apiFetch<ProjectRecord[]>(
+        '/api/projects',
+        { method: 'GET' },
+        async () => {
+          await delay(40);
+          let results = [...dataStore.projects];
+          if (filters) {
+            if (filters.status && filters.status !== 'All') {
+              results = results.filter(p => p.status.toLowerCase() === filters.status!.toLowerCase());
+            }
+            if (filters.search) {
+              const q = filters.search.toLowerCase();
+              results = results.filter(p =>
+                p.project_name.toLowerCase().includes(q) ||
+                p.customer_name.toLowerCase().includes(q) ||
+                p.project_manager.toLowerCase().includes(q)
+              );
+            }
+          }
+          return {
+            code: 200,
+            message: 'PROJECTS_FETCHED_SUCCESSFULLY',
+            data: results,
+            metaInfo: { totalCount: results.length }
+          };
+        }
+      );
+    },
+
+    async saveProject(project: Omit<ProjectRecord, 'id'>): Promise<CustomResponse<ProjectRecord>> {
+      return apiFetch<ProjectRecord>(
+        '/api/projects',
+        {
+          method: 'POST',
+          body: JSON.stringify(project),
+        },
+        async () => {
+          await delay(50);
+          const newProj: ProjectRecord = {
+            ...project,
+            id: `proj-${Date.now()}`
+          };
+          dataStore.projects.unshift(newProj);
+          return {
+            code: 200,
+            message: 'PROJECT_CREATED_SUCCESSFULLY',
+            data: newProj
+          };
+        }
+      );
+    },
+
+    async updateProject(id: string, updates: Partial<ProjectRecord>): Promise<CustomResponse<ProjectRecord>> {
+      return apiFetch<ProjectRecord>(
+        `/api/projects/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(updates),
+        },
+        async () => {
+          await delay(50);
+          const idx = dataStore.projects.findIndex(p => p.id === id || p.project_id === id);
+          if (idx === -1) throw new Error('Project not found');
+          dataStore.projects[idx] = { ...dataStore.projects[idx], ...updates };
+          return {
+            code: 200,
+            message: 'PROJECT_UPDATED_SUCCESSFULLY',
+            data: dataStore.projects[idx]
+          };
+        }
+      );
+    },
+
+    async deleteProject(id: string): Promise<CustomResponse<boolean>> {
+      return apiFetch<boolean>(
+        `/api/projects/${id}`,
+        { method: 'DELETE' },
+        async () => {
+          await delay(50);
+          dataStore.projects = dataStore.projects.filter(p => p.id !== id && p.project_id !== id);
+          return {
+            code: 200,
+            message: 'PROJECT_DELETED_SUCCESSFULLY',
+            data: true
+          };
+        }
+      );
+    }
+  },
+
+  // Sales CRM Module
+  sales: {
+    async getLeads(filters?: { stage?: string; assigned_to?: string; search?: string }): Promise<CustomResponse<LeadRecord[]>> {
+      return apiFetch<LeadRecord[]>(
+        '/api/sales/leads',
+        { method: 'GET' },
+        async () => {
+          await delay(40);
+          let results = [...dataStore.leads];
+          if (filters) {
+            if (filters.stage && filters.stage !== 'All') {
+              results = results.filter(l => l.stage.toLowerCase() === filters.stage!.toLowerCase());
+            }
+            if (filters.assigned_to && filters.assigned_to !== 'All') {
+              results = results.filter(l => l.assigned_to.toLowerCase() === filters.assigned_to!.toLowerCase());
+            }
+            if (filters.search) {
+              const q = filters.search.toLowerCase();
+              results = results.filter(l =>
+                l.contact_name.toLowerCase().includes(q) ||
+                l.company_name.toLowerCase().includes(q) ||
+                l.lead_code.toLowerCase().includes(q)
+              );
+            }
+          }
+          return {
+            code: 200,
+            message: 'LEADS_FETCHED_SUCCESSFULLY',
+            data: results,
+            metaInfo: { totalCount: results.length }
+          };
+        }
+      );
+    },
+
+    async saveLead(lead: Omit<LeadRecord, 'id'>): Promise<CustomResponse<LeadRecord>> {
+      return apiFetch<LeadRecord>(
+        '/api/sales/leads',
+        {
+          method: 'POST',
+          body: JSON.stringify(lead),
+        },
+        async () => {
+          await delay(50);
+          const newLead: LeadRecord = {
+            ...lead,
+            id: `lead-${Date.now()}`
+          };
+          dataStore.leads.unshift(newLead);
+          return {
+            code: 200,
+            message: 'LEAD_CREATED_SUCCESSFULLY',
+            data: newLead
+          };
+        }
+      );
+    },
+
+    async updateLead(id: string, updates: Partial<LeadRecord>): Promise<CustomResponse<LeadRecord>> {
+      return apiFetch<LeadRecord>(
+        `/api/sales/leads/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(updates),
+        },
+        async () => {
+          await delay(50);
+          const idx = dataStore.leads.findIndex(l => l.id === id || l.lead_code === id);
+          if (idx === -1) throw new Error('Lead not found');
+          dataStore.leads[idx] = { ...dataStore.leads[idx], ...updates };
+          return {
+            code: 200,
+            message: 'LEAD_UPDATED_SUCCESSFULLY',
+            data: dataStore.leads[idx]
+          };
+        }
+      );
+    },
+
+    async deleteLead(id: string): Promise<CustomResponse<boolean>> {
+      return apiFetch<boolean>(
+        `/api/sales/leads/${id}`,
+        { method: 'DELETE' },
+        async () => {
+          await delay(50);
+          dataStore.leads = dataStore.leads.filter(l => l.id !== id && l.lead_code !== id);
+          return {
+            code: 200,
+            message: 'LEAD_DELETED_SUCCESSFULLY',
+            data: true
+          };
+        }
+      );
+    }
+  },
+
+  // QA & Bug Tracking Module
+  qa: {
+    async getBugs(filters?: { severity?: string; status?: string; project?: string; search?: string }): Promise<CustomResponse<BugRecord[]>> {
+      return apiFetch<BugRecord[]>(
+        '/api/qa/bugs',
+        { method: 'GET' },
+        async () => {
+          await delay(40);
+          let results = [...dataStore.bugs];
+          if (filters) {
+            if (filters.severity && filters.severity !== 'All') {
+              results = results.filter(b => b.severity.toLowerCase() === filters.severity!.toLowerCase());
+            }
+            if (filters.status && filters.status !== 'All') {
+              results = results.filter(b => b.status.toLowerCase() === filters.status!.toLowerCase());
+            }
+            if (filters.project && filters.project !== 'All') {
+              results = results.filter(b => b.project.toLowerCase() === filters.project!.toLowerCase());
+            }
+            if (filters.search) {
+              const q = filters.search.toLowerCase();
+              results = results.filter(b =>
+                b.title.toLowerCase().includes(q) ||
+                b.bug_code.toLowerCase().includes(q) ||
+                b.reported_by.toLowerCase().includes(q)
+              );
+            }
+          }
+          return {
+            code: 200,
+            message: 'BUGS_FETCHED_SUCCESSFULLY',
+            data: results,
+            metaInfo: { totalCount: results.length }
+          };
+        }
+      );
+    },
+
+    async saveBug(bug: Omit<BugRecord, 'id'>): Promise<CustomResponse<BugRecord>> {
+      return apiFetch<BugRecord>(
+        '/api/qa/bugs',
+        {
+          method: 'POST',
+          body: JSON.stringify(bug),
+        },
+        async () => {
+          await delay(50);
+          const newBug: BugRecord = {
+            ...bug,
+            id: `bug-${Date.now()}`
+          };
+          dataStore.bugs.unshift(newBug);
+          return {
+            code: 200,
+            message: 'BUG_CREATED_SUCCESSFULLY',
+            data: newBug
+          };
+        }
+      );
+    },
+
+    async updateBug(id: string, updates: Partial<BugRecord>): Promise<CustomResponse<BugRecord>> {
+      return apiFetch<BugRecord>(
+        `/api/qa/bugs/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(updates),
+        },
+        async () => {
+          await delay(50);
+          const idx = dataStore.bugs.findIndex(b => b.id === id || b.bug_code === id);
+          if (idx === -1) throw new Error('Bug not found');
+          dataStore.bugs[idx] = { ...dataStore.bugs[idx], ...updates };
+          return {
+            code: 200,
+            message: 'BUG_UPDATED_SUCCESSFULLY',
+            data: dataStore.bugs[idx]
+          };
+        }
+      );
+    },
+
+    async getTestCases(filters?: { suite?: string; status?: string }): Promise<CustomResponse<TestCaseRecord[]>> {
+      return apiFetch<TestCaseRecord[]>(
+        '/api/qa/tests',
+        { method: 'GET' },
+        async () => {
+          await delay(40);
+          let results = [...dataStore.testCases];
+          if (filters) {
+            if (filters.suite && filters.suite !== 'All') {
+              results = results.filter(t => t.suite.toLowerCase() === filters.suite!.toLowerCase());
+            }
+            if (filters.status && filters.status !== 'All') {
+              results = results.filter(t => t.status.toLowerCase() === filters.status!.toLowerCase());
+            }
+          }
+          return {
+            code: 200,
+            message: 'TEST_CASES_FETCHED_SUCCESSFULLY',
+            data: results
+          };
+        }
+      );
+    },
+
+    async saveTestCase(tc: Omit<TestCaseRecord, 'id'>): Promise<CustomResponse<TestCaseRecord>> {
+      return apiFetch<TestCaseRecord>(
+        '/api/qa/tests',
+        {
+          method: 'POST',
+          body: JSON.stringify(tc),
+        },
+        async () => {
+          await delay(50);
+          const newTc: TestCaseRecord = {
+            ...tc,
+            id: `tc-${Date.now()}`
+          };
+          dataStore.testCases.unshift(newTc);
+          return {
+            code: 200,
+            message: 'TEST_CASE_CREATED_SUCCESSFULLY',
+            data: newTc
+          };
+        }
+      );
+    },
+
+    async updateTestCase(id: string, updates: Partial<TestCaseRecord>): Promise<CustomResponse<TestCaseRecord>> {
+      return apiFetch<TestCaseRecord>(
+        `/api/qa/tests/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(updates),
+        },
+        async () => {
+          await delay(50);
+          const idx = dataStore.testCases.findIndex(t => t.id === id || t.test_code === id);
+          if (idx === -1) throw new Error('Test case not found');
+          dataStore.testCases[idx] = { ...dataStore.testCases[idx], ...updates };
+          return {
+            code: 200,
+            message: 'TEST_CASE_UPDATED_SUCCESSFULLY',
+            data: dataStore.testCases[idx]
+          };
+        }
+      );
+    }
+  },
+
+  // Audit Logs Module
+  auditLogs: {
+    async getAll(filters?: { module?: string; outcome?: string; search?: string }): Promise<CustomResponse<AuditLogRecord[]>> {
+      return apiFetch<AuditLogRecord[]>(
+        '/api/audit-logs',
+        { method: 'GET' },
+        async () => {
+          await delay(40);
+          let results = [...dataStore.auditLogs];
+          if (filters) {
+            if (filters.module && filters.module !== 'All') {
+              results = results.filter(a => a.module.toLowerCase() === filters.module!.toLowerCase());
+            }
+            if (filters.outcome && filters.outcome !== 'All') {
+              results = results.filter(a => a.outcome.toLowerCase() === filters.outcome!.toLowerCase());
+            }
+            if (filters.search) {
+              const q = filters.search.toLowerCase();
+              results = results.filter(a =>
+                a.actor_name.toLowerCase().includes(q) ||
+                a.action.toLowerCase().includes(q) ||
+                a.details.toLowerCase().includes(q)
+              );
+            }
+          }
+          return {
+            code: 200,
+            message: 'AUDIT_LOGS_FETCHED_SUCCESSFULLY',
+            data: results,
+            metaInfo: { totalCount: results.length }
+          };
+        }
+      );
+    },
+
+    async logAction(log: Omit<AuditLogRecord, 'id' | 'timestamp'>): Promise<CustomResponse<AuditLogRecord>> {
+      const now = new Date();
+      const formatted = `${now.getDate().toString().padStart(2, '0')}-Nov-2026 ${now.toTimeString().slice(0, 8)}`;
+      const entry: AuditLogRecord = {
+        ...log,
+        id: `aud-${Date.now()}`,
+        timestamp: formatted
+      };
+      dataStore.auditLogs.unshift(entry);
+      return {
+        code: 200,
+        message: 'AUDIT_LOG_RECORDED',
+        data: entry
+      };
+    }
+  },
+
+  // Roles & Permissions Module
+  roles: {
+    async getAll(): Promise<CustomResponse<{ name: string; userCount: number; permissionsCount: number }[]>> {
+      return apiFetch<any>(
+        '/api/roles',
+        { method: 'GET' },
+        async () => {
+          await delay(30);
+          const roles = [
+            { name: 'Super Admin', userCount: 1, permissionsCount: 33 },
+            { name: 'Admin', userCount: 1, permissionsCount: 22 },
+            { name: 'Project Manager', userCount: 1, permissionsCount: 15 },
+            { name: 'Developer', userCount: 1, permissionsCount: 11 },
+            { name: 'Sales Executive', userCount: 1, permissionsCount: 8 },
+            { name: 'Sales Manager', userCount: 1, permissionsCount: 13 },
+            { name: 'QA Tester', userCount: 1, permissionsCount: 12 },
+            { name: 'HR Manager', userCount: 1, permissionsCount: 11 },
+            { name: 'Employee', userCount: 1, permissionsCount: 7 },
+            { name: 'Client', userCount: 1, permissionsCount: 2 }
+          ];
+          return {
+            code: 200,
+            message: 'ROLES_FETCHED_SUCCESSFULLY',
+            data: roles
+          };
+        }
+      );
+    }
+  }
 };

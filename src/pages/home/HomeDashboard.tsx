@@ -28,12 +28,15 @@ import { Skeleton } from '../../components/common/Skeleton';
 import { MascotEmpty } from '../../components/common/MascotEmpty';
 import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 import { useAppTheme } from '../../context/ThemeContext';
+import { UserAccount } from '../../api/types';
+import { CURRENT_USER } from '../../api/mockData';
 
 interface HomeDashboardProps {
   onNavigate: (route: string) => void;
+  currentUser?: UserAccount;
 }
 
-export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
+export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, currentUser = CURRENT_USER }) => {
   const { showToast } = useToast();
   const { isGlass } = useAppTheme();
 
@@ -393,6 +396,287 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
           </button>
         </div>
       )}
+
+      {/* Role-Specific Workspace Banner (Tailored for each of the 10 roles) */}
+      <div className={`p-5 rounded-3xl border shadow-xs transition-all ${
+        isGlass
+          ? 'bg-gradient-to-r from-violet-950/40 via-black/40 to-slate-950/40 border-white/15 text-white'
+          : 'bg-white border-slate-200/80 text-[#191627]'
+      }`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#7B3AEC]/15 text-[#7B3AEC] flex items-center justify-center font-bold text-xs">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[#191627]">
+                  {currentUser.role} Workspace
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#7B3AEC]/15 text-[#7B3AEC]">
+                  Persona Active: {currentUser.name}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Tailored widgets and operational actions configured for your role permissions.
+              </p>
+            </div>
+          </div>
+
+          {/* Role specific quick action button */}
+          <div>
+            {(currentUser.role === 'Sales Executive' || currentUser.role === 'Sales Manager') && (
+              <button
+                type="button"
+                onClick={() => onNavigate('/sales-crm')}
+                className="px-4 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <span>Open Sales CRM</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentUser.role === 'QA Tester' && (
+              <button
+                type="button"
+                onClick={() => onNavigate('/qa-bugs')}
+                className="px-4 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <span>QA &amp; Bug Tracking</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentUser.role === 'Project Manager' && (
+              <button
+                type="button"
+                onClick={() => onNavigate('/projects')}
+                className="px-4 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <span>Manage Projects</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentUser.role === 'Developer' && (
+              <button
+                type="button"
+                onClick={() => onNavigate('/task-tracker')}
+                className="px-4 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <span>My Dev Tasks</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentUser.role === 'HR Manager' && (
+              <button
+                type="button"
+                onClick={() => onNavigate('/leave-wfh-dashboard')}
+                className="px-4 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <span>Leave Approvals</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentUser.role === 'Client' && (
+              <button
+                type="button"
+                onClick={() => onNavigate('/task-upload-files')}
+                className="px-4 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <span>Shared Deliverables</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {(currentUser.role === 'Super Admin' || currentUser.role === 'Admin') && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('/admin/audit-logs')}
+                  className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-semibold transition-colors"
+                >
+                  Audit Logs
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('/admin/roles-permissions')}
+                  className="px-3.5 py-1.5 bg-[#7B3AEC] hover:bg-[#682ecf] text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
+                >
+                  Roles &amp; Perms
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Role metrics strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          {currentUser.role === 'Developer' && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Assigned Tasks</span>
+                <span className="font-mono font-bold text-slate-800 text-base">3 Active</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Pull Requests / Review</span>
+                <span className="font-mono font-bold text-[#00A6FC] text-base">2 Pending</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Open Blockers</span>
+                <span className="font-mono font-bold text-amber-600 text-base">1 Blocker</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Hours Logged Today</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">6.5 hrs</span>
+              </div>
+            </>
+          )}
+
+          {(currentUser.role === 'Sales Executive' || currentUser.role === 'Sales Manager') && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Pipeline Revenue</span>
+                <span className="font-mono font-bold text-[#7B3AEC] text-base">$242,000</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Active Opportunities</span>
+                <span className="font-mono font-bold text-slate-800 text-base">6 Leads</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Deal Win Rate</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">67%</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Follow-ups Due</span>
+                <span className="font-mono font-bold text-amber-600 text-base">2 Due Today</span>
+              </div>
+            </>
+          )}
+
+          {currentUser.role === 'QA Tester' && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Defects Logged</span>
+                <span className="font-mono font-bold text-slate-800 text-base">4 Defects</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Critical Blockers</span>
+                <span className="font-mono font-bold text-red-600 text-base">1 P0</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Ready for Retest</span>
+                <span className="font-mono font-bold text-[#00A6FC] text-base">1 Fixed</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Test Pass Rate</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">75%</span>
+              </div>
+            </>
+          )}
+
+          {currentUser.role === 'Project Manager' && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Engagements Managed</span>
+                <span className="font-mono font-bold text-slate-800 text-base">5 Projects</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Health Distribution</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">4 Healthy / 1 Risk</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Sprint 14 Target</span>
+                <span className="font-mono font-bold text-[#7B3AEC] text-base">75% Target</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">AEC Kuwait Progress</span>
+                <span className="font-mono font-bold text-[#00A6FC] text-base">68% Done</span>
+              </div>
+            </>
+          )}
+
+          {currentUser.role === 'HR Manager' && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Staff Directory</span>
+                <span className="font-mono font-bold text-slate-800 text-base">10 Users</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Planned Leaves</span>
+                <span className="font-mono font-bold text-[#7B3AEC] text-base">28 Days</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Approved WFH</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">14 Days</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Missing Logs</span>
+                <span className="font-mono font-bold text-amber-600 text-base">9 Members</span>
+              </div>
+            </>
+          )}
+
+          {currentUser.role === 'Client' && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Shared Project</span>
+                <span className="font-mono font-bold text-slate-800 text-base">AEC Kuwait</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Approved Milestones</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">3 Signed Off</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Delivery Progress</span>
+                <span className="font-mono font-bold text-[#7B3AEC] text-base">68% Complete</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Verified Documents</span>
+                <span className="font-mono font-bold text-[#00A6FC] text-base">2 Available</span>
+              </div>
+            </>
+          )}
+
+          {currentUser.role === 'Employee' && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">My Tasks</span>
+                <span className="font-mono font-bold text-slate-800 text-base">2 Assigned</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Upcoming Meetings</span>
+                <span className="font-mono font-bold text-[#00A6FC] text-base">1 Today</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Leave Balance</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">18 Days</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">My Department</span>
+                <span className="font-mono font-bold text-slate-700 text-base">{currentUser.team}</span>
+              </div>
+            </>
+          )}
+
+          {(currentUser.role === 'Super Admin' || currentUser.role === 'Admin') && (
+            <>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Total Accounts</span>
+                <span className="font-mono font-bold text-slate-800 text-base">10 Active</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">RBAC Roles</span>
+                <span className="font-mono font-bold text-[#7B3AEC] text-base">10 Configured</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">System Health</span>
+                <span className="font-mono font-bold text-[#4D6B00] text-base">UP (MongoDB)</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-2xl">
+                <span className="text-slate-400 block text-[10px]">Compliance Audit</span>
+                <span className="font-mono font-bold text-[#00A6FC] text-base">Stream Active</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* 4 KPI Cards (HD-3) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

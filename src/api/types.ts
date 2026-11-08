@@ -245,6 +245,14 @@ export interface PeopleNotFillingTasks {
 export type UserRole =
   | 'Super Admin'
   | 'Admin'
+  | 'Project Manager'
+  | 'Developer'
+  | 'Sales Executive'
+  | 'Sales Manager'
+  | 'QA Tester'
+  | 'HR Manager'
+  | 'Employee'
+  | 'Client'
   | 'Production Engineer'
   | 'Lead Architect'
   | 'Senior Backend Engineer'
@@ -263,12 +271,96 @@ export interface UserAccount extends BaseDomain {
   email: string;
   role: UserRole;
   team: string;
+  department?: string;
+  designation?: string;
   status: UserStatus;
   avatar: string;
   phone?: string;
+  permissions?: string[];
   last_login?: string;
   created_date: string;
 }
+
+export interface ProjectRecord extends BaseDomain {
+  id: string;
+  project_id: string;
+  project_name: string;
+  customer_name: string;
+  project_manager: string;
+  status: 'Planning' | 'Not Started' | 'In Progress' | 'On Hold' | 'Completed' | 'Cancelled';
+  priority: 'Critical P0' | 'Urgent P1' | 'Normal P2' | 'Low P3';
+  start_date: string;
+  target_date: string;
+  completion_percentage: number;
+  health_score: 'Healthy' | 'At Risk' | 'Critical';
+  budget_hours?: number;
+  logged_hours?: number;
+  members: string[];
+  description?: string;
+  milestones?: { id: string; title: string; due_date: string; completed: boolean }[];
+}
+
+export interface LeadRecord extends BaseDomain {
+  id: string;
+  lead_code: string;
+  contact_name: string;
+  company_name: string;
+  email: string;
+  phone: string;
+  stage: 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost';
+  assigned_to: string;
+  expected_revenue: number;
+  probability: number;
+  source: string;
+  follow_up_date: string;
+  notes?: string;
+  lost_reason?: string;
+}
+
+export interface BugRecord extends BaseDomain {
+  id: string;
+  bug_code: string;
+  title: string;
+  project: string;
+  module: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  priority: 'Critical P0' | 'Urgent P1' | 'Normal P2' | 'Low P3';
+  status: 'Open' | 'Assigned' | 'In Progress' | 'Fixed' | 'Ready for Retest' | 'Retest Passed' | 'Reopened' | 'Closed';
+  reported_by: string;
+  assigned_to: string;
+  linked_task_id?: string;
+  reproduction_steps: string;
+  expected_result: string;
+  actual_result: string;
+  environment?: string;
+  created_at: string;
+}
+
+export interface TestCaseRecord extends BaseDomain {
+  id: string;
+  test_code: string;
+  title: string;
+  project: string;
+  suite: string;
+  status: 'Passed' | 'Failed' | 'Blocked' | 'Untested';
+  last_executed_by?: string;
+  last_executed_at?: string;
+  execution_notes?: string;
+}
+
+export interface AuditLogRecord extends BaseDomain {
+  id: string;
+  timestamp: string;
+  user_id: string;
+  actor_name: string;
+  actor_role: string;
+  action: string;
+  module: string;
+  record_id?: string;
+  outcome: 'SUCCESS' | 'FAILURE' | 'DENIED';
+  details: string;
+}
+
 
 export interface EmailConfig {
   host: string;

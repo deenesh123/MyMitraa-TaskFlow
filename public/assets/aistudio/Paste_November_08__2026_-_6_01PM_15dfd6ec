@@ -1,0 +1,1077 @@
+# MASTER IMPLEMENTATION PROMPT
+# MyMitraa TaskFlow — Enterprise Role-Based Project & Work Management Platform
+
+You are working on the EXISTING MyMitraa TaskFlow application.
+
+Your responsibility is to directly inspect, modify, integrate, and improve the existing application code to implement a complete enterprise-grade role-based project and work management platform.
+
+This is an implementation task, not a request for suggestions, mockups, or a newly generated application.
+
+You must make the changes directly in the existing project wherever the environment supports code editing.
+
+---
+
+# 1. PROJECT IDENTITY
+
+**Product:** MyMitraa TaskFlow
+
+**Platform:** Enterprise Project, Employee, Sales, Development, Testing and Workflow Management System.
+
+**Target users:**
+- Super Administrators
+- Administrators
+- Project Managers
+- Developers
+- Sales Executives
+- Sales Managers
+- QA Engineers / Testers
+- HR Managers
+- Employees
+- Clients / External Viewers
+
+**Backend architecture:**
+- Spring Boot 3.3.4
+- Java 17-compatible source
+- MongoDB
+- Database: `mymitraa_taskflow`
+- Java package: `com.mymitraa.taskflow`
+
+**Frontend architecture:**
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+
+MongoDB must remain the ONLY application database.
+
+The Spring Boot backend is the authoritative API and business-logic layer.
+
+The React frontend must communicate with the Spring Boot backend.
+
+---
+
+# 2. MOST IMPORTANT RULE — MODIFY THE EXISTING APPLICATION
+
+Before making changes:
+
+1. Inspect the existing project structure.
+2. Understand the current frontend architecture.
+3. Identify existing dashboards, navigation, modules, routes, components and services.
+4. Inspect the existing API integration.
+5. Identify existing authentication and user-management functionality.
+6. Understand existing backend API contracts if backend source is available.
+7. Identify reusable components and existing business functionality.
+
+Then extend the existing application.
+
+**DO NOT:**
+- Rebuild the application from scratch.
+- Replace the existing UI with a generic dashboard template.
+- Remove existing features.
+- Remove existing modules.
+- Change the existing branding.
+- Break existing navigation.
+- Replace existing API calls with fake data.
+- introduce a second backend.
+- Introduce SQL, local JSON-file databases or Express in-memory business persistence.
+- Remove existing MongoDB functionality.
+- Make unnecessary dependency upgrades.
+- Duplicate existing functionality.
+
+Preserve the current MyMitraa TaskFlow branding, design system, components, responsive layout and working functionality.
+
+Reuse existing components wherever possible.
+
+If a backend API is missing, identify it and create the necessary integration contract. Do not pretend that an unimplemented endpoint is functional.
+
+---
+
+# 3. IMPLEMENT A COMPLETE ROLE-BASED ACCESS CONTROL SYSTEM
+
+Build a centralized RBAC architecture.
+
+Every authenticated user must have a role and associated permissions.
+
+The system must support:
+- Role-based permissions.
+- Module-based access.
+- Action-based permissions.
+- Project-level access.
+- User-level access.
+- Data visibility restrictions.
+- Role assignment by authorized administrators.
+- Permission checks on both frontend and backend.
+
+Do not rely only on hiding buttons in the frontend.
+
+Every sensitive operation must be authorized by Spring Boot.
+
+## 3.1 Required roles
+
+Implement the following roles.
+
+### ROLE 1 — SUPER ADMIN
+
+Highest-level platform administrator.
+
+Features:
+- Complete application access.
+- Create, edit, deactivate and manage administrators.
+- Manage all user accounts.
+- Create and configure roles.
+- Configure permissions.
+- Manage all departments.
+- Manage all projects.
+- View all employees and activities.
+- View all system reports.
+- View audit logs.
+- Manage organization settings.
+- Manage application configurations.
+- Manage integrations.
+- Manage system-wide notifications.
+- Manage security settings.
+- View system health and activity.
+- Assign users to departments.
+- Assign project managers.
+- Manage global dropdowns and master data.
+
+Only securely provisioned Super Admin accounts can access these features.
+
+No public registration must grant Super Admin.
+
+### ROLE 2 — ADMIN
+
+Organization or system administrator.
+
+Features:
+- Manage employees.
+- Create and manage departments.
+- Manage projects.
+- Assign project managers.
+- Manage employee roles where permitted.
+- Manage tasks.
+- Manage leave requests.
+- Manage attendance.
+- Manage meetings.
+- Manage weekly updates.
+- Manage feedback.
+- Manage documents.
+- View reports.
+- View dashboards.
+- Manage announcements.
+- View audit logs within authorized scope.
+
+Admin must not be able to change Super Admin privileges.
+
+### ROLE 3 — PROJECT MANAGER
+
+Responsible for project execution and team management.
+
+Features:
+- Create and manage assigned projects.
+- Assign developers and testers.
+- Create tasks and subtasks.
+- Assign tasks to employees.
+- Set deadlines and priorities.
+- Track project progress.
+- Monitor development activity.
+- Review weekly updates.
+- Approve or reject project-related work.
+- Monitor bugs and testing progress.
+- Track blockers and dependencies.
+- Manage project meetings.
+- View project reports.
+- Monitor employee workload.
+- Review project documents.
+- Manage project milestones.
+- Track delivery status.
+
+Project Managers must only access projects within their authorized scope.
+
+### ROLE 4 — DEVELOPER
+
+A dedicated development workspace.
+
+Dashboard:
+- My Tasks.
+- Assigned Projects.
+- In Progress.
+- Pending Tasks.
+- Completed Tasks.
+- Blocked Tasks.
+- Upcoming Deadlines.
+- Overdue Tasks.
+- Recent Activity.
+
+Features:
+- View assigned projects.
+- View assigned tasks.
+- Update task status.
+- Update development progress.
+- Add task comments.
+- Add technical notes.
+- Upload permitted development documents.
+- Attach screenshots and supporting files.
+- Report blockers.
+- Add estimated effort.
+- Record actual work hours.
+- Create subtasks where permitted.
+- View project milestones.
+- View assigned bugs.
+- Link code review or pull request references.
+- Submit work for review.
+- View tester feedback.
+- Respond to bug reports.
+- Update task completion information.
+- Submit daily and weekly work updates.
+- View personal performance and workload.
+
+Developers must not:
+- Access unrelated employees' private data.
+- Assign themselves administrator privileges.
+- Approve their own restricted administrative actions.
+- Modify project-wide security settings.
+- Delete other users' tasks without permission.
+
+### ROLE 5 — SALES EXECUTIVE
+
+A dedicated sales workspace.
+
+Dashboard:
+- Total Leads.
+- New Leads.
+- Contacted Leads.
+- Qualified Leads.
+- Follow-ups Due.
+- Proposals Sent.
+- Won Opportunities.
+- Lost Opportunities.
+- Revenue Pipeline.
+- Monthly Sales Target.
+- Recent Customer Activity.
+
+Features:
+- Create leads.
+- Edit assigned leads.
+- Manage prospects.
+- Record customer details.
+- Record customer interactions.
+- Schedule follow-ups.
+- Manage sales activities.
+- Add notes.
+- Schedule customer meetings.
+- Track opportunity stages.
+- Create and manage quotations where authorized.
+- Track proposals.
+- Upload sales documents.
+- Track expected revenue.
+- Update deal status.
+- View assigned sales targets.
+- View personal performance.
+- Generate permitted sales reports.
+
+Sales executives must only see assigned or explicitly shared customer and opportunity information.
+
+### ROLE 6 — SALES MANAGER
+
+Features:
+- View team sales dashboard.
+- Assign leads.
+- Reassign leads.
+- Monitor sales executives.
+- Track conversion rates.
+- Monitor revenue pipeline.
+- Review sales performance.
+- Manage sales targets.
+- Approve discounts or proposals where authorized.
+- View team activity.
+- Generate sales reports.
+- Track follow-up completion.
+- Monitor lost opportunities and reasons.
+
+Sales Managers must not automatically receive access to unrelated HR or administrative data.
+
+### ROLE 7 — QA TESTER
+
+A dedicated testing and quality assurance workspace.
+
+Dashboard:
+- Assigned Test Cases.
+- Pending Testing.
+- Testing in Progress.
+- Passed Tests.
+- Failed Tests.
+- Open Bugs.
+- Critical Bugs.
+- Reopened Bugs.
+- Retest Required.
+- Upcoming Testing Deadlines.
+
+Features:
+- View assigned projects.
+- View development tasks.
+- Create test cases.
+- Create test suites.
+- Execute test cases.
+- Record actual results.
+- Record expected results.
+- Mark tests as Passed, Failed, Blocked or Skipped.
+- Create bug reports.
+- Assign severity and priority.
+- Attach screenshots and test evidence.
+- Record browser/device/environment information.
+- Link bugs to development tasks.
+- Assign or recommend bug ownership according to permissions.
+- Retest fixed bugs.
+- Reopen failed issues.
+- Maintain testing history.
+- Generate QA reports.
+- Track release readiness.
+- Submit testing summaries.
+
+QA testers must not directly change protected development code or administrator settings.
+
+### ROLE 8 — HR MANAGER
+
+Features:
+- Manage employee profiles.
+- Manage departments.
+- Manage employee onboarding.
+- Manage leave requests.
+- Manage attendance.
+- Review employee documents.
+- Manage holidays.
+- View employee activity within authorized HR scope.
+- Manage employee announcements.
+- Generate HR reports.
+- Track employee status.
+- Maintain authorized employee records.
+
+Sensitive employee information must only be available to authorized HR and administrators.
+
+### ROLE 9 — EMPLOYEE
+
+A general employee workspace.
+
+Features:
+- View personal dashboard.
+- View assigned tasks.
+- View assigned projects.
+- Update permitted task information.
+- Submit daily updates.
+- Submit weekly updates.
+- Apply for leave.
+- View leave balances.
+- View attendance.
+- View announcements.
+- View meetings.
+- Upload permitted documents.
+- Submit feedback.
+- View personal profile.
+- View personal activity history.
+- View personal performance summaries.
+
+Employees must not see other employees' restricted information.
+
+### ROLE 10 — CLIENT / EXTERNAL VIEWER
+
+Optional restricted external access.
+
+Features:
+- View explicitly shared projects.
+- View approved milestones.
+- View permitted project progress.
+- View approved reports.
+- Download explicitly shared documents.
+- Submit feedback or comments where enabled.
+
+Clients must never access internal employee, HR, financial, security, or administrative data.
+
+---
+
+# 4. CENTRALIZED PERMISSION MATRIX
+
+Implement permissions centrally rather than scattering role-name checks throughout the frontend.
+
+Support permission identifiers such as:
+
+- `users.view`
+- `users.create`
+- `users.update`
+- `users.delete`
+- `users.assign_role`
+- `roles.manage`
+- `permissions.manage`
+- `projects.view`
+- `projects.create`
+- `projects.update`
+- `projects.delete`
+- `tasks.view`
+- `tasks.create`
+- `tasks.assign`
+- `tasks.update`
+- `tasks.delete`
+- `sales.leads.view`
+- `sales.leads.create`
+- `sales.leads.update`
+- `sales.reports.view`
+- `qa.tests.create`
+- `qa.tests.execute`
+- `qa.bugs.create`
+- `qa.bugs.update`
+- `hr.employees.view`
+- `hr.leave.approve`
+- `reports.view`
+- `reports.export`
+- `documents.upload`
+- `documents.download`
+- `audit.view`
+- `settings.manage`
+
+The permission system must support:
+- Role-based permissions.
+- Individual user permission overrides where authorized.
+- Module-level permissions.
+- Record-level and project-level access restrictions.
+- Explicit deny behavior for restricted operations.
+- Server-side permission enforcement.
+
+The frontend must use the authenticated user's effective permissions to control:
+- Sidebar navigation.
+- Dashboard widgets.
+- Page access.
+- Action buttons.
+- Forms.
+- Tables.
+- Edit and delete operations.
+- Exports.
+- Document access.
+
+The backend must independently enforce the same permissions.
+
+Never trust permissions supplied by the browser.
+
+---
+
+# 5. ROLE-SPECIFIC DASHBOARDS
+
+Create a distinct dashboard experience for every role.
+
+Do not show every user the same generic dashboard.
+
+The dashboard must be assembled based on the authenticated user's role and effective permissions.
+
+Examples:
+
+**Super Admin:** organization overview, user statistics, project overview, security events, system activity.
+
+**Admin:** employee overview, project overview, task status, pending approvals.
+
+**Project Manager:** assigned projects, project health, workload, deadlines, blockers.
+
+**Developer:** personal tasks, coding work, pending reviews, blockers, deadlines.
+
+**Sales Executive:** leads, follow-ups, proposals, sales targets and pipeline.
+
+**Sales Manager:** team pipeline, conversions, team targets and sales performance.
+
+**QA Tester:** test execution, failures, bugs, retests and release readiness.
+
+**HR Manager:** employee overview, attendance, leave requests and onboarding.
+
+**Employee:** personal tasks, attendance, leave, updates and announcements.
+
+**Client:** shared projects, milestones, progress and approved documents.
+
+Dashboard metrics must come from real backend data whenever the API exists.
+
+Clearly identify demo or simulated data when real backend data is unavailable.
+
+Do not invent real business metrics.
+
+---
+
+# 6. PROJECT MANAGEMENT MODULE
+
+Implement and integrate:
+
+- Project creation.
+- Project assignment.
+- Project members.
+- Project managers.
+- Project status.
+- Project priority.
+- Project deadlines.
+- Project milestones.
+- Project progress.
+- Project documents.
+- Project comments.
+- Project activity.
+- Project reports.
+- Project archive.
+
+Project statuses:
+- Planning.
+- Not Started.
+- In Progress.
+- On Hold.
+- Completed.
+- Cancelled.
+
+Provide appropriate role-specific access.
+
+---
+
+# 7. TASK MANAGEMENT MODULE
+
+Implement:
+
+- Tasks.
+- Subtasks.
+- Task assignment.
+- Task priorities.
+- Task deadlines.
+- Task status.
+- Task descriptions.
+- Task attachments.
+- Task comments.
+- Task activity history.
+- Dependencies.
+- Blockers.
+- Estimated effort.
+- Actual effort.
+- Task approval.
+- Task review.
+- Task reassignment.
+
+Task statuses:
+- Backlog.
+- To Do.
+- In Progress.
+- In Review.
+- Testing.
+- Blocked.
+- Completed.
+- Cancelled.
+
+Use permission checks for all task actions.
+
+---
+
+# 8. SALES CRM MODULE
+
+Implement:
+
+- Leads.
+- Prospects.
+- Customers.
+- Opportunities.
+- Sales pipeline.
+- Follow-ups.
+- Calls.
+- Meetings.
+- Notes.
+- Quotations.
+- Proposals.
+- Sales targets.
+- Revenue forecasts.
+- Conversion reports.
+- Lost opportunity reasons.
+
+Pipeline stages:
+- New.
+- Contacted.
+- Qualified.
+- Proposal.
+- Negotiation.
+- Won.
+- Lost.
+
+Sales data must be restricted by assignment and authorized team scope.
+
+---
+
+# 9. QA AND BUG TRACKING MODULE
+
+Implement:
+
+- Test plans.
+- Test suites.
+- Test cases.
+- Test executions.
+- Test evidence.
+- Bug reports.
+- Bug severity.
+- Bug priority.
+- Bug assignment.
+- Retesting.
+- Bug history.
+- QA reports.
+- Release readiness.
+
+Bug severity:
+- Critical.
+- High.
+- Medium.
+- Low.
+
+Bug status:
+- Open.
+- Assigned.
+- In Progress.
+- Fixed.
+- Ready for Retest.
+- Retest Passed.
+- Reopened.
+- Closed.
+
+Connect bugs to their related projects and development tasks.
+
+---
+
+# 10. EXISTING TASKFLOW MODULES
+
+Preserve and integrate all existing modules wherever present:
+
+- User Management.
+- Employee Management.
+- Department Management.
+- Project Management.
+- Task Management.
+- Weekly Updates.
+- Daily Updates.
+- Feedback.
+- Leave Management.
+- Attendance.
+- Meetings.
+- Documents.
+- File Uploads.
+- Notifications.
+- Reports.
+- Dropdown Management.
+- Dashboard.
+- Settings.
+
+Do not remove existing modules just because the new role-specific dashboards are introduced.
+
+Add the appropriate permission checks and role-based visibility.
+
+---
+
+# 11. USER MANAGEMENT AND ROLE ASSIGNMENT
+
+Create an administrator-controlled user management experience.
+
+Features:
+- Create user.
+- Edit user.
+- Deactivate user.
+- Reactivate user.
+- Assign department.
+- Assign project.
+- Assign role.
+- View permissions.
+- Manage permitted overrides.
+- Reset password through a secure workflow.
+- View account status.
+- View last login where available.
+- View user activity where authorized.
+
+User creation must include:
+- Name.
+- Email.
+- Username where supported.
+- Department.
+- Designation.
+- Role.
+- Account status.
+
+Security:
+- Public registration must never grant privileged roles.
+- Only authorized administrators may assign privileged roles.
+- Never store plaintext passwords.
+- Never expose password hashes.
+- Do not create automatic Super Admin accounts during login.
+- Never add default administrator credentials.
+
+---
+
+# 12. ROLE-BASED NAVIGATION AND USER EXPERIENCE
+
+Create a consistent application shell with:
+
+- MyMitraa TaskFlow branding.
+- Role-aware sidebar.
+- Role-aware top navigation.
+- User profile menu.
+- Notifications.
+- Breadcrumbs.
+- Search.
+- Responsive navigation.
+- Role-specific dashboards.
+- Access-denied page.
+- Account settings.
+- Logout.
+
+The sidebar must show only modules the user can access.
+
+Examples:
+
+Developer:
+- Dashboard
+- My Projects
+- My Tasks
+- Code Reviews
+- Bugs
+- Daily Updates
+- Weekly Updates
+- Meetings
+- Documents
+
+Sales:
+- Dashboard
+- Leads
+- Customers
+- Opportunities
+- Follow-ups
+- Proposals
+- Sales Reports
+
+QA Tester:
+- Dashboard
+- Test Plans
+- Test Suites
+- Test Cases
+- Test Execution
+- Bug Tracking
+- Retesting
+- QA Reports
+
+Admin:
+- Dashboard
+- Users
+- Roles & Permissions
+- Departments
+- Projects
+- Tasks
+- Employees
+- Leave
+- Attendance
+- Reports
+- Audit Logs
+- Settings
+
+These menus must be permission-driven, not hardcoded as the sole security mechanism.
+
+---
+
+# 13. DATABASE AND BACKEND INTEGRATION
+
+MongoDB is the only application database.
+
+Database:
+`mymitraa_taskflow`
+
+Use Spring Data MongoDB and existing repository/service architecture.
+
+Reuse existing collections and document relationships where possible.
+
+Add new MongoDB documents and repositories only when necessary.
+
+Potential entities include:
+- User.
+- Role.
+- Permission.
+- Department.
+- Project.
+- Task.
+- Lead.
+- Customer.
+- Opportunity.
+- TestPlan.
+- TestCase.
+- TestExecution.
+- Bug.
+- LeaveRequest.
+- Attendance.
+- Notification.
+- AuditLog.
+
+Avoid duplicate entities when an equivalent existing entity already exists.
+
+Preserve existing API contracts.
+
+All critical operations must use Spring Boot APIs.
+
+Do not use:
+- SQL.
+- JPA.
+- Hibernate.
+- H2.
+- MySQL.
+- PostgreSQL.
+- JSON files as application databases.
+- Express in-memory persistence.
+- Browser localStorage as authoritative business persistence.
+
+Browser storage may be used for non-sensitive presentation preferences only.
+
+Never store privileged role assignments or trusted permission decisions solely in browser storage.
+
+---
+
+# 14. AUDIT LOGGING
+
+Introduce a secure audit trail for sensitive operations.
+
+Record:
+- User ID.
+- Actor role.
+- Action.
+- Module.
+- Record ID.
+- Timestamp.
+- Relevant change summary.
+- Outcome.
+- Source context where available.
+
+Audit:
+- Login success/failure events where appropriate.
+- User creation and deactivation.
+- Role assignments.
+- Permission changes.
+- Project changes.
+- Task assignments.
+- Sensitive document access.
+- Administrative operations.
+
+Do not record passwords, JWTs, API keys, or private secrets.
+
+Audit logs must be protected against unauthorized modification.
+
+---
+
+# 15. NOTIFICATIONS AND APPROVAL WORKFLOWS
+
+Implement permission-aware notifications for:
+- Task assignments.
+- Task updates.
+- Deadline reminders.
+- Project milestones.
+- Bug assignments.
+- Retest requests.
+- Sales follow-ups.
+- Leave approvals.
+- Meeting invitations.
+- Weekly update submissions.
+- Feedback.
+
+Provide in-app notifications.
+
+Email notifications must use the existing authoritative backend email service where available.
+
+Do not send real emails during testing.
+
+---
+
+# 16. REPORTING AND ANALYTICS
+
+Provide role-appropriate reports.
+
+Admin:
+- Employee statistics.
+- Project statistics.
+- Task completion.
+- Department activity.
+
+Project Manager:
+- Project progress.
+- Team workload.
+- Deadline performance.
+- Blockers.
+
+Developer:
+- Personal completed tasks.
+- Workload.
+- Time tracking.
+- Task history.
+
+Sales:
+- Leads.
+- Conversion.
+- Revenue pipeline.
+- Follow-up performance.
+- Sales targets.
+
+QA:
+- Test pass rate.
+- Failed tests.
+- Open bugs.
+- Bug resolution time.
+- Release readiness.
+
+HR:
+- Attendance.
+- Leave.
+- Employee activity within authorized scope.
+
+Reports must respect the user's data-access permissions.
+
+Provide export functionality only for authorized roles.
+
+---
+
+# 17. RESPONSIVE DESIGN AND QUALITY
+
+Ensure:
+- Desktop support.
+- Tablet support.
+- Mobile support.
+- Consistent spacing.
+- Accessible forms.
+- Clear loading states.
+- Empty states.
+- Error states.
+- Confirmation before destructive actions.
+- Pagination for large datasets.
+- Search and filtering.
+- Consistent tables.
+- Form validation.
+- Appropriate notifications.
+
+Keep the existing MyMitraa TaskFlow design language.
+
+Do not introduce an unrelated visual theme.
+
+---
+
+# 18. TESTING REQUIREMENTS
+
+Verify every role.
+
+For each role, test:
+1. Successful authentication.
+2. Correct dashboard.
+3. Correct navigation.
+4. Authorized module access.
+5. Unauthorized module rejection.
+6. Authorized CRUD operations.
+7. Unauthorized CRUD rejection.
+8. Record-level access restrictions.
+9. Logout.
+10. Session/token expiration.
+
+Security scenarios:
+- Developer must not access Admin settings.
+- Sales Executive must not access HR records.
+- QA Tester must not change administrator permissions.
+- Employee must not access another employee's restricted information.
+- Client must only access explicitly shared project information.
+- Project Manager must not access unrelated projects.
+- Admin must not grant or modify Super Admin privileges.
+- Public registration must not grant privileged roles.
+- Manipulating frontend requests must not bypass backend authorization.
+
+Use automated tests and safe test accounts.
+
+Do not modify existing user permissions or production-like data.
+
+Use isolated test data and clean up only records created by the test process.
+
+---
+
+# 19. IMPLEMENTATION STRATEGY
+
+Work directly on the existing project.
+
+Follow this sequence internally:
+
+1. Inspect current architecture.
+2. Identify reusable components and existing functionality.
+3. Design the role and permission model.
+4. Implement backend RBAC where backend source is available.
+5. Implement secure permission enforcement.
+6. Implement role-aware frontend authentication state.
+7. Implement role-aware dashboards.
+8. Implement role-aware navigation.
+9. Implement the role-specific modules.
+10. Connect every feature to actual backend APIs.
+11. Add necessary MongoDB documents and repositories.
+12. Add audit logging.
+13. Add notifications.
+14. Add tests.
+15. Run TypeScript checks.
+16. Run frontend production build.
+17. Run backend compile and tests if backend source is accessible.
+18. Verify all roles and security scenarios.
+19. Review existing functionality for regressions.
+
+Do not stop after creating dashboard designs.
+
+Implement the actual interactions, forms, filters, tables, permission checks and API integration.
+
+Do not create fake API success responses.
+
+If a required backend API is missing, implement it only when the backend source is available and the change is compatible with the existing architecture.
+
+If backend source is unavailable in this environment:
+- Complete the frontend integration using clearly defined API contracts.
+- Do not simulate successful persistence.
+- Identify backend work that remains.
+- Do not claim end-to-end integration is complete.
+
+---
+
+# 20. FINAL REPORT
+
+After implementation, report:
+
+1. Existing application architecture inspected.
+2. Files created.
+3. Files modified.
+4. Existing functionality preserved.
+5. Roles implemented.
+6. Permissions implemented.
+7. Role-specific dashboards.
+8. Role-specific navigation.
+9. Modules added or integrated.
+10. MongoDB integration.
+11. Backend API integration.
+12. Authentication and authorization security.
+13. Audit logs.
+14. Notifications.
+15. Automated test results.
+16. Frontend build result.
+17. Backend build result.
+18. Remaining backend work.
+19. Known limitations.
+20. Exact next steps.
+
+Use accurate labels:
+- PASS: Executed and passed.
+- FAIL: Executed and failed.
+- STATICALLY VERIFIED: Confirmed through source inspection.
+- NOT RUN: Not executed.
+- BLOCKED: Could not execute because of a dependency or environment limitation.
+
+Do not claim features are complete merely because UI components exist.
+
+Do not claim role security works unless backend authorization has been verified.
+
+Do not remove existing features to simplify implementation.
+
+---
+
+# FINAL INSTRUCTION
+
+Start inspecting the existing MyMitraa TaskFlow application now.
+
+Implement the complete role-based system directly into the existing codebase.
+
+Prioritize security, data integrity, compatibility, maintainability and preservation of current functionality.
+
+Do not generate a replacement application.
+
+Do not stop at a plan or explanation.
+
+Make the actual code changes supported by the available project environment, run the available checks, and report honestly what is complete and what still requires backend integration.

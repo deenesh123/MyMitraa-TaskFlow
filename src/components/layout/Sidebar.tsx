@@ -15,11 +15,19 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  FolderKanban,
+  TrendingUp,
+  Bug,
+  ShieldAlert,
+  KeyRound
 } from 'lucide-react';
 import { MascotPenguin } from '../mascot/MascotPenguin';
 import { MyMitraaLogo } from '../common/MyMitraaLogo';
 import { useAppTheme } from '../../context/ThemeContext';
+import { UserAccount } from '../../api/types';
+import { CURRENT_USER } from '../../api/mockData';
+import { canAccessRoute } from '../../utils/rbac';
 
 interface SidebarProps {
   currentRoute: string;
@@ -27,7 +35,7 @@ interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   openTasksCount?: number;
-  userRole?: string;
+  currentUser?: UserAccount;
 }
 
 interface MenuItem {
@@ -47,17 +55,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   collapsed,
   onToggleCollapse,
-  openTasksCount = 24
+  openTasksCount = 24,
+  currentUser = CURRENT_USER
 }) => {
   const { isGlass } = useAppTheme();
-  const menuGroups: MenuGroup[] = [
+
+  const allMenuGroups: MenuGroup[] = [
     {
       group: 'Work',
       items: [
         { title: 'Dashboard', route: '/', icon: LayoutDashboard },
+        { title: 'Projects', route: '/projects', icon: FolderKanban },
         { title: 'Task Tracker', route: '/task-tracker', icon: CheckSquare, badge: openTasksCount },
         { title: 'Calendar View', route: '/users/task-calendar-view', icon: Calendar },
         { title: 'Timeline View', route: '/users/timeline-view', icon: GanttChartSquare },
+      ]
+    },
+    {
+      group: 'Commercial',
+      items: [
+        { title: 'Sales CRM', route: '/sales-crm', icon: TrendingUp },
+      ]
+    },
+    {
+      group: 'Quality',
+      items: [
+        { title: 'QA & Bug Tracker', route: '/qa-bugs', icon: Bug },
       ]
     },
     {
@@ -75,15 +98,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ]
     },
     {
-      group: 'Insights and admin',
+      group: 'Governance & Admin',
       items: [
         { title: 'Reports', route: '/task-dashboard', icon: BarChart3 },
         { title: 'User Management', route: '/users/user-management', icon: Shield, badge: 'Admin' },
+        { title: 'Roles & Permissions', route: '/admin/roles-permissions', icon: KeyRound },
+        { title: 'Audit Trail', route: '/admin/audit-logs', icon: ShieldAlert },
         { title: 'Zoho Mail & SMTP', route: '/admin/email-zoho', icon: Mail, badge: 'Zoho' },
         { title: 'Dropdown Management', route: '/users/dropdown-management', icon: Settings2 },
       ]
     }
   ];
+
+  // Filter groups according to current user's effective permissions
+  const menuGroups = allMenuGroups
+    .map(grp => ({
+      ...grp,
+      items: grp.items.filter(item => canAccessRoute(currentUser as any, item.route))
+    }))
+    .filter(grp => grp.items.length > 0);
+
 
   return (
     <aside

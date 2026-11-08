@@ -13,6 +13,7 @@ interface AppLayoutProps {
   openTasksCount?: number;
   currentUser?: UserAccount;
   onSignOut?: () => void;
+  onSwitchUser?: (user: UserAccount) => void;
   children: ReactNode;
 }
 
@@ -22,6 +23,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   openTasksCount = 24,
   currentUser = CURRENT_USER,
   onSignOut,
+  onSwitchUser,
   children
 }) => {
   const { isGlass } = useAppTheme();
@@ -60,6 +62,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(prev => !prev)}
         openTasksCount={openTasksCount}
+        currentUser={currentUser}
       />
 
       {/* Main Content Area */}
@@ -69,6 +72,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           onNavigate={onNavigate}
           currentUser={currentUser}
           onSignOut={onSignOut}
+          onSwitchUser={onSwitchUser}
         />
 
         <main className="flex-1 p-6 lg:p-8 max-w-[1600px] w-full mx-auto">

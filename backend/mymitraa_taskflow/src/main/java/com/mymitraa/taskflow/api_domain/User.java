@@ -17,6 +17,9 @@ public class User extends BaseDomain {
     private String avatar;
     private String createdDate;
     private String lastLogin;
+    private String department;
+    private String designation;
+    private Set<String> permissions = new HashSet<>();
     private boolean enabled = true;
     private Set<String> roles = new HashSet<>();
 
@@ -117,5 +120,29 @@ public class User extends BaseDomain {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
+
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
     }
 }
