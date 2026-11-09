@@ -13,12 +13,12 @@ describe('QaBugTrackerPage UI & Features', () => {
   it('renders bug tracker with severity filters and report bug button', async () => {
     renderWithProviders(<QaBugTrackerPage currentUser={CURRENT_USER} />);
 
-    expect(screen.getByText(/QA & Bug Tracker/i)).toBeDefined();
+    expect(screen.getByText(/QA & Bug Tracking/i)).toBeDefined();
     expect(screen.getByPlaceholderText(/Search bugs/i)).toBeDefined();
     expect(screen.getByRole('button', { name: /Report Bug/i })).toBeDefined();
 
     await waitFor(() => {
-      expect(screen.getByText(/Session timeout on slow 3G/i)).toBeDefined();
+      expect(screen.getByText(/Token expiry/i)).toBeDefined();
     });
   });
 });

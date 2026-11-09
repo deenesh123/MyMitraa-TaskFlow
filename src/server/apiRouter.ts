@@ -55,15 +55,33 @@ const db = {
   ],
 };
 
+// Protection: Disable in-memory write persistence across business endpoints
+apiRouter.use((req: Request, res: Response, next) => {
+  const isWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase());
+  const isDevLogin = req.path === '/auth/login' || req.path === '/auth/logout';
+
+  if (isWrite && !isDevLogin) {
+    return res.status(503).json({
+      code: 503,
+      statusCode: 503,
+      error: 'Authoritative Persistence Required',
+      message: 'In-memory business persistence is disabled. Write operations must be processed by the authoritative Spring Boot backend and persisted to MongoDB.',
+      data: null,
+    });
+  }
+  next();
+});
+
 // --- Health Check ---
 apiRouter.get('/health', (_req: Request, res: Response) => {
   return res.json({
     code: 200,
     status: 'UP',
     application: 'MyMitraa TaskFlow',
-    runtime: 'Node.js 22 / Express',
-    database: 'mymitraa_taskflow (In-Memory Datastore)',
-    databaseConnected: true,
+    runtime: 'Node.js 22 Development Support Proxy',
+    authoritativeBackend: 'Spring Boot (com.mymitraa.taskflow)',
+    authoritativeDatabase: 'MongoDB (mymitraa_taskflow)',
+    inMemoryPersistence: 'DISABLED (Authoritative MongoDB Required)',
     modules: {
       tasks: db.tasks.length,
       meetings: db.meetings.length,

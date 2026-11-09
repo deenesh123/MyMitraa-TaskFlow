@@ -43,13 +43,15 @@ describe('Sidebar & Navigation RBAC Rendering', () => {
         onNavigate={handleNavigate}
         openTasksCount={12}
         currentUser={superAdminUser}
+        collapsed={false}
+        onToggleCollapse={vi.fn()}
       />
     );
 
-    expect(screen.getByText(/Home Dashboard/i)).toBeDefined();
-    expect(screen.getByText(/User Directory/i)).toBeDefined();
-    expect(screen.getByText(/Audit Logs/i)).toBeDefined();
-    expect(screen.getByText(/Roles & Perms/i)).toBeDefined();
+    expect(screen.getByText(/Dashboard/i)).toBeDefined();
+    expect(screen.getByText(/User Management/i)).toBeDefined();
+    expect(screen.getByText(/Audit Trail/i)).toBeDefined();
+    expect(screen.getByText(/Roles & Permissions/i)).toBeDefined();
   });
 
   it('hides administrative and privileged routes from Client role', () => {
@@ -60,23 +62,26 @@ describe('Sidebar & Navigation RBAC Rendering', () => {
         onNavigate={handleNavigate}
         openTasksCount={0}
         currentUser={clientUser}
+        collapsed={false}
+        onToggleCollapse={vi.fn()}
       />
     );
 
     expect(screen.getByText(/Projects/i)).toBeDefined();
-    expect(screen.queryByText(/User Directory/i)).toBeNull();
-    expect(screen.queryByText(/Audit Logs/i)).toBeNull();
-    expect(screen.queryByText(/Roles & Perms/i)).toBeNull();
+    expect(screen.queryByText(/User Management/i)).toBeNull();
+    expect(screen.queryByText(/Audit Trail/i)).toBeNull();
+    expect(screen.queryByText(/Roles & Permissions/i)).toBeNull();
   });
 
   it('renders TopBar with active user information and role badge', () => {
     const handleNavigate = vi.fn();
     const handleSignOut = vi.fn();
     const handleSwitch = vi.fn();
+    const handleOpenSearch = vi.fn();
 
     renderWithProviders(
       <TopBar
-        currentRoute="/"
+        onOpenSearch={handleOpenSearch}
         onNavigate={handleNavigate}
         currentUser={superAdminUser}
         onSignOut={handleSignOut}
@@ -85,6 +90,6 @@ describe('Sidebar & Navigation RBAC Rendering', () => {
     );
 
     expect(screen.getByText(/Deenesh Sabat/i)).toBeDefined();
-    expect(screen.getByText(/Super Admin/i)).toBeDefined();
+    expect(screen.getAllByText(/Super Admin/i).length).toBeGreaterThan(0);
   });
 });

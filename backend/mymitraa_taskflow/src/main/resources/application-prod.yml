@@ -1,0 +1,43 @@
+# ==============================================================================
+# MyMitraa TaskFlow — Production Profile (prod)
+# Purpose: Authoritative deployment at https://task.mitratechgroup.com
+# Activation: SPRING_PROFILES_ACTIVE=prod
+# Security: Fails startup clearly if MONGODB_URI or JWT_SECRET is missing
+# ==============================================================================
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: strict
+
+spring:
+  data:
+    mongodb:
+      # Mandatory: Must be provided via environment variable; no insecure default fallback
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE:mymitraa_taskflow}
+  upload-path: ${UPLOAD_PATH:/var/data/mymitraa_uploads}
+  history-uploads: history_uploads
+
+mymitraa:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://task.mitratechgroup.com}
+  security:
+    jwt:
+      # Mandatory: 64+ byte cryptographic key passed via server environment variable
+      secret: ${JWT_SECRET}
+
+jwt:
+  # Aligned with mymitraa.security.jwt.secret
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    root: WARN
+    com.mymitraa.taskflow: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN

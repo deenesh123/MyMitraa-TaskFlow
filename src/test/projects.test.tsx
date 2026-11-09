@@ -13,12 +13,12 @@ describe('ProjectManagementPage UI & Features', () => {
   it('renders project list view with search and status pills', async () => {
     renderWithProviders(<ProjectManagementPage currentUser={CURRENT_USER} />);
 
-    expect(screen.getByText(/Enterprise Projects/i)).toBeDefined();
+    expect(screen.getByText(/Project Portfolio/i)).toBeDefined();
     expect(screen.getByPlaceholderText(/Search projects/i)).toBeDefined();
     expect(screen.getByRole('button', { name: /New Project/i })).toBeDefined();
 
     await waitFor(() => {
-      expect(screen.getByText(/Core Banking Engine/i)).toBeDefined();
+      expect(screen.getByText(/AEC Kuwait/i)).toBeDefined();
     });
   });
 });

@@ -1,17 +1,16 @@
-server:
-  port: ${SERVER_PORT:8080}
-  servlet:
-    context-path: /
+# ==============================================================================
+# MyMitraa TaskFlow — Shared Spring Boot Application Configuration
+# Targets: Spring Boot 3.3.4 / Java 17 / MongoDB
+# Active Profile is determined by SPRING_PROFILES_ACTIVE (default: dev)
+# ==============================================================================
 
 spring:
-  main:
-    allow-circular-references: true
+  profiles:
+    default: dev
   application:
     name: mymitraa-taskflow
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/${MONGODB_DATABASE:mymitraa_taskflow}}
-      database: ${MONGODB_DATABASE:mymitraa_taskflow}
+  main:
+    allow-circular-references: true
   servlet:
     multipart:
       max-file-size: 50MB
@@ -35,21 +34,17 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
-  upload-path: ${UPLOAD_PATH:/tmp/mymitraa_uploads}
-  history-uploads: history_uploads
+server:
+  servlet:
+    context-path: /
 
 mymitraa:
-  cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:8080}
   security:
     jwt:
-      secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2}
       expiration-ms: ${JWT_EXPIRATION:86400000} # 24 hours
   mail:
     from-email: ${ZOHO_FROM_EMAIL:notifications@mymitraa.com}
     from-name: ${ZOHO_FROM_NAME:MY MiTRAA TaskFlow}
 
 jwt:
-  secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2}
   expiration: ${JWT_EXPIRATION_SECONDS:86400}
-

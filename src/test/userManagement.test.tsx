@@ -12,7 +12,7 @@ describe('UserManagementPage UI & Features', () => {
   it('renders user directory table with headers and add user button', async () => {
     renderWithProviders(<UserManagementPage />);
 
-    expect(screen.getByText(/User Directory & Access Control/i)).toBeDefined();
+    expect(screen.getByRole('heading', { name: /User Management/i })).toBeDefined();
     expect(screen.getByPlaceholderText(/Search by name or email/i)).toBeDefined();
     expect(screen.getByRole('button', { name: /Add New User/i })).toBeDefined();
 
@@ -21,10 +21,14 @@ describe('UserManagementPage UI & Features', () => {
     });
   });
 
-  it('renders filter controls for Role, Team, and Status', () => {
+  it('renders filter controls for Role, Team, and Status', async () => {
     renderWithProviders(<UserManagementPage />);
 
     const comboboxes = screen.getAllByRole('combobox');
     expect(comboboxes.length).toBeGreaterThanOrEqual(3);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Deenesh Sabat/i)).toBeDefined();
+    });
   });
 });

@@ -14,10 +14,10 @@ describe('AuditLogsPage UI & Features', () => {
     renderWithProviders(<AuditLogsPage currentUser={CURRENT_USER} />);
 
     expect(screen.getByText(/System Audit Trail/i)).toBeDefined();
-    expect(screen.getByPlaceholderText(/Search actor, action, or details/i)).toBeDefined();
+    expect(screen.getByPlaceholderText(/Search actor, action/i)).toBeDefined();
 
     await waitFor(() => {
-      expect(screen.getByText(/USER_LOGIN/i)).toBeDefined();
+      expect(screen.getByText(/USER_ROLE_ASSIGN/i)).toBeDefined();
     });
   });
 });

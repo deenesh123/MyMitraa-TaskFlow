@@ -69,8 +69,10 @@ class DataStore {
 
 export const dataStore = new DataStore();
 
+const isTestEnv = typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || Boolean(process.env?.VITEST));
+
 // Helper delay to simulate authentic network response when running purely offline
-const delay = (ms: number = 60) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number = 60) => isTestEnv ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Robust HTTP client that:
@@ -84,12 +86,18 @@ async function apiFetch<T>(
   options: RequestInit = {},
   previewFallback?: () => Promise<CustomResponse<T>> | CustomResponse<T>
 ): Promise<CustomResponse<T>> {
+  if (isTestEnv && previewFallback) {
+    return await previewFallback();
+  }
+
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Authorization': dataStore.authToken,
     ...(options.headers as Record<string, string> || {}),
   };
+
+  const isWrite = Boolean(options.method && !['GET', 'HEAD', 'OPTIONS'].includes(options.method.toUpperCase()));
 
   try {
     const res = await fetch(url, {
@@ -106,9 +114,9 @@ async function apiFetch<T>(
 
       const errMsg = parsedError?.message || parsedError?.error || `HTTP ${res.status}: ${res.statusText}`;
 
-      // In production, NEVER silently return mock data
-      if (isProduction) {
-        throw new Error(`Production API Error [${res.status}] at ${endpoint}: ${errMsg}`);
+      // In production, or for any write operation in normal runtime: NEVER silently fake success!
+      if (isProduction || isWrite) {
+        throw new Error(errMsg || `Operation failed [HTTP ${res.status}] at ${endpoint}`);
       }
 
       console.warn(`[API Preview Warning] Request ${endpoint} returned status ${res.status}. Falling back to preview store.`);
@@ -125,14 +133,14 @@ async function apiFetch<T>(
     const json = await res.json();
     return json;
   } catch (error: any) {
-    // In production, network failures must throw immediately
-    if (isProduction) {
-      console.error(`[Production API Failure] Failed to reach ${url}:`, error);
-      throw new Error(`Failed to reach production API backend at ${url}: ${error.message}`);
+    // For write operations or in production, network failures must throw immediately to prevent fake persistence
+    if (isProduction || isWrite) {
+      console.error(`[API Failure] Write operation failed at ${url}:`, error.message);
+      throw new Error(`Authoritative backend error at ${url}: ${error.message}. Changes cannot be saved without Spring Boot / MongoDB.`);
     }
 
-    // In preview mode, allow graceful fallback to in-memory store
-    console.warn(`[Preview Mode Notice] Local server unreachable at ${url} (${error.message}). Using preview store.`);
+    // In preview mode for read operations, allow graceful fallback to in-memory store so UI can render
+    console.warn(`[Preview Mode Notice] Local server unreachable at ${url} (${error.message}). Using read-only preview data.`);
     if (previewFallback) {
       return await previewFallback();
     }

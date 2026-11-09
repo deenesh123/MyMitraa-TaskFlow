@@ -13,12 +13,12 @@ describe('SalesCrmPage UI & Features', () => {
   it('renders sales lead pipeline with search and stage tabs', async () => {
     renderWithProviders(<SalesCrmPage currentUser={CURRENT_USER} />);
 
-    expect(screen.getByText(/Sales CRM & Leads/i)).toBeDefined();
-    expect(screen.getByPlaceholderText(/Search leads/i)).toBeDefined();
+    expect(screen.getByText(/Sales Pipeline/i)).toBeDefined();
+    expect(screen.getByPlaceholderText(/Search company/i)).toBeDefined();
     expect(screen.getByRole('button', { name: /Add Lead/i })).toBeDefined();
 
     await waitFor(() => {
-      expect(screen.getByText(/Rajesh Sharma/i)).toBeDefined();
+      expect(screen.getByText(/Tariq Mansoor/i)).toBeDefined();
     });
   });
 });

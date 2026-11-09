@@ -1,0 +1,34 @@
+# ==============================================================================
+# MyMitraa TaskFlow — Local Development Profile (dev)
+# Purpose: Local development on Windows workstation
+# Activation: SPRING_PROFILES_ACTIVE=dev
+# Target Database: Local MongoDB (mongodb://127.0.0.1:27017/mymitraa_taskflow)
+# ==============================================================================
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017/mymitraa_taskflow}
+      database: ${MONGODB_DATABASE:mymitraa_taskflow}
+  upload-path: ${UPLOAD_PATH:./uploads/mymitraa_uploads}
+  history-uploads: history_uploads
+
+mymitraa:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173}
+  security:
+    jwt:
+      secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2ZGV2}
+
+jwt:
+  secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2ZGV2}
+
+logging:
+  level:
+    root: INFO
+    com.mymitraa.taskflow: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.security: INFO
