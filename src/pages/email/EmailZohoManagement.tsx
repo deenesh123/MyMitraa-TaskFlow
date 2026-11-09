@@ -21,12 +21,17 @@ import {
   ExternalLink,
   Info,
   Check,
-  Calendar
+  Calendar,
+  Image,
+  Download,
+  Eye
 } from 'lucide-react';
 import { ApiClient } from '../../api/client';
 import { useToast } from '../../components/common/Toast';
 import { useAppTheme } from '../../context/ThemeContext';
 import { EmailLogEntry } from '../../api/types';
+import { exportToCsv } from '../../utils/exportUtils';
+import { Modal } from '../../components/common/Modal';
 
 export const EmailZohoManagement: React.FC = () => {
   const { isGlass } = useAppTheme();
@@ -55,6 +60,21 @@ export const EmailZohoManagement: React.FC = () => {
   // Logs State
   const [logs, setLogs] = useState<EmailLogEntry[]>([]);
   const [dbStatus, setDbStatus] = useState<any>(null);
+  const [selectedLogDetail, setSelectedLogDetail] = useState<EmailLogEntry | null>(null);
+
+  // Export Email Audit Logs to CSV
+  const handleExportLogs = () => {
+    exportToCsv(logs, 'zoho-email-delivery-logs', [
+      { key: 'id', label: 'Log ID' },
+      { key: 'to', label: 'Recipient' },
+      { key: 'category', label: 'Category' },
+      { key: 'subject', label: 'Subject' },
+      { key: 'status', label: 'Status' },
+      { key: 'details', label: 'Gateway Details' },
+      { key: 'timestamp', label: 'Timestamp' }
+    ]);
+    showToast('Export Generated', 'Downloaded Zoho email delivery logs as CSV');
+  };
 
   // Load initial email configuration & logs
   const loadData = async () => {
@@ -535,6 +555,34 @@ export const EmailZohoManagement: React.FC = () => {
             </form>
           </div>
 
+          {/* Approved Dashboard Email Asset Showcase (Section 5) */}
+          <div className={`p-6 rounded-3xl border transition-all ${
+            isGlass
+              ? 'bg-[#0A1021]/80 backdrop-blur-xl border-white/10 text-white'
+              : 'bg-white border-slate-200/90 shadow-xs text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Image className="w-3.5 h-3.5 text-[#7B3AEC]" />
+                <span>Approved Email Dashboard Asset</span>
+              </span>
+              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full font-mono font-bold border border-emerald-200">
+                CID: dashboardPreview
+              </span>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xs mb-3 group relative">
+              <img
+                src="/assets/dashboard-preview.jpeg"
+                alt="MyMitraa TaskFlow Delivery Dashboard"
+                className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              This authentic delivery dashboard is embedded inline into outgoing Zoho SMTPS emails (Weekly Reports, Task Assignments) via MIME CID attachment without exposing internal localhost URLs.
+            </p>
+          </div>
+
           {/* Quick Triggers from Java Controllers */}
           <div className={`p-6 rounded-3xl border transition-all ${
             isGlass
@@ -599,7 +647,7 @@ export const EmailZohoManagement: React.FC = () => {
           ? 'bg-[#0A1021]/80 backdrop-blur-xl border-white/10 text-white'
           : 'bg-white border-slate-200/90 shadow-xs text-slate-900'
       }`}>
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
               <FileText className="w-4 h-4" />
@@ -610,9 +658,31 @@ export const EmailZohoManagement: React.FC = () => {
             </div>
           </div>
 
-          <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
-            {logs.length} logs recorded
-          </span>
+          {/* Right-aligned actions: Export & Refresh */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+              {logs.length} logs
+            </span>
+
+            <button
+              type="button"
+              onClick={handleExportLogs}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export CSV</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={loadData}
+              disabled={loading}
+              className="p-1.5 bg-slate-50 border border-slate-200 rounded-full text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Refresh logs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#7B3AEC]' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {logs.length === 0 ? (
@@ -624,17 +694,22 @@ export const EmailZohoManagement: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                  <th className="py-3 px-4">Log ID</th>
                   <th className="py-3 px-4">Time</th>
                   <th className="py-3 px-4">Recipient</th>
                   <th className="py-3 px-4">Category</th>
                   <th className="py-3 px-4">Subject</th>
-                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Gateway Details</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {logs.map(log => (
                   <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                      {log.id}
+                    </td>
                     <td className="py-3 px-4 text-slate-500 font-mono text-[11px] whitespace-nowrap">
                       {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </td>
@@ -655,22 +730,32 @@ export const EmailZohoManagement: React.FC = () => {
                     <td className="py-3 px-4 text-slate-700 max-w-xs truncate" title={log.subject}>
                       {log.subject}
                     </td>
+                    <td className="py-3 px-4 text-slate-500 text-[11px] max-w-sm truncate" title={log.details || log.error}>
+                      {log.details || log.error || 'N/A'}
+                    </td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         log.status === 'SENT'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : log.status === 'SIMULATED'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-red-50 text-red-700 border border-red-200'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                          : log.status === 'SIMULATED' || log.status === 'PENDING'
+                          ? 'bg-amber-50 text-amber-900 border border-amber-300'
+                          : 'bg-rose-50 text-rose-800 border border-rose-300'
                       }`}>
-                        {log.status === 'SENT' && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
-                        {log.status === 'SIMULATED' && <Clock className="w-3 h-3 text-amber-500" />}
-                        {log.status === 'FAILED' && <AlertCircle className="w-3 h-3 text-red-500" />}
+                        {log.status === 'SENT' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                        {(log.status === 'SIMULATED' || log.status === 'PENDING') && <Clock className="w-3 h-3 text-amber-500" />}
+                        {log.status === 'FAILED' && <AlertCircle className="w-3 h-3 text-rose-600" />}
                         <span>{log.status}</span>
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-500 text-[11px] max-w-sm truncate" title={log.details || log.error}>
-                      {log.details || log.error || 'N/A'}
+                    <td className="py-3 px-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLogDetail(log)}
+                        className="p-1.5 text-slate-500 hover:text-[#7B3AEC] hover:bg-violet-50 rounded-lg transition-colors cursor-pointer"
+                        title="View Log Details"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -679,6 +764,47 @@ export const EmailZohoManagement: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Log Detail Modal */}
+      {selectedLogDetail && (
+        <Modal
+          isOpen={!!selectedLogDetail}
+          onClose={() => setSelectedLogDetail(null)}
+          title={`Email Log Detail: ${selectedLogDetail.id}`}
+          subtitle={`Dispatched to ${selectedLogDetail.to}`}
+          maxWidth="md"
+        >
+          <div className="space-y-3 text-xs">
+            <div className="p-3 bg-slate-50 rounded-2xl grid grid-cols-2 gap-2">
+              <div><span className="text-slate-400">Recipient:</span> <strong>{selectedLogDetail.to}</strong></div>
+              <div><span className="text-slate-400">Category:</span> <strong>{selectedLogDetail.category}</strong></div>
+              <div><span className="text-slate-400">Status:</span> <strong>{selectedLogDetail.status}</strong></div>
+              <div><span className="text-slate-400">Timestamp:</span> <span className="font-mono">{new Date(selectedLogDetail.timestamp).toLocaleString()}</span></div>
+            </div>
+            <div>
+              <span className="text-slate-400 font-semibold block mb-1">Subject</span>
+              <p className="p-2.5 bg-slate-50 rounded-xl text-slate-800 font-medium">
+                {selectedLogDetail.subject}
+              </p>
+            </div>
+            <div>
+              <span className="text-slate-400 font-semibold block mb-1">Gateway Details / Error</span>
+              <p className="p-2.5 bg-slate-50 rounded-xl text-slate-600 font-mono text-[11px] break-all">
+                {selectedLogDetail.details || selectedLogDetail.error || 'Delivered successfully via Zoho SMTPS :465'}
+              </p>
+            </div>
+            <div className="flex justify-end pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setSelectedLogDetail(null)}
+                className="px-5 py-2 bg-[#191627] text-white rounded-full text-xs font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

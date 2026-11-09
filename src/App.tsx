@@ -39,8 +39,14 @@ export default function App() {
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const saved = localStorage.getItem('mitraa_is_auth');
-    return saved !== null ? saved === 'true' : true;
+    if (typeof sessionStorage === 'undefined') return false;
+    const token = sessionStorage.getItem('mitraa_jwt_token');
+    return Boolean(token);
+  });
+
+  const [isVerifyingSession, setIsVerifyingSession] = useState<boolean>(() => {
+    if (typeof sessionStorage === 'undefined') return false;
+    return Boolean(sessionStorage.getItem('mitraa_jwt_token'));
   });
 
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -62,19 +68,64 @@ export default function App() {
   const handleLoginSuccess = (user: UserAccount) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
-    localStorage.setItem('mitraa_is_auth', 'true');
   };
 
   const handleSignOut = () => {
     ApiClient.auth.logout();
     setIsAuthenticated(false);
-    localStorage.setItem('mitraa_is_auth', 'false');
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('mitraa_jwt_token');
+      sessionStorage.removeItem('mitraa_auth_user');
+    }
   };
 
   const handleSwitchUser = (user: UserAccount) => {
     setCurrentUser(user);
     ApiClient.auth.setCurrentUser(user);
   };
+
+  // Validate session on startup with GET /api/auth/current
+  useEffect(() => {
+    const token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('mitraa_jwt_token') : null;
+    if (!token) {
+      setIsAuthenticated(false);
+      setIsVerifyingSession(false);
+      return;
+    }
+
+    ApiClient.auth.getCurrentUser()
+      .then(res => {
+        if (res && res.data) {
+          setCurrentUser(res.data);
+          setIsAuthenticated(true);
+        } else {
+          sessionStorage.removeItem('mitraa_jwt_token');
+          sessionStorage.removeItem('mitraa_auth_user');
+          setIsAuthenticated(false);
+        }
+      })
+      .catch(() => {
+        sessionStorage.removeItem('mitraa_jwt_token');
+        sessionStorage.removeItem('mitraa_auth_user');
+        setIsAuthenticated(false);
+      })
+      .finally(() => {
+        setIsVerifyingSession(false);
+      });
+  }, []);
+
+  // Listen for unauthorized 401 events to clear session and return to login
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('mitraa_jwt_token');
+        sessionStorage.removeItem('mitraa_auth_user');
+      }
+    };
+    window.addEventListener('mitraa:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('mitraa:unauthorized', handleUnauthorized);
+  }, []);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -176,7 +227,12 @@ export default function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
-        {!isAuthenticated ? (
+        {isVerifyingSession ? (
+          <div className="min-h-screen w-full flex flex-col items-center justify-center bg-black text-white">
+            <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-xs text-zinc-400 tracking-wider uppercase font-semibold">Validating session...</p>
+          </div>
+        ) : !isAuthenticated ? (
           <AuthPage onSuccess={handleLoginSuccess} />
         ) : (
           <AppLayout

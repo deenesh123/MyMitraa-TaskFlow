@@ -26,53 +26,57 @@ export type TaskStatus = 'Open' | 'In Progress' | 'Closed' | 'On Hold' | 'Overdu
 export type PriorityLevel = 'Critical P0' | 'Urgent P1' | 'Normal P2' | 'Low P3';
 export type LeaveType = 'Leave' | 'Unplanned Leave' | 'WFH (Approved)' | 'WFH (Unapproved)' | 'Holiday';
 
-export function getStatusStyle(status: string): { bg: string; text: string; border: string; dot: string } {
-  const normalized = status.replace('_', ' ').trim();
-  switch (normalized.toLowerCase()) {
-    case 'open':
-      return {
-        bg: 'bg-[#7B3AEC]/10',
-        text: 'text-[#7B3AEC]',
-        border: 'border-[#7B3AEC]/20',
-        dot: 'bg-[#7B3AEC]',
-      };
-    case 'in progress':
-      return {
-        bg: 'bg-[#00A6FC]/10',
-        text: 'text-[#0082CA]',
-        border: 'border-[#00A6FC]/25',
-        dot: 'bg-[#00A6FC]',
-      };
-    case 'closed':
-    case 'completed':
-      return {
-        bg: 'bg-[#A3D801]/15',
-        text: 'text-[#4D6B00]',
-        border: 'border-[#A3D801]/30',
-        dot: 'bg-[#A3D801]',
-      };
-    case 'on hold':
-      return {
-        bg: 'bg-[#D946EF]/10',
-        text: 'text-[#B024C5]',
-        border: 'border-[#D946EF]/25',
-        dot: 'bg-[#D946EF]',
-      };
-    case 'overdue':
-      return {
-        bg: 'bg-amber-50',
-        text: 'text-amber-800',
-        border: 'border-amber-200',
-        dot: 'bg-amber-500',
-      };
-    default:
-      return {
-        bg: 'bg-slate-100',
-        text: 'text-slate-700',
-        border: 'border-slate-200',
-        dot: 'bg-slate-400',
-      };
+export function getStatusStyle(status: string): { bg: string; text: string; border: string; dot: string; semantic: 'green' | 'orange' | 'red' } {
+  const normalized = (status || '').replace(/_/g, ' ').trim().toLowerCase();
+
+  // GREEN: Completed, Active, Success, Healthy, Approved, Closed, Resolved
+  if (
+    normalized === 'completed' ||
+    normalized === 'closed' ||
+    normalized === 'active' ||
+    normalized === 'success' ||
+    normalized === 'healthy' ||
+    normalized === 'approved' ||
+    normalized === 'resolved' ||
+    normalized === 'done'
+  ) {
+    return {
+      bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+      text: 'text-emerald-800 dark:text-emerald-300',
+      border: 'border-emerald-300 dark:border-emerald-700/50',
+      dot: 'bg-emerald-600 dark:bg-emerald-400',
+      semantic: 'green',
+    };
   }
+
+  // RED: Overdue, Failed, Rejected, Blocked, Critical, Error, Cancelled
+  if (
+    normalized === 'overdue' ||
+    normalized === 'failed' ||
+    normalized === 'rejected' ||
+    normalized === 'blocked' ||
+    normalized === 'critical' ||
+    normalized === 'error' ||
+    normalized === 'cancelled' ||
+    normalized.includes('fail')
+  ) {
+    return {
+      bg: 'bg-rose-50 dark:bg-rose-950/30',
+      text: 'text-rose-800 dark:text-rose-300',
+      border: 'border-rose-300 dark:border-rose-700/50',
+      dot: 'bg-rose-600 dark:bg-rose-400',
+      semantic: 'red',
+    };
+  }
+
+  // ORANGE: Pending, In Progress, Waiting, Warning, Requires Attention, Open, On Hold, Scheduled (Default)
+  return {
+    bg: 'bg-amber-50 dark:bg-amber-950/30',
+    text: 'text-amber-900 dark:text-amber-300',
+    border: 'border-amber-300 dark:border-amber-700/50',
+    dot: 'bg-amber-500 dark:bg-amber-400',
+    semantic: 'orange',
+  };
 }
 
 export function getPriorityStyle(priority: string): { bg: string; text: string; border: string } {

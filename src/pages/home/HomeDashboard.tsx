@@ -20,13 +20,12 @@ import { ApiClient } from '../../api/client';
 import { FeedbackHistory, MeetingTimeTracker, OptimaLeaveTracker, NumericalCount } from '../../api/types';
 import { PROJECTS, TEAMS, MODULES, CUSTOMERS } from '../../api/mockData';
 import { MascotPenguin } from '../../components/mascot/MascotPenguin';
-import { DateRangeBox } from '../../components/common/DateRangeBox';
+import { MascotPenguin } from '../../components/mascot/MascotPenguin';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { Modal } from '../../components/common/Modal';
 import { useToast } from '../../components/common/Toast';
 import { Skeleton } from '../../components/common/Skeleton';
 import { MascotEmpty } from '../../components/common/MascotEmpty';
-import { ModuleUploadTrigger } from '../../components/common/ModuleUploadTrigger';
 import { useAppTheme } from '../../context/ThemeContext';
 import { UserAccount } from '../../api/types';
 import { CURRENT_USER } from '../../api/mockData';
@@ -192,33 +191,22 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, curren
 
   return (
     <div className="space-y-6">
-      {/* Period Selector Header (HD-7) */}
+      {/* Home Dashboard Header (Clean, dashboard-only per Section 3 rules) */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-xl font-extrabold text-[#191627] tracking-tight">
+          <h1 className="text-xl font-extrabold text-[#191627] dark:text-white tracking-tight">
             Home Dashboard
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
             Real-time delivery progress, active sprints, and upcoming schedule.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <ModuleUploadTrigger
-            moduleName="Home Dashboard"
-            defaultProject="AEC Kuwait"
-            buttonLabel="Upload Project File"
-          />
-
-          <DateRangeBox
-            startDate={startDate}
-            endDate={endDate}
-            onChange={(s, e) => {
-              setStartDate(s);
-              setEndDate(e);
-              showToast('Period Updated', `Showing data for ${s} – ${e}`, 'info');
-            }}
-          />
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Live Delivery Active
+          </span>
         </div>
       </div>
 
@@ -295,7 +283,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, curren
               <h3 className={`text-sm font-bold ${isGlass ? 'text-white' : 'text-[#191627]'}`}>Overall Progress</h3>
             </div>
             <span className={`text-[11px] font-semibold font-mono ${isGlass ? 'text-zinc-400' : 'text-slate-400'}`}>
-              {startDate} – {endDate}
+              Active Sprint Cycle
             </span>
           </div>
 
@@ -1083,7 +1071,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, curren
         >
           <div className="space-y-4">
             <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 leading-relaxed">
-              These contributors need to submit their daily work logs in Task Tracker to reflect team capacity accurately.
+              These contributors need to submit their daily work logs in Task Force to reflect team capacity accurately.
             </div>
 
             <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto">

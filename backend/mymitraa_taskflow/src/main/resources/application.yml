@@ -41,10 +41,10 @@ server:
 mymitraa:
   security:
     jwt:
-      expiration-ms: ${JWT_EXPIRATION:86400000} # 24 hours
+      expiration-ms: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
   mail:
     from-email: ${ZOHO_FROM_EMAIL:notifications@mymitraa.com}
     from-name: ${ZOHO_FROM_NAME:MY MiTRAA TaskFlow}
 
 jwt:
-  expiration: ${JWT_EXPIRATION_SECONDS:86400}
+  expiration: ${JWT_EXPIRATION:86400000} # Standardized to 86400000 ms (24 hours)

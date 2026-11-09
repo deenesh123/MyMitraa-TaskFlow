@@ -243,17 +243,39 @@ public class OptimaWeeklyUpdateTrackerServiceImpl implements OptimaWeeklyUpdateT
                         "[Weekly Report] " + mailRequestVM.getProjectName() + " Status");
 
                 String html = mailRequestVM.getContent() != null ? mailRequestVM.getContent() :
-                        "<h3>Weekly Status Report: " + mailRequestVM.getProjectName() + "</h3>" +
-                        "<p>Milestones: " + (mailRequestVM.getMilestonesCompleted() != null ? mailRequestVM.getMilestonesCompleted() : "Completed scheduled deliverables.") + "</p>" +
-                        "<p>Highlights: " + (mailRequestVM.getHighlights() != null ? mailRequestVM.getHighlights() : "Zero blockers.") + "</p>";
+                        "<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; color: #191627;\">" +
+                        "<h2 style=\"color: #7B3AEC;\">Weekly Status Report: " + mailRequestVM.getProjectName() + "</h2>" +
+                        "<p><b>Milestones Completed:</b> " + (mailRequestVM.getMilestonesCompleted() != null ? mailRequestVM.getMilestonesCompleted() : "Completed scheduled deliverables.") + "</p>" +
+                        "<p><b>Sprint Highlights:</b> " + (mailRequestVM.getHighlights() != null ? mailRequestVM.getHighlights() : "Zero blockers.") + "</p>" +
+                        "<div style=\"margin: 16px 0; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;\">" +
+                        "<img src=\"cid:dashboardPreview\" alt=\"MyMitraa TaskFlow Live Delivery Dashboard\" style=\"width: 100%; height: auto; display: block;\" />" +
+                        "</div>" +
+                        "<p style=\"color: #64748b; font-size: 12px;\">Dispatched via MyMitraa TaskFlow Zoho Mail SMTPS Gateway</p>" +
+                        "</div>";
 
                 helper.setText(html, true);
+
+                try {
+                    org.springframework.core.io.Resource imgResource = new org.springframework.core.io.ClassPathResource("static/dashboard-preview.jpeg");
+                    if (!imgResource.exists()) {
+                        java.io.File file = new java.io.File("public/assets/dashboard-preview.jpeg");
+                        if (file.exists()) {
+                            imgResource = new org.springframework.core.io.FileSystemResource(file);
+                        }
+                    }
+                    if (imgResource != null && imgResource.exists()) {
+                        helper.addInline("dashboardPreview", imgResource, "image/jpeg");
+                    }
+                } catch (Exception imgEx) {
+                    log.warn("Could not attach inline dashboard image: {}", imgEx.getMessage());
+                }
+
                 mailSender.send(message);
                 result.put("success", true);
                 result.put("message", "Weekly status email dispatched via Zoho Mail SMTP");
             } else {
-                result.put("success", true);
-                result.put("message", "Weekly status email simulated (Zoho SMTP configured)");
+                result.put("success", false);
+                result.put("error", "Zoho Mail SMTP sender is unconfigured. Set ZOHO_SMTP_USER and ZOHO_SMTP_PASSWORD.");
             }
         } catch (Exception ex) {
             log.error("Error sending weekly email: {}", ex.getMessage(), ex);

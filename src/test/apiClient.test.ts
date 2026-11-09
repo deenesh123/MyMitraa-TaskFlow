@@ -132,4 +132,66 @@ describe('ApiClient Core Operations & Error Resilience', () => {
     expect(res.code).toBe(200);
     expect(Array.isArray(res.data)).toBe(true);
   });
+
+  it('stores JWT token in sessionStorage and never in localStorage', () => {
+    localStorage.clear();
+    sessionStorage.clear();
+
+    ApiClient.setAuthToken('eyJhbGciOiJIUzI1NiJ9.customPayloadToken');
+
+    // Token must be in sessionStorage
+    expect(sessionStorage.getItem('mitraa_jwt_token')).toBe('Bearer eyJhbGciOiJIUzI1NiJ9.customPayloadToken');
+    // Token must NOT be in localStorage
+    expect(localStorage.getItem('mitraa_jwt_token')).toBeNull();
+  });
+
+  it('ensures exactly one Bearer prefix is applied to auth tokens', () => {
+    ApiClient.setAuthToken('raw-token-without-prefix');
+    expect(ApiClient.getAuthToken()).toBe('Bearer raw-token-without-prefix');
+
+    ApiClient.setAuthToken('Bearer already-prefixed-token');
+    expect(ApiClient.getAuthToken()).toBe('Bearer already-prefixed-token');
+    expect(ApiClient.getAuthToken().startsWith('Bearer Bearer')).toBe(false);
+  });
+
+  it('clears sessionStorage and local state on logout even if backend is offline', async () => {
+    ApiClient.setAuthToken('Bearer token-to-clear');
+    sessionStorage.setItem('mitraa_jwt_token', 'Bearer token-to-clear');
+    sessionStorage.setItem('mitraa_auth_user', JSON.stringify({ name: 'Deenesh' }));
+
+    await ApiClient.auth.logout();
+
+    expect(ApiClient.getAuthToken()).toBe('');
+    expect(sessionStorage.getItem('mitraa_jwt_token')).toBeNull();
+    expect(sessionStorage.getItem('mitraa_auth_user')).toBeNull();
+  });
+
+  it('enforces write operations throw errors rather than silently faking persistence when backend is offline', async () => {
+    // Mock global fetch to simulate a 503 backend offline response
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: new Headers({ 'content-type': 'application/json' }),
+      text: async () => JSON.stringify({ message: 'Spring Boot backend is offline' }),
+      json: async () => ({ message: 'Spring Boot backend is offline' }),
+    });
+
+    try {
+      // POST write operation to save user must throw and NOT succeed
+      await expect(
+        ApiClient.users.saveUser({
+          name: 'Unpersisted User',
+          email: 'unpersisted@example.com',
+          role: 'Employee',
+          team: 'Technology',
+          status: 'Active',
+          last_login: 'Never',
+        })
+      ).rejects.toThrow();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

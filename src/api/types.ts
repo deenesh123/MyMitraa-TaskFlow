@@ -12,6 +12,12 @@ export interface CustomResponse<T> {
     totalCount?: number;
     page?: number;
     size?: number;
+    token?: string;
+    [key: string]: any;
+  };
+  meta?: {
+    token?: string;
+    [key: string]: any;
   };
 }
 

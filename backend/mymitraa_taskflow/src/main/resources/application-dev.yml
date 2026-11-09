@@ -11,8 +11,8 @@ server:
 spring:
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017/mymitraa_taskflow}
-      database: ${MONGODB_DATABASE:mymitraa_taskflow}
+      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017/mymitraa_taskflow_dev}
+      database: ${MONGODB_DATABASE:mymitraa_taskflow_dev}
   upload-path: ${UPLOAD_PATH:./uploads/mymitraa_uploads}
   history-uploads: history_uploads
 

@@ -66,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { title: 'Dashboard', route: '/', icon: LayoutDashboard },
         { title: 'Projects', route: '/projects', icon: FolderKanban },
-        { title: 'Task Tracker', route: '/task-tracker', icon: CheckSquare, badge: openTasksCount },
+        { title: 'Task Force', route: '/task-tracker', icon: CheckSquare, badge: openTasksCount },
         { title: 'Calendar View', route: '/users/task-calendar-view', icon: Calendar },
         { title: 'Timeline View', route: '/users/timeline-view', icon: GanttChartSquare },
       ]

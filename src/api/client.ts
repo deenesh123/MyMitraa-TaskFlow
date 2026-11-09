@@ -108,7 +108,7 @@ class DataStore {
   testCases: TestCaseRecord[] = [...SAMPLE_TEST_CASES];
   auditLogs: AuditLogRecord[] = [...SAMPLE_AUDIT_LOGS];
   currentUser: UserAccount = { ...CURRENT_USER };
-  authToken: string = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mitraa-taskflow-user-session';
+  authToken: string = typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('mitraa_jwt_token') || '') : '';
   useMock: boolean = !isProduction;
 }
 
@@ -122,7 +122,8 @@ const delay = (ms: number = 60) => isTestEnv ? Promise.resolve() : new Promise(r
 /**
  * Robust HTTP client that:
  * - Normalizes API URLs without double '/api/api/'
- * - Automatically injects Authorization & JSON headers
+ * - Automatically injects exactly one Bearer prefix in Authorization header
+ * - Intercepts HTTP 401 to clear local session and trigger login redirect
  * - Enforces production integrity: Throws loud errors on failure; NEVER returns mock data in production.
  * - In preview: Attempts real backend endpoint first, gracefully falling back to local store for reads if offline.
  */
@@ -131,18 +132,25 @@ async function apiFetch<T>(
   options: RequestInit = {},
   previewFallback?: () => Promise<CustomResponse<T>> | CustomResponse<T>
 ): Promise<CustomResponse<T>> {
-  if (isTestEnv && previewFallback) {
+  const isWrite = isWriteEndpoint(options.method, endpoint);
+
+  if (isTestEnv && previewFallback && !isWrite) {
     return await previewFallback();
   }
 
   const url = resolveApiUrl(API_BASE_URL, endpoint);
+  
+  // Format token with exactly one Bearer prefix
+  let authHeader = dataStore.authToken ? dataStore.authToken.trim() : '';
+  if (authHeader && !authHeader.toLowerCase().startsWith('bearer ')) {
+    authHeader = `Bearer ${authHeader}`;
+  }
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Authorization': dataStore.authToken,
+    ...(authHeader ? { 'Authorization': authHeader } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
-
-  const isWrite = isWriteEndpoint(options.method, endpoint);
 
   try {
     const res = await fetch(url, {
@@ -152,6 +160,18 @@ async function apiFetch<T>(
 
     const contentType = res.headers.get('content-type') || '';
     const isHtmlResponse = contentType.includes('text/html');
+
+    // HTTP 401 Handling: clear session immediately
+    if (res.status === 401) {
+      dataStore.authToken = '';
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('mitraa_jwt_token');
+        sessionStorage.removeItem('mitraa_auth_user');
+      }
+      if (typeof window !== 'undefined' && window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('mitraa:unauthorized'));
+      }
+    }
 
     if (!res.ok || isHtmlResponse) {
       let errMsg = `HTTP ${res.status}: ${res.statusText}`;
@@ -202,7 +222,18 @@ async function apiFetch<T>(
 export const ApiClient = {
   // Auth & Mode Config
   setAuthToken(token: string) {
-    dataStore.authToken = token;
+    if (!token) {
+      dataStore.authToken = '';
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('mitraa_jwt_token');
+      }
+      return;
+    }
+    const formatted = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    dataStore.authToken = formatted;
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem('mitraa_jwt_token', formatted);
+    }
   },
   getAuthToken(): string {
     return dataStore.authToken;
@@ -223,6 +254,14 @@ export const ApiClient = {
   // Auth Operations
   auth: {
     getCurrentUserSync(): UserAccount {
+      if (typeof sessionStorage !== 'undefined') {
+        const stored = sessionStorage.getItem('mitraa_auth_user');
+        if (stored) {
+          try {
+            return JSON.parse(stored);
+          } catch {}
+        }
+      }
       return dataStore.currentUser;
     },
     async getCurrentUser(): Promise<CustomResponse<UserAccount>> {
@@ -241,6 +280,9 @@ export const ApiClient = {
     },
     async setCurrentUser(user: UserAccount): Promise<CustomResponse<UserAccount>> {
       dataStore.currentUser = user;
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('mitraa_auth_user', JSON.stringify(user));
+      }
       return {
         code: 200,
         message: 'CURRENT_USER_UPDATED',
@@ -248,29 +290,48 @@ export const ApiClient = {
       };
     },
     async logout(): Promise<CustomResponse<boolean>> {
-      return apiFetch<boolean>(
-        '/api/auth/logout',
-        { method: 'POST' },
-        async () => {
-          await delay(20);
-          return {
-            code: 200,
-            message: 'LOGGED_OUT_SUCCESSFULLY',
-            data: true,
-          };
+      try {
+        await apiFetch<boolean>(
+          '/api/auth/logout',
+          { method: 'POST' },
+          async () => {
+            await delay(20);
+            return {
+              code: 200,
+              message: 'LOGGED_OUT_SUCCESSFULLY',
+              data: true,
+            };
+          }
+        );
+      } catch (err) {
+        console.warn('Backend logout call failed or offline; clearing local session regardless.');
+      } finally {
+        ApiClient.setAuthToken('');
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem('mitraa_jwt_token');
+          sessionStorage.removeItem('mitraa_auth_user');
         }
-      );
+      }
+      return {
+        code: 200,
+        message: 'LOGGED_OUT_SUCCESSFULLY',
+        data: true,
+      };
     },
     async login(emailOrUsername: string, password?: string): Promise<CustomResponse<UserAccount>> {
-      return apiFetch<UserAccount>(
+      const payload: Record<string, string> = {
+        email: emailOrUsername,
+        username: emailOrUsername,
+      };
+      if (password) {
+        payload.password = password;
+      }
+
+      const res = await apiFetch<UserAccount>(
         '/api/auth/login',
         {
           method: 'POST',
-          body: JSON.stringify({
-            email: emailOrUsername,
-            username: emailOrUsername,
-            password: password || 'Password@123',
-          }),
+          body: JSON.stringify(payload),
         },
         async () => {
           await delay(100);
@@ -285,9 +346,24 @@ export const ApiClient = {
             code: 200,
             message: 'LOGIN_SUCCESS',
             data: user,
+            metaInfo: { token: 'mock-dev-token-' + Date.now() },
           };
         }
       );
+
+      // Extract genuine token from backend response contract
+      const token = (res as any)?.metaInfo?.token || (res as any)?.meta?.token;
+      if (token) {
+        ApiClient.setAuthToken(token);
+      }
+      if (res.data) {
+        dataStore.currentUser = res.data;
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('mitraa_auth_user', JSON.stringify(res.data));
+        }
+      }
+
+      return res;
     },
     async register(name: string, email: string, role: string, team: string, password?: string): Promise<CustomResponse<UserAccount>> {
       return apiFetch<UserAccount>(
@@ -300,7 +376,7 @@ export const ApiClient = {
             role,
             team,
             username: email.includes('@') ? email.split('@')[0] : email,
-            password: password || 'Password@123',
+            ...(password ? { password } : {}),
           }),
         },
         async () => {
@@ -315,15 +391,14 @@ export const ApiClient = {
             id: `usr-${Date.now()}`,
             name,
             email,
-            role: role as any,
+            role: 'Employee' as any,
             team,
             status: 'Active',
             avatar: initials || 'U',
-            created_date: '04-Nov-2026',
-            last_login: 'Just now',
+            created_date: '09-Nov-2026',
+            last_login: 'Never',
           };
           dataStore.users.unshift(newUser);
-          dataStore.currentUser = newUser;
           return {
             code: 200,
             message: 'REGISTRATION_SUCCESS',
@@ -333,6 +408,7 @@ export const ApiClient = {
       );
     },
   },
+
 
   // User Management Module
   users: {

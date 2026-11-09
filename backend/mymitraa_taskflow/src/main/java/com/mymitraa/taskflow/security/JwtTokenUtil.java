@@ -17,11 +17,15 @@ public class JwtTokenUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenUtil.class);
 
-    @Value("${jwt.secret:defaultSecretKeyForDevelopmentPurposesMustBeLongEnough1234567890}")
+    @Value("${mymitraa.security.jwt.secret:${jwt.secret:dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2ZGV2}}")
     private String secret;
 
-    @Value("${jwt.expiration:86400}")
-    private long expiration;
+    @Value("${mymitraa.security.jwt.expiration-ms:${jwt.expiration:86400000}}")
+    private long expirationMs;
+
+    public long getExpirationMs() {
+        return expirationMs;
+    }
 
     public String getUsernameFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
@@ -58,7 +62,7 @@ public class JwtTokenUtil {
 
     public String generateToken(String username) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration * 1000);
+        Date expiryDate = new Date(now.getTime() + expirationMs);
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(now)

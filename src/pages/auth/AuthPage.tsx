@@ -27,8 +27,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
 
   // Sign In inputs
-  const [userName, setUserName] = useState('deenesh-sabat');
-  const [password, setPassword] = useState('••••••••••');
+  const [userName, setUserName] = useState('');
+  const [password, setPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,12 +52,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
     setLoginError(null);
 
     if (!userName.trim()) {
-      setLoginError('User Name is required');
-      showToast('Validation Error', 'Please enter your User Name', 'error');
+      setLoginError('User Name or email is required');
+      showToast('Validation Error', 'Please enter your username or email', 'error');
       return;
     }
 
-    if (!password.trim()) {
+    if (!password) {
       setLoginError('Password is required');
       showToast('Validation Error', 'Please enter your password', 'error');
       return;
@@ -71,15 +71,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
 
     setLoading(true);
     try {
-      let lookupIdentifier = userName.trim();
-      if (!lookupIdentifier.includes('@')) {
-        if (lookupIdentifier.toLowerCase().includes('deenesh')) {
-          lookupIdentifier = 'deeneshsabat2002@gmail.com';
-        } else {
-          lookupIdentifier = `${lookupIdentifier.replace(/\s+/g, '.')}@mymitraa.internal`;
-        }
-      }
-
+      const lookupIdentifier = userName.trim();
       const res = await ApiClient.auth.login(lookupIdentifier, password);
       setAuthenticatedUser(res.data);
 
@@ -94,14 +86,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
           onSuccess(res.data);
         }, 1100);
       }, 700);
-    } catch {
+    } catch (err: any) {
       setLoading(false);
-      setLoginError('Authentication failed. Please verify credentials.');
-      showToast('Login Failed', 'Invalid credentials or account inactive', 'error');
+      const errMsg = err?.message || 'Authentication failed. Please verify credentials.';
+      setLoginError(errMsg);
+      showToast('Login Failed', errMsg, 'error');
     }
   };
 
-  // Sign Up Handler
+  // Sign Up Handler - Registers user but does not fabricate authenticated session
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
@@ -133,40 +126,26 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
         signUpDepartment,
         signUpPassword
       );
-      setAuthenticatedUser(res.data);
-      setTimeout(() => {
-        setLoading(false);
-        setLoginSuccess(true);
-        showToast('Account Created!', `Welcome to MY MiTRAA, ${res.data.name}!`);
-        setTimeout(() => {
-          onSuccess(res.data);
-        }, 1100);
-      }, 700);
-    } catch {
       setLoading(false);
-      setLoginError('Could not create account');
-      showToast('Error', 'Registration could not be completed', 'error');
+      showToast('Account Created!', `Welcome, ${res.data.name}! Please sign in with your password.`);
+      // Switch to sign in view with email prefilled; never fabricate login session
+      setActiveTab('signin');
+      setUserName(signUpEmail.trim());
+      setPassword('');
+    } catch (err: any) {
+      setLoading(false);
+      const msg = err?.message || 'Could not create account';
+      setLoginError(msg);
+      showToast('Error', msg, 'error');
     }
   };
 
-  // Quick Demo Account Switcher
-  const handleSelectQuickAccount = (uname: string, email: string) => {
+  // Quick profile selector to fill username without hardcoding credentials
+  const handleSelectQuickAccount = (uname: string) => {
     setUserName(uname);
-    setPassword('adminSecret123');
-    setAgreeTerms(true);
+    setPassword('');
     setLoginError(null);
-    setLoading(true);
-    ApiClient.auth.login(email).then(res => {
-      setAuthenticatedUser(res.data);
-      setTimeout(() => {
-        setLoading(false);
-        setLoginSuccess(true);
-        showToast('Quick Sign In', `Signed in as ${res.data.name} (${res.data.role})`);
-        setTimeout(() => {
-          onSuccess(res.data);
-        }, 900);
-      }, 500);
-    });
+    showToast('Username Selected', `Selected ${uname}. Please enter your password to proceed.`);
   };
 
   return (
@@ -586,7 +565,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => handleSelectQuickAccount('deenesh-sabat', 'deeneshsabat2002@gmail.com')}
+                        onClick={() => handleSelectQuickAccount('deenesh-sabat')}
                         className="px-2.5 py-1.5 bg-black/40 hover:bg-black/60 border border-white/15 rounded-lg text-left transition-all cursor-pointer group"
                       >
                         <div className="text-[11px] font-bold text-white flex items-center justify-between">
@@ -598,7 +577,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onSuccess }) => {
 
                       <button
                         type="button"
-                        onClick={() => handleSelectQuickAccount('bharat-sharma', 'bharat.sharma@mymitraa.internal')}
+                        onClick={() => handleSelectQuickAccount('bharat-sharma')}
                         className="px-2.5 py-1.5 bg-black/40 hover:bg-black/60 border border-white/15 rounded-lg text-left transition-all cursor-pointer group"
                       >
                         <div className="text-[11px] font-bold text-white flex items-center justify-between">
