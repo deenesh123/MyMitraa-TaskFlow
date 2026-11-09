@@ -97,4 +97,39 @@ describe('ApiClient Core Operations & Error Resilience', () => {
     expect(logs.code).toBe(200);
     expect(Array.isArray(logs.data)).toBe(true);
   });
+
+  it('correctly resolves API URLs without double /api/api/ prefixes', async () => {
+    const { resolveApiUrl } = await import('../api/client');
+    expect(resolveApiUrl('', '/api/feedback/get_all_feedback')).toBe('/api/feedback/get_all_feedback');
+    expect(resolveApiUrl('/api', '/api/feedback/get_all_feedback')).toBe('/api/feedback/get_all_feedback');
+    expect(resolveApiUrl('/api/', '/api/optima_weekly_update_tracker/getAll')).toBe('/api/optima_weekly_update_tracker/getAll');
+    expect(resolveApiUrl('https://task.mitratechgroup.com', '/api/users/getAll')).toBe('https://task.mitratechgroup.com/api/users/getAll');
+    expect(resolveApiUrl('https://task.mitratechgroup.com/api', '/api/users/getAll')).toBe('https://task.mitratechgroup.com/api/users/getAll');
+  });
+
+  it('differentiates search query PUT endpoints from data mutation write operations', async () => {
+    const { isWriteEndpoint } = await import('../api/client');
+    // SearchVM query endpoints use PUT in Spring Boot but are read operations
+    expect(isWriteEndpoint('PUT', '/api/feedback/get_all_feedback')).toBe(false);
+    expect(isWriteEndpoint('PUT', '/api/optima_weekly_update_tracker/getAll')).toBe(false);
+    expect(isWriteEndpoint('PUT', '/api/meeting_time_tracker/getAll')).toBe(false);
+    expect(isWriteEndpoint('PUT', '/api/optima_leave_tracker/getAll')).toBe(false);
+    expect(isWriteEndpoint('PUT', '/api/dropdown_management/getAll')).toBe(false);
+    expect(isWriteEndpoint('PUT', '/api/optima_weekly_update_tracker/advance_search')).toBe(false);
+
+    // Standard GET operations are read operations
+    expect(isWriteEndpoint('GET', '/api/users/getAll')).toBe(false);
+
+    // Actual write operations must be identified as writes
+    expect(isWriteEndpoint('POST', '/api/users/save')).toBe(true);
+    expect(isWriteEndpoint('PUT', '/api/users/update/usr-123')).toBe(true);
+    expect(isWriteEndpoint('DELETE', '/api/users/delete/usr-123')).toBe(true);
+    expect(isWriteEndpoint('POST', '/api/feedback/save_feedback')).toBe(true);
+  });
+
+  it('retrieves weekly updates successfully via weeklyUpdates.getAll', async () => {
+    const res = await ApiClient.weeklyUpdates.getAll();
+    expect(res.code).toBe(200);
+    expect(Array.isArray(res.data)).toBe(true);
+  });
 });

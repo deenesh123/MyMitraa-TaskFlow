@@ -48,6 +48,51 @@ export const API_MODE = (import.meta.env.VITE_API_MODE || (import.meta.env.PROD 
 export const isProduction = API_MODE === 'production';
 export const enableMockFallback = import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true';
 
+/**
+ * Resolves full API URL without creating redundant /api/api/ prefixes
+ */
+export function resolveApiUrl(baseUrl: string, endpoint: string): string {
+  const base = (baseUrl || '').replace(/\/$/, '');
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+  if (!base) {
+    return path;
+  }
+
+  // Prevent double '/api/api/' if baseUrl ends with '/api' and endpoint starts with '/api/'
+  if (base.endsWith('/api') && path.startsWith('/api/')) {
+    return `${base.slice(0, -4)}${path}`;
+  }
+
+  return `${base}${path}`;
+}
+
+/**
+ * Differentiates business write operations from SearchVM-backed query/read operations.
+ * Spring Boot controllers use @PutMapping for complex search/read endpoints
+ * (e.g., /feedback/get_all_feedback, /optima_weekly_update_tracker/getAll, etc.).
+ */
+export function isWriteEndpoint(method: string | undefined, endpoint: string): boolean {
+  const m = (method || 'GET').toUpperCase();
+  if (['GET', 'HEAD', 'OPTIONS'].includes(m)) return false;
+
+  const clean = endpoint.toLowerCase();
+  if (m === 'PUT') {
+    if (
+      clean.includes('/getall') ||
+      clean.includes('/get_all') ||
+      clean.includes('/advance_search') ||
+      clean.includes('/get_with_pagination') ||
+      clean.includes('/dashboard') ||
+      clean.includes('/download')
+    ) {
+      return false; // Search/read query!
+    }
+  }
+
+  return ['POST', 'PUT', 'PATCH', 'DELETE'].includes(m);
+}
+
 // Central in-memory state initialized with seed data (used for offline preview & testing)
 class DataStore {
   tasks: FeedbackHistory[] = [...INITIAL_TASKS];
@@ -76,10 +121,10 @@ const delay = (ms: number = 60) => isTestEnv ? Promise.resolve() : new Promise(r
 
 /**
  * Robust HTTP client that:
- * - Appends API_BASE_URL
+ * - Normalizes API URLs without double '/api/api/'
  * - Automatically injects Authorization & JSON headers
  * - Enforces production integrity: Throws loud errors on failure; NEVER returns mock data in production.
- * - In preview: Attempts real Express backend endpoint first, gracefully falling back to local store if offline.
+ * - In preview: Attempts real backend endpoint first, gracefully falling back to local store for reads if offline.
  */
 async function apiFetch<T>(
   endpoint: string,
@@ -90,14 +135,14 @@ async function apiFetch<T>(
     return await previewFallback();
   }
 
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = resolveApiUrl(API_BASE_URL, endpoint);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Authorization': dataStore.authToken,
     ...(options.headers as Record<string, string> || {}),
   };
 
-  const isWrite = Boolean(options.method && !['GET', 'HEAD', 'OPTIONS'].includes(options.method.toUpperCase()));
+  const isWrite = isWriteEndpoint(options.method, endpoint);
 
   try {
     const res = await fetch(url, {
@@ -105,21 +150,27 @@ async function apiFetch<T>(
       headers,
     });
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      let parsedError: any = null;
-      try {
-        parsedError = JSON.parse(errText);
-      } catch {}
+    const contentType = res.headers.get('content-type') || '';
+    const isHtmlResponse = contentType.includes('text/html');
 
-      const errMsg = parsedError?.message || parsedError?.error || `HTTP ${res.status}: ${res.statusText}`;
+    if (!res.ok || isHtmlResponse) {
+      let errMsg = `HTTP ${res.status}: ${res.statusText}`;
+      if (isHtmlResponse) {
+        errMsg = `API endpoint ${url} returned HTML instead of JSON. The backend service may be offline or unmapped.`;
+      } else {
+        const errText = await res.text().catch(() => '');
+        try {
+          const parsed = JSON.parse(errText);
+          errMsg = parsed?.message || parsed?.error || errMsg;
+        } catch {}
+      }
 
       // In production, or for any write operation in normal runtime: NEVER silently fake success!
       if (isProduction || isWrite) {
         throw new Error(errMsg || `Operation failed [HTTP ${res.status}] at ${endpoint}`);
       }
 
-      console.warn(`[API Preview Warning] Request ${endpoint} returned status ${res.status}. Falling back to preview store.`);
+      console.warn(`[API Preview Warning] Request ${endpoint} returned non-JSON/status ${res.status}. Falling back to preview store.`);
       if (previewFallback) {
         return await previewFallback();
       }

@@ -55,9 +55,31 @@ const db = {
   ],
 };
 
+// Protection: Differentiate write operations from SearchVM-backed query/read operations
+function isWriteEndpoint(method: string, path: string): boolean {
+  const m = method.toUpperCase();
+  if (['GET', 'HEAD', 'OPTIONS'].includes(m)) return false;
+
+  const clean = path.toLowerCase();
+  if (m === 'PUT') {
+    if (
+      clean.includes('/getall') ||
+      clean.includes('/get_all') ||
+      clean.includes('/advance_search') ||
+      clean.includes('/get_with_pagination') ||
+      clean.includes('/dashboard') ||
+      clean.includes('/download')
+    ) {
+      return false; // Search/read query!
+    }
+  }
+
+  return ['POST', 'PUT', 'PATCH', 'DELETE'].includes(m);
+}
+
 // Protection: Disable in-memory write persistence across business endpoints
 apiRouter.use((req: Request, res: Response, next) => {
-  const isWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase());
+  const isWrite = isWriteEndpoint(req.method, req.path);
   const isDevLogin = req.path === '/auth/login' || req.path === '/auth/logout';
 
   if (isWrite && !isDevLogin) {
