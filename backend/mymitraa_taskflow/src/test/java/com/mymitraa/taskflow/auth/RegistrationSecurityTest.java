@@ -8,6 +8,7 @@ import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class RegistrationSecurityTest {
 
     @Autowired
@@ -90,7 +92,7 @@ public class RegistrationSecurityTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", is("200")))
+                .andExpect(jsonPath("$.code", is(200)))
                 .andExpect(jsonPath("$.message", is("REGISTRATION_SUCCESS")))
                 // Critical assertion: returned user MUST have Employee role, NOT the requested privileged role
                 .andExpect(jsonPath("$.data.role", is("Employee")))
@@ -101,7 +103,7 @@ public class RegistrationSecurityTest {
         verify(userRepository).save(userCaptor.capture());
         User persistedUser = userCaptor.getValue();
         assertThat("Persisted user role must always be Employee", persistedUser.getRole(), is("Employee"));
-        assertThat("Password in DB must be hashed", persistedUser.getPassword(), startsWith("$2a$"));
+        assertThat("Password in DB must be hashed", persistedUser.getPassword(), org.hamcrest.Matchers.startsWith("$2a$"));
     }
 
     @Test
@@ -116,7 +118,7 @@ public class RegistrationSecurityTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode", is(400)))
+                .andExpect(jsonPath("$.code", is(400)))
                 .andExpect(jsonPath("$.message", containsString("at least 6 characters")));
     }
 
@@ -134,7 +136,7 @@ public class RegistrationSecurityTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode", is(400)))
+                .andExpect(jsonPath("$.code", is(400)))
                 .andExpect(jsonPath("$.message", containsString("already exists with email")));
     }
 }

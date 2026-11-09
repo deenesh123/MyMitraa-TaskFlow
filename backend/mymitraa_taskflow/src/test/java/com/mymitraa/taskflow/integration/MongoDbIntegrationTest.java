@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -24,9 +25,10 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * Prohibits connecting to or touching production database.
  */
 @SpringBootTest
+@ActiveProfiles("test")
 @TestPropertySource(properties = {
     "spring.data.mongodb.database=mymitraa_taskflow_test",
-    "spring.data.mongodb.uri=mongodb://${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/mymitraa_taskflow_test"
+    "spring.data.mongodb.uri=mongodb://127.0.0.1:27017/mymitraa_taskflow_test"
 })
 public class MongoDbIntegrationTest {
 

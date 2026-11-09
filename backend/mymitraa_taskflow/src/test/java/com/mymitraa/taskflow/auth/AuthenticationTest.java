@@ -9,6 +9,7 @@ import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class AuthenticationTest {
 
     @Autowired
@@ -80,7 +82,7 @@ public class AuthenticationTest {
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Authorization"))
-                .andExpect(jsonPath("$.code", is("200")))
+                .andExpect(jsonPath("$.code", is(200)))
                 .andExpect(jsonPath("$.message", is("LOGIN_SUCCESS")))
                 .andExpect(jsonPath("$.data.email", is("testuser@mymitraa.com")))
                 .andExpect(jsonPath("$.data.password").doesNotExist()) // Never expose password hash
@@ -101,7 +103,7 @@ public class AuthenticationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.statusCode", is(401)))
+                .andExpect(jsonPath("$.code", is(401)))
                 .andExpect(jsonPath("$.message", containsString("Invalid username/email or password")));
     }
 
@@ -119,7 +121,8 @@ public class AuthenticationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.statusCode", is(401)));
+                .andExpect(jsonPath("$.code", is(401)))
+                .andExpect(jsonPath("$.message", containsString("Invalid username/email or password")));
     }
 
     @Test
@@ -133,7 +136,8 @@ public class AuthenticationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.statusCode", is(401)));
+                .andExpect(jsonPath("$.code", is(401)))
+                .andExpect(jsonPath("$.message", containsString("Both identifier (email or username) and password are required for login")));
     }
 
     @Test
@@ -152,7 +156,7 @@ public class AuthenticationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.statusCode", is(403)))
+                .andExpect(jsonPath("$.code", is(403)))
                 .andExpect(jsonPath("$.message", containsString("deactivated or disabled")));
     }
 
@@ -161,7 +165,7 @@ public class AuthenticationTest {
     void testLogoutSuccess() throws Exception {
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", is("200")))
+                .andExpect(jsonPath("$.code", is(200)))
                 .andExpect(jsonPath("$.message", is("LOGGED_OUT_SUCCESSFULLY")))
                 .andExpect(jsonPath("$.data", is(true)));
     }

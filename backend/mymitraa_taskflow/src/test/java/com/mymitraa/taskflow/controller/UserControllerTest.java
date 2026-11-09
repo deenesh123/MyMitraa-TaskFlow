@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymitraa.taskflow.api_controller.UserController;
 import com.mymitraa.taskflow.api_domain.User;
 import com.mymitraa.taskflow.api_repository.UserRepository;
-import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
+import com.mymitraa.taskflow.security.WebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@ActiveProfiles("test")
+@Import(WebSecurityConfiguration.class)
 public class UserControllerTest {
 
     @Autowired
@@ -39,10 +43,6 @@ public class UserControllerTest {
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
-
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -65,7 +65,7 @@ public class UserControllerTest {
 
         mockMvc.perform(get("/api/users/getAll"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.code", is(200)))
                 .andExpect(jsonPath("$.data", hasSize(2)))
                 .andExpect(jsonPath("$.data[0].password").doesNotExist())
                 .andExpect(jsonPath("$.data[1].password").doesNotExist());
@@ -85,12 +85,12 @@ public class UserControllerTest {
 
         mockMvc.perform(get("/api/users/u-existing"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.code", is(200)))
                 .andExpect(jsonPath("$.data.name", is("Charlie QA")));
 
         mockMvc.perform(get("/api/users/u-missing"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.statusCode", is(404)));
+                .andExpect(jsonPath("$.responseCode", is(404)));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(superAdminTarget)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.statusCode", is(403)))
+                .andExpect(jsonPath("$.responseCode", is(403)))
                 .andExpect(jsonPath("$.message", containsString("Only Super Admin can provision Super Admin")));
     }
 
@@ -132,7 +132,7 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data.email", is("newdev@mymitraa.com")));
     }
 }

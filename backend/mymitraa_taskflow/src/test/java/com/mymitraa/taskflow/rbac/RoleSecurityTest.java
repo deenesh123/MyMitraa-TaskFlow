@@ -9,6 +9,8 @@ import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.mymitraa.taskflow.security.WebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({UserController.class, RoleController.class, ProjectController.class, LeadController.class, BugController.class, AuditLogController.class})
+@Import(WebSecurityConfiguration.class)
 public class RoleSecurityTest {
 
     @Autowired
@@ -53,9 +56,6 @@ public class RoleSecurityTest {
 
     @MockBean
     private PasswordEncoder passwordEncoder;
-
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

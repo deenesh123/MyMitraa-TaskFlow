@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymitraa.taskflow.api_controller.AuditLogController;
 import com.mymitraa.taskflow.api_domain.AuditLog;
 import com.mymitraa.taskflow.api_repository.AuditLogRepository;
-import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
+import com.mymitraa.taskflow.security.WebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,8 +26,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuditLogController.class)
+@ActiveProfiles("test")
+@Import(WebSecurityConfiguration.class)
 public class AuditLogControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,8 +38,6 @@ public class AuditLogControllerTest {
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -56,7 +57,7 @@ public class AuditLogControllerTest {
 
         mockMvc.perform(get("/api/audit-logs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].action", is("USER_ROLE_UPDATED")));
 
@@ -93,7 +94,7 @@ public class AuditLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(entry)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data.timestamp", notNullValue()))
                 .andExpect(jsonPath("$.data.action", is("PROJECT_ARCHIVED")));
     }

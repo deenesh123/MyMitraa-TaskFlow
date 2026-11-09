@@ -8,8 +8,8 @@ spring:
     name: mymitraa-taskflow-test
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/${MONGODB_DATABASE:mymitraa_taskflow_test}}
-      database: ${MONGODB_DATABASE:mymitraa_taskflow_test}
+      uri: mongodb://127.0.0.1:27017/mymitraa_taskflow_test
+      database: mymitraa_taskflow_test
   servlet:
     multipart:
       max-file-size: 10MB

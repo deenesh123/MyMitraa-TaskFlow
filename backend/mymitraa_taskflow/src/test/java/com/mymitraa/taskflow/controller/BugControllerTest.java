@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymitraa.taskflow.api_controller.BugController;
 import com.mymitraa.taskflow.api_domain.Bug;
 import com.mymitraa.taskflow.api_repository.BugRepository;
-import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
+import com.mymitraa.taskflow.security.WebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +27,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BugController.class)
+@ActiveProfiles("test")
+@Import(WebSecurityConfiguration.class)
 public class BugControllerTest {
 
     @Autowired
@@ -36,8 +40,6 @@ public class BugControllerTest {
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -56,7 +58,7 @@ public class BugControllerTest {
 
         mockMvc.perform(get("/api/bugs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.code", is(200)))
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].title", containsString("Login button")));
 
@@ -84,8 +86,8 @@ public class BugControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(input)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
-                .andExpect(jsonPath("$.data.bugCode", startsWith("BUG-")))
+                .andExpect(jsonPath("$.responseCode", is(200)))
+                .andExpect(jsonPath("$.data.bugCode", org.hamcrest.Matchers.startsWith("BUG-")))
                 .andExpect(jsonPath("$.data.createdAt", notNullValue()));
     }
 
@@ -108,7 +110,7 @@ public class BugControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updates)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data.status", is("In Progress")));
     }
 }

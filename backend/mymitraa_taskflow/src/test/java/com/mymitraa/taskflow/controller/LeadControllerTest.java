@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymitraa.taskflow.api_controller.LeadController;
 import com.mymitraa.taskflow.api_domain.Lead;
 import com.mymitraa.taskflow.api_repository.LeadRepository;
-import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
+import com.mymitraa.taskflow.security.WebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +27,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(LeadController.class)
+@ActiveProfiles("test")
+@Import(WebSecurityConfiguration.class)
 public class LeadControllerTest {
 
     @Autowired
@@ -35,9 +39,6 @@ public class LeadControllerTest {
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
-
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -55,7 +56,7 @@ public class LeadControllerTest {
 
         mockMvc.perform(get("/api/leads"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].contactName", is("John Smith")));
 
@@ -83,8 +84,8 @@ public class LeadControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(input)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
-                .andExpect(jsonPath("$.data.leadCode", startsWith("LEAD-")))
+                .andExpect(jsonPath("$.responseCode", is(200)))
+                .andExpect(jsonPath("$.data.leadCode", org.hamcrest.Matchers.startsWith("LEAD-")))
                 .andExpect(jsonPath("$.data.contactName", is("Diana Prince")));
     }
 
@@ -107,7 +108,7 @@ public class LeadControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updates)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data.stage", is("Closed Won")));
     }
 }

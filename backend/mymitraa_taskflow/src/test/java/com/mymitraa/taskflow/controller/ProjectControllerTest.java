@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mymitraa.taskflow.api_controller.ProjectController;
 import com.mymitraa.taskflow.api_domain.Project;
 import com.mymitraa.taskflow.api_repository.ProjectRepository;
-import com.mymitraa.taskflow.security.JwtAuthenticationFilter;
+import com.mymitraa.taskflow.security.WebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 import com.mymitraa.taskflow.security.JwtTokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +27,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProjectController.class)
+@ActiveProfiles("test")
+@Import(WebSecurityConfiguration.class)
 public class ProjectControllerTest {
 
     @Autowired
@@ -35,9 +39,6 @@ public class ProjectControllerTest {
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
-
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -55,7 +56,7 @@ public class ProjectControllerTest {
 
         mockMvc.perform(get("/api/projects"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].projectName", is("Core Banking Migration")));
 
@@ -82,9 +83,9 @@ public class ProjectControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(input)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data.projectName", is("ERP Portal")))
-                .andExpect(jsonPath("$.data.projectId", startsWith("PRJ-")));
+                .andExpect(jsonPath("$.data.projectId", org.hamcrest.Matchers.startsWith("PRJ-")));
     }
 
     @Test
@@ -105,7 +106,7 @@ public class ProjectControllerTest {
 
         mockMvc.perform(delete("/api/projects/p-to-delete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.responseCode", is(200)))
                 .andExpect(jsonPath("$.data", is(true)));
 
         verify(projectRepository).deleteById("p-to-delete");
