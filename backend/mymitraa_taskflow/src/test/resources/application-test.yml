@@ -1,0 +1,27 @@
+server:
+  port: 8081
+
+spring:
+  main:
+    allow-circular-references: true
+  application:
+    name: mymitraa-taskflow-test
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/${MONGODB_DATABASE:mymitraa_taskflow_test}}
+      database: ${MONGODB_DATABASE:mymitraa_taskflow_test}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+mymitraa:
+  cors:
+    allowed-origins: http://localhost:3000
+  security:
+    jwt:
+      secret: dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JteW1pdHJhYXRhc2tmbG93YXBwbGljYXRpb24yMDI2
+      expiration-ms: 3600000 # 1 hour for testing
+  mail:
+    from-email: test-notifications@mymitraa.com
+    from-name: MY MiTRAA TaskFlow Test Suite

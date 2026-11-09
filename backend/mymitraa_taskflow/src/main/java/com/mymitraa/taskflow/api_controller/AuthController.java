@@ -81,14 +81,10 @@ public class AuthController {
         String email = payload.get("email");
         String username = payload.get("username");
         String password = payload.get("password");
-        String role = payload.getOrDefault("role", "Employee");
+        // Security enforcement: Public registration always creates an Employee account.
+        // Client-supplied role information must never override the server-assigned role.
+        String role = "Employee";
         String team = payload.getOrDefault("team", "Technology");
-
-        // Security enforcement: Public registration cannot assign privileged roles
-        List<String> privilegedRoles = Arrays.asList("Super Admin", "Admin", "Project Manager", "Sales Manager", "HR Manager", "ROLE_SUPER_ADMIN", "ROLE_ADMIN");
-        if (privilegedRoles.stream().anyMatch(pr -> pr.equalsIgnoreCase(role))) {
-            role = "Employee";
-        }
 
         if (name == null || name.trim().isEmpty() || email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)

@@ -113,12 +113,9 @@ apiRouter.post('/auth/logout', (_req: Request, res: Response) => {
 apiRouter.post('/auth/register', (req: Request, res: Response) => {
   const { name, email, role, team } = req.body || {};
   
-  // Security constraint: Public registration cannot assign privileged roles
-  const privilegedRoles = ['Super Admin', 'Admin', 'Project Manager', 'Sales Manager', 'HR Manager'];
-  let assignedRole = role || 'Employee';
-  if (privilegedRoles.some(pr => pr.toLowerCase() === (assignedRole || '').toLowerCase())) {
-    assignedRole = 'Employee';
-  }
+  // Security constraint: Public registration always assigns the default Employee role.
+  // Client-supplied role information must never override the server-assigned role.
+  const assignedRole = 'Employee';
 
   const initials = (name || 'User')
     .split(' ')

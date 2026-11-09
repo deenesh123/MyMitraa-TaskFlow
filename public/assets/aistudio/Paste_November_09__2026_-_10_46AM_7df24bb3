@@ -1,0 +1,1146 @@
+# MyMitraa TaskFlow — Complete Master Prompt
+## Automated Testing, Security Verification, Production Readiness & Future Deployment Preparation
+
+You are working on my existing **MyMitraa TaskFlow** application in Google AI Studio Build mode.
+
+Your task is to inspect the existing application, create a comprehensive executable automated test suite, verify role-based access control and application security, and prepare the project for future production deployment at:
+
+**Production domain:** `task.mitratechgroup.com`  
+**Production URL:** `https://task.mitratechgroup.com`  
+**GitHub repository:** `https://github.com/deenesh123/MyMitraa-TaskFlow`
+
+**Important hosting situation:** I currently own the domain and subdomain only. I have NOT purchased or configured a VPS, hosting server, or production database. Do not pretend that a server exists or attempt deployment.
+
+Perform the work in clearly separated workstreams and follow the required order.
+
+---
+
+# PART 1 — NON-NEGOTIABLE PROJECT RULES
+
+## 1.1 Preserve the existing application
+
+This is an existing application, not a new project.
+
+- Do not rebuild, redesign, rewrite, or replace the application.
+- Do not create a new application from scratch.
+- Do not remove existing pages, components, features, modules, APIs, workflows, or business logic.
+- Preserve the existing UI, design system, branding, navigation, responsiveness, and user experience.
+- Preserve existing API contracts, request/response structures, authentication, authorization, and business workflows.
+- Preserve existing database relationships and business rules.
+- Reuse existing components and utilities wherever possible.
+- Do not introduce unnecessary dependencies or frameworks.
+- Do not change working functionality just to make tests pass.
+- Do not replace actual application logic with mock implementations.
+- Do not silently weaken security or permissions.
+
+Before editing anything, inspect the current codebase and document its architecture.
+
+## 1.2 Technology stack
+
+Preserve the existing stack:
+
+**Frontend**
+- React 19
+- TypeScript
+- Vite
+- Existing CSS/Tailwind configuration
+- Existing component architecture
+
+**Backend**
+- Java
+- Spring Boot 3.3.4
+- Maven
+- Java 17 application target
+- Existing Spring Security and JWT architecture
+
+**Database**
+- MongoDB ONLY.
+
+### MongoDB is the only permitted application database.
+
+Strictly prohibited:
+- MySQL
+- PostgreSQL
+- H2
+- SQL Server
+- Oracle
+- JPA
+- Hibernate
+- Firebase
+- Supabase
+- SQL-based application persistence
+- Node.js in-memory persistence for business data
+- JSON files used as an alternative business database
+
+All persistent business data must be handled by the Spring Boot backend and MongoDB.
+
+Do not introduce another database to support testing or deployment.
+
+## 1.3 GitHub and source protection
+
+Repository:
+
+`https://github.com/deenesh123/MyMitraa-TaskFlow`
+
+Rules:
+- Do not delete or replace the GitHub repository.
+- Do not automatically commit, push, merge, reset, or force-push.
+- Do not overwrite the original project with a generated project.
+- Do not remove existing branches or history.
+- Do not make changes outside the currently opened project.
+- Show the list of modified and newly created files.
+- Let me review and approve any GitHub synchronization or push.
+
+## 1.4 Free and local-first approach
+
+- Prefer free and open-source testing tools.
+- Do not introduce paid APIs or paid testing services.
+- Do not require paid cloud services to run the automated test suite.
+- Do not use production credentials or customer data.
+- Do not connect automated tests to a production database.
+- Do not make unnecessary external API calls.
+
+---
+
+# PART 2 — FIRST INSPECT THE COMPLETE APPLICATION
+
+Before creating tests or deployment files, inspect the existing project.
+
+## 2.1 Frontend inspection
+
+Inspect:
+- `package.json`
+- Package lockfile
+- Vite configuration
+- TypeScript configuration
+- React entry points
+- Routing
+- Authentication state
+- Role-based access logic
+- Sidebar and navigation
+- Dashboard components
+- User management
+- Project management
+- Lead management
+- Bug tracking
+- Audit logs
+- API client
+- API routing
+- Error handling
+- Loading states
+- Existing test configuration
+
+Identify whether Vitest, Jest, React Testing Library, Playwright, or another test framework already exists.
+
+Reuse the existing framework wherever practical.
+
+## 2.2 Backend inspection
+
+Inspect:
+- `pom.xml`
+- Java source structure
+- Controllers
+- Services
+- Repositories
+- MongoDB documents/models
+- DTOs
+- Request and response structures
+- Spring Security configuration
+- JWT implementation
+- Authentication and authorization
+- Role and permission implementation
+- Audit logging
+- Exception handling
+- File uploads
+- Existing integration tests
+- Existing test configuration
+- MongoDB configuration
+
+Inspect the actual endpoints and business workflows.
+
+Do not invent endpoints, roles, database fields, or expected behavior.
+
+## 2.3 Architecture and defect inventory
+
+Prepare an initial report containing:
+
+1. Current frontend architecture.
+2. Current backend architecture.
+3. Actual API endpoint inventory.
+4. Actual MongoDB collections and relationships.
+5. Authentication flow.
+6. Authorization implementation.
+7. Existing role and permission matrix.
+8. Existing test frameworks.
+9. Existing test coverage.
+10. Architectural risks and defects.
+11. Test gaps.
+12. Deployment-readiness gaps.
+
+Pay special attention to:
+
+`src/server/apiRouter.ts`
+
+Inspect whether this file contains an in-memory fallback that could pretend to save business data.
+
+The Spring Boot backend must be authoritative.
+
+If the backend is unavailable:
+- Display a meaningful connection error.
+- Do not pretend that data was saved.
+- Do not silently save business data in browser memory.
+- Do not silently switch to fake in-memory persistence.
+
+Report any required application-code changes separately before making changes beyond the test-suite scope.
+
+---
+
+# PART 3 — ROLE-BASED ACCESS CONTROL
+
+The application must support the following ten roles.
+
+1. Super Admin
+2. Admin
+3. Project Manager
+4. Developer
+5. Sales Executive
+6. Sales Manager
+7. QA Tester
+8. HR Manager
+9. Employee
+10. Client
+
+## 3.1 Role-based testing
+
+Inspect the actual role and permission implementation.
+
+Create tests for:
+- Login and authentication for each supported role.
+- Role-specific dashboard access.
+- Role-specific sidebar and navigation.
+- Role-specific pages.
+- Role-specific buttons and actions.
+- API-level authorization.
+- Forbidden access.
+- Unauthorized access.
+- Data visibility boundaries.
+- Cross-role access restrictions.
+- Logout and session invalidation.
+- Direct URL access restrictions.
+- Changing roles and refreshing permissions.
+
+Do not assume that hiding a button in the frontend provides security.
+
+The backend must enforce authorization independently.
+
+## 3.2 Expected role-based coverage
+
+Test the actual configured permissions for:
+
+| Role | Areas to verify |
+|---|---|
+| Super Admin | System-wide administration and permitted privileged operations |
+| Admin | Administrative functions and user management according to actual permissions |
+| Project Manager | Project management and assigned project operations |
+| Developer | Assigned development work and permitted project access |
+| Sales Executive | Permitted leads and sales activities |
+| Sales Manager | Sales team and sales management functions |
+| QA Tester | Bug tracking and testing workflows |
+| HR Manager | Permitted employee and HR operations |
+| Employee | Permitted employee-specific functions |
+| Client | Restricted client-facing access and assigned data only |
+
+Do not grant permissions merely because a role is listed here.
+
+Use the existing approved permission matrix and report missing or inconsistent permissions.
+
+Do not invent new business permissions.
+
+---
+
+# PART 4 — BACKEND AUTOMATED TEST SUITE
+
+Create actual executable backend tests under:
+
+`backend/mymitraa_taskflow/src/test/java/`
+
+Use the existing Maven and Spring Boot testing architecture.
+
+Prefer existing dependencies. Add only minimal, compatible, free test dependencies if necessary.
+
+## 4.1 Authentication tests
+
+Create tests for:
+
+- Successful login.
+- Incorrect password.
+- Nonexistent email.
+- Missing email.
+- Empty email.
+- Missing password.
+- Empty password.
+- Invalid credentials.
+- JWT generation.
+- JWT validation.
+- Invalid JWT.
+- Expired JWT.
+- Missing JWT.
+- Unauthorized protected endpoint.
+- Authenticated protected endpoint.
+- Password hashing.
+- Password hash not exposed in API responses.
+- User sanitization.
+- Duplicate registration.
+- Invalid registration data.
+
+Verify actual status codes and response structures.
+
+## 4.2 Public registration security tests
+
+This is a critical security requirement.
+
+Public registration must always assign the default `Employee` role.
+
+A client must never be able to choose a privileged role through a registration request.
+
+Test attempts to register as:
+- Super Admin
+- Admin
+- Project Manager
+- Sales Manager
+- HR Manager
+- Any other privileged role
+- Any unknown role
+- Any role supplied through an alternative request field
+
+Expected behavior:
+
+- Public registration always creates an Employee account.
+- Client-supplied role information must not override the server-assigned role.
+- Unknown roles must not result in privilege escalation.
+- Passwords must be securely hashed.
+- Sensitive fields must not appear in responses.
+- Existing role representation and authentication behavior must remain compatible.
+
+Inspect the complete registration implementation, not just one conditional statement.
+
+Do not weaken registration security to make a test pass.
+
+## 4.3 RBAC backend tests
+
+For all ten roles, test:
+
+- Permitted endpoints.
+- Forbidden endpoints.
+- Unauthenticated access.
+- Unauthorized cross-role access.
+- Access to another user's records.
+- Access to another user's projects or assigned data.
+- Restricted administrative operations.
+- Data isolation.
+- Backend authorization independent of frontend visibility.
+
+Use the actual permissions configured in the application.
+
+## 4.4 Controller and API tests
+
+Inspect and test existing controllers, including:
+
+- AuthController
+- UserController
+- RoleController
+- ProjectController
+- LeadController
+- BugController
+- AuditLogController
+
+Only test endpoints that actually exist.
+
+For each supported endpoint, test:
+- Valid requests.
+- Invalid requests.
+- Missing required fields.
+- Invalid IDs.
+- Nonexistent records.
+- Unauthorized requests.
+- Forbidden requests.
+- Successful operations.
+- Correct HTTP status.
+- Correct response structure.
+- Correct validation errors.
+- Correct persistence behavior.
+
+Test CRUD operations only where the application actually supports them.
+
+Do not create fake endpoints just to satisfy the test plan.
+
+## 4.5 Service-layer tests
+
+Create isolated unit tests for existing services related to:
+
+- Users
+- Projects
+- Leads
+- Bugs
+- Roles
+- Audit logs
+
+Requirements:
+- Mock dependencies where appropriate.
+- Do not mock the functionality being tested.
+- Verify business rules.
+- Verify validation.
+- Verify error handling.
+- Verify repository interactions.
+- Verify correct results.
+- Verify unauthorized or invalid operations are rejected where applicable.
+
+## 4.6 MongoDB integration tests
+
+MongoDB must remain the only database.
+
+Use a dedicated test database:
+
+`mymitraa_taskflow_test`
+
+Test:
+- Repository save.
+- Retrieve.
+- Update.
+- Delete.
+- Unique constraints where implemented.
+- Relationships and references.
+- Queries and filtering.
+- Data isolation.
+- Persistence across application contexts.
+
+Rules:
+- Never use the production database.
+- Never delete production records.
+- Never perform destructive operations against an unknown MongoDB database.
+- Clean up only test records or the dedicated test database created for this suite.
+- Do not assume Docker or Testcontainers is available.
+- Support a configurable local MongoDB test connection.
+- If MongoDB is unavailable, mark integration tests as NOT RUN, not PASSED.
+- Do not replace MongoDB integration tests with fake successful tests.
+
+Use environment variables for test configuration.
+
+Example test configuration:
+
+`MONGODB_URI=mongodb://127.0.0.1:27017/mymitraa_taskflow_test`
+
+Verify the actual configuration mechanism before using it.
+
+---
+
+# PART 5 — FRONTEND AUTOMATED TEST SUITE
+
+Use the existing frontend testing framework if available.
+
+If no framework exists, select a minimal compatible free framework.
+
+Preferred options:
+- Vitest
+- React Testing Library
+- Playwright for end-to-end tests where practical
+
+Do not unnecessarily add multiple overlapping frameworks.
+
+## 5.1 Authentication UI
+
+Test:
+- Login form.
+- Email validation.
+- Password validation.
+- Incorrect credentials.
+- Successful login state.
+- Loading state.
+- Error messages.
+- Show/hide password.
+- Logout.
+- Protected routes.
+- Session handling.
+- Role changes.
+
+## 5.2 Role-based UI
+
+Test all ten roles.
+
+Verify:
+- Correct dashboard.
+- Correct sidebar.
+- Correct navigation.
+- Correct page visibility.
+- Correct action visibility.
+- Restricted menu items.
+- Restricted buttons.
+- Direct URL restrictions.
+- Client restrictions.
+- State changes after logout or role change.
+
+Frontend permission checks must agree with backend permissions.
+
+## 5.3 User management
+
+Test existing user-management functionality:
+- User listing.
+- User creation.
+- User editing.
+- User deletion where supported.
+- Validation.
+- Role assignment by authorized users.
+- Search and filtering where implemented.
+- Error handling.
+- Loading states.
+
+## 5.4 Project workflows
+
+Test:
+- Project listing.
+- Project creation.
+- Project retrieval.
+- Project update.
+- Project deletion where supported.
+- Assignment.
+- Permissions.
+- Validation.
+- API integration.
+
+## 5.5 Lead workflows
+
+Test:
+- Lead listing.
+- Lead creation.
+- Lead retrieval.
+- Lead updates.
+- Status changes.
+- Assignment.
+- Validation.
+- Permissions.
+- API integration.
+
+## 5.6 Bug tracking
+
+Test:
+- Bug listing.
+- Bug creation.
+- Bug details.
+- Bug updates.
+- Assignment.
+- Status transitions.
+- QA Tester permissions.
+- Developer permissions.
+- Validation.
+- API integration.
+
+## 5.7 Audit logs
+
+Test:
+- Audit event creation where implemented.
+- Audit log retrieval.
+- Correct user attribution.
+- Restricted access.
+- Data consistency.
+
+Do not allow unauthorized users to modify or delete audit records if the existing design treats them as protected records.
+
+## 5.8 API client and integration tests
+
+Inspect the existing API client and all actual API calls.
+
+Test:
+- Correct HTTP methods.
+- Correct endpoint paths.
+- Authentication headers.
+- JWT handling.
+- Request payloads.
+- Response parsing.
+- Error responses.
+- Network failures.
+- Backend unavailable behavior.
+- Loading states.
+- Retry behavior where implemented.
+
+Verify that the frontend uses the Spring Boot backend for business persistence.
+
+Do not make tests pass by pretending that a failed API request succeeded.
+
+---
+
+# PART 6 — END-TO-END TESTING
+
+Where practical, create executable E2E tests covering real application workflows.
+
+Use isolated test accounts and the dedicated test database.
+
+Test these scenarios:
+
+1. User login.
+2. Admin user management.
+3. Project creation by an authorized user.
+4. Project retrieval by an authorized Developer.
+5. Sales Executive lead creation.
+6. Sales Manager permitted sales operations.
+7. QA Tester bug creation and tracking.
+8. Audit log generation and retrieval.
+9. Client restricted access.
+10. Unauthorized direct URL access.
+11. Logout.
+12. Protected route behavior after logout.
+13. MongoDB persistence across application restart.
+
+Do not assume every workflow exists. Verify actual application functionality first.
+
+If a workflow cannot be tested because a feature is missing, report it as a gap rather than inventing the feature.
+
+---
+
+# PART 7 — TEST CONFIGURATION AND QUALITY
+
+Create a reliable, repeatable test environment.
+
+Provide:
+- Maven test configuration.
+- Frontend test configuration.
+- E2E test configuration where applicable.
+- Environment variable examples.
+- Test data fixtures.
+- Test builders.
+- Authentication helpers.
+- Role-specific test users.
+- Dedicated MongoDB test profile.
+- Cleanup utilities.
+- Clear test commands.
+
+Test quality requirements:
+
+- Tests must be executable.
+- Assertions must verify actual behavior.
+- Tests must be independent.
+- Tests must not depend on execution order.
+- Tests must clean up their own data.
+- Tests must not require production credentials.
+- Tests must not use production databases.
+- Tests must not contain false-positive assertions.
+- Tests must not merely assert that an object is non-null.
+- Tests must not weaken authentication or authorization.
+- Tests must not hide failures.
+- Skipped tests must be clearly identified.
+- Unavailable infrastructure must be reported honestly.
+
+---
+
+# PART 8 — COVERAGE INVENTORY AND REPORTING
+
+Create a coverage inventory with the following categories:
+
+| Area | Test files | Test cases | Status |
+|---|---|---|---|
+| Authentication | | | |
+| Registration security | | | |
+| RBAC | | | |
+| User management | | | |
+| Projects | | | |
+| Leads | | | |
+| Bug tracking | | | |
+| Audit logs | | | |
+| MongoDB | | | |
+| Frontend | | | |
+| API integration | | | |
+| End-to-end | | | |
+
+Use these status labels accurately:
+
+- CREATED
+- EXECUTED - PASSED
+- EXECUTED - FAILED
+- SKIPPED
+- NOT RUN
+- NOT IMPLEMENTED
+- BLOCKED
+
+Do not claim coverage percentages unless they have actually been measured by a coverage tool.
+
+Generate a final testing report containing:
+
+1. Test files created.
+2. Existing files modified.
+3. Test frameworks used.
+4. Dependencies added.
+5. Backend test commands.
+6. Frontend test commands.
+7. E2E test commands.
+8. MongoDB test configuration.
+9. Coverage inventory.
+10. Passed tests.
+11. Failed tests.
+12. Skipped tests.
+13. Tests not run.
+14. Identified application defects.
+15. Security issues.
+16. Missing test coverage.
+17. Production credentials and data usage confirmation.
+18. Confirmation that no GitHub commit or push was performed.
+
+---
+
+# PART 9 — PRODUCTION DEPLOYMENT READINESS
+
+This is a separate workstream.
+
+I currently have:
+- Domain: `mitratechgroup.com`
+- Subdomain: `task.mitratechgroup.com`
+- No VPS purchased.
+- No hosting server configured.
+- No confirmed server operating system.
+- No confirmed DNS provider.
+- No confirmed public server IP.
+
+Use these values:
+
+`PRODUCTION_DOMAIN=task.mitratechgroup.com`
+
+`PRODUCTION_URL=https://task.mitratechgroup.com`
+
+`SERVER_PUBLIC_IP=[NOT_AVAILABLE_YET]`
+
+`SERVER_OS=[NOT_SELECTED_YET]`
+
+`DNS_PROVIDER=[TO_BE_IDENTIFIED]`
+
+Do not invent missing information.
+
+## 9.1 Hosting recommendation
+
+Prepare a hosting recommendation for MyMitraa TaskFlow.
+
+My preferred approach:
+- Low-cost VPS.
+- Ubuntu 24.04 LTS as the recommended server OS.
+- Nginx reverse proxy.
+- Spring Boot backend.
+- MongoDB on the same private server initially, if resource and security requirements permit.
+- HTTPS.
+- Automated backups.
+- A setup that can be upgraded later.
+
+Compare practical VPS options suitable for a small initial deployment.
+
+Consider:
+- Monthly cost.
+- RAM.
+- CPU.
+- SSD storage.
+- Bandwidth.
+- Data-centre location.
+- Backup options.
+- Firewall support.
+- Ease of administration.
+- Upgrade options.
+
+Do not purchase a VPS or create an account.
+
+Do not assume that a free-tier server will be available or suitable.
+
+Give a realistic minimum and recommended server specification after considering the actual application.
+
+If you cannot verify current provider prices, clearly label estimates as estimates.
+
+## 9.2 Domain and DNS preparation
+
+Prepare instructions for connecting:
+
+`task.mitratechgroup.com`
+
+to the future VPS public IP.
+
+Explain:
+- How to identify the domain's DNS provider.
+- How to check nameservers.
+- How to create an A record.
+- Whether a CNAME is appropriate in any alternative setup.
+- How DNS propagation can be checked.
+- How to verify the subdomain points to the correct server.
+
+Use placeholders until the real server IP and DNS provider are known.
+
+Do not modify DNS records.
+
+Do not claim DNS is configured.
+
+## 9.3 Frontend production configuration
+
+Inspect the current frontend API configuration.
+
+Prepare production configuration using a same-origin API path:
+
+`VITE_API_BASE_URL=/api`
+
+The production browser must communicate through the domain and reverse proxy.
+
+Requirements:
+- No production localhost API URLs.
+- No internal server IP exposed in the frontend bundle.
+- No backend secrets in frontend environment variables.
+- No hardcoded credentials.
+- No in-memory business-data fallback.
+- Proper production build configuration.
+- Existing React/Vite structure preserved.
+
+Use the actual variable names required by the current project if they differ from this example.
+
+## 9.4 Backend production configuration
+
+Inspect the actual Spring Boot configuration before creating production templates.
+
+Prepare an environment-based production configuration for:
+- Application port.
+- MongoDB connection.
+- MongoDB database.
+- JWT secret.
+- JWT expiration.
+- CORS allowed origin.
+- File upload directory.
+- Logging.
+- Production profile.
+- Health checks.
+
+Potential values, subject to verification:
+
+`SERVER_PORT=8080`
+
+`MONGODB_URI=[SET_SECURELY_ON_SERVER]`
+
+`MONGODB_DATABASE=mymitraa_taskflow`
+
+`JWT_SECRET=[GENERATE_AND_SET_SECURELY_ON_SERVER]`
+
+`JWT_EXPIRATION=86400000`
+
+`FRONTEND_PUBLIC_URL=https://task.mitratechgroup.com`
+
+`UPLOAD_PATH=[SERVER_UPLOAD_DIRECTORY]`
+
+Do not hardcode secrets.
+
+Do not place real secrets in `.env.example`, GitHub, source code, frontend files, or deployment documentation.
+
+Do not assume these variable names are correct until the existing application configuration has been inspected.
+
+## 9.5 MongoDB production security
+
+MongoDB remains the only application database.
+
+Prepare instructions for:
+- Creating the production database `mymitraa_taskflow`.
+- Creating a dedicated application database user.
+- Strong authentication.
+- Least-privilege access.
+- Binding MongoDB to localhost or a private network.
+- Blocking public access to port 27017.
+- Backups.
+- Restore procedures.
+- Database monitoring.
+- Connection security.
+
+Do not create or modify a production database now.
+
+Do not expose MongoDB publicly.
+
+Do not use the test database for production.
+
+## 9.6 Nginx reverse proxy preparation
+
+Prepare an Nginx configuration template for:
+
+`task.mitratechgroup.com`
+
+Expected architecture:
+
+Browser → HTTPS → Nginx → React frontend / Spring Boot API
+
+Configure the template for:
+- HTTP to HTTPS redirection.
+- Frontend static file serving.
+- SPA fallback.
+- `/api/` reverse proxy to the backend.
+- Proxy headers.
+- Appropriate upload limits.
+- Timeouts.
+- Security headers where appropriate.
+- Correct handling of frontend routes.
+
+Use a placeholder backend address such as `127.0.0.1:8080` only after confirming the actual backend port.
+
+Do not assume Nginx is installed.
+
+Do not execute Nginx commands or claim the configuration is active.
+
+## 9.7 HTTPS and SSL preparation
+
+Prepare instructions for HTTPS using Let's Encrypt and Certbot if compatible with the selected hosting environment.
+
+Include:
+- Domain DNS verification.
+- Certificate issuance.
+- Nginx integration.
+- Automatic renewal.
+- Renewal verification.
+- HTTP-to-HTTPS redirection.
+- Secure cookie settings where applicable.
+- Avoiding mixed-content errors.
+
+Do not claim an SSL certificate exists.
+
+Do not attempt certificate issuance before DNS points to a configured server.
+
+## 9.8 Firewall and server security
+
+Prepare a server security checklist.
+
+Expected public access:
+- Port 80: HTTP, primarily for HTTPS redirection and certificate validation.
+- Port 443: HTTPS.
+
+Private/internal access:
+- Port 8080: Spring Boot, not publicly exposed.
+- Port 27017: MongoDB, not publicly exposed.
+- SSH: restricted to authorized IP addresses where practical.
+
+Also cover:
+- OS updates.
+- SSH security.
+- Firewall configuration.
+- Application service permissions.
+- Secret storage.
+- Log rotation.
+- File permissions.
+- Upload validation.
+- Path traversal protection.
+- Backup security.
+- Monitoring.
+- Incident recovery.
+
+Do not run server commands without a confirmed server.
+
+## 9.9 File uploads and storage
+
+Inspect the existing file upload functionality.
+
+Prepare a secure persistent upload directory outside the frontend deployment directory.
+
+Verify:
+- File type validation.
+- File size limits.
+- Filename handling.
+- Path traversal protection.
+- Access control.
+- Storage permissions.
+- Backup and restore.
+- No sensitive upload paths exposed to unauthorized users.
+
+Preserve existing upload functionality and API contracts.
+
+## 9.10 Production health and recovery
+
+Prepare instructions for:
+- Backend health checks.
+- Frontend availability.
+- MongoDB health checks.
+- Application startup.
+- Automatic restart after server reboot.
+- Service logs.
+- Log rotation.
+- MongoDB backup.
+- MongoDB restore.
+- Application rollback.
+- Previous release recovery.
+
+Do not claim any health check passed unless actually executed.
+
+---
+
+# PART 10 — REQUIRED DEPLOYMENT DELIVERABLES
+
+Prepare the following files or equivalent documentation, using the existing project structure:
+
+1. `.env.example`
+2. Frontend production environment example.
+3. Backend production configuration template.
+4. MongoDB production setup guide.
+5. Nginx configuration template.
+6. VPS hosting recommendation.
+7. DNS configuration guide.
+8. HTTPS/SSL setup guide.
+9. Firewall and server security checklist.
+10. File upload storage guide.
+11. Backup and restore guide.
+12. Application deployment guide.
+13. Health-check guide.
+14. Rollback guide.
+15. Production readiness checklist.
+
+Do not create multiple conflicting deployment configurations.
+
+Do not put actual credentials or secrets in any generated file.
+
+Keep deployment instructions conditional on the actual hosting provider and operating system.
+
+---
+
+# PART 11 — STRICT EXECUTION ORDER
+
+Follow this sequence.
+
+## Phase A — Inspect
+
+1. Inspect the entire current project.
+2. Understand the existing architecture.
+3. Identify existing tests.
+4. Inventory APIs, roles, permissions, and MongoDB collections.
+5. Identify existing defects and architectural risks.
+6. Present the findings.
+
+Do not start by rewriting code.
+
+## Phase B — Create automated tests
+
+1. Create backend tests.
+2. Create registration security tests.
+3. Create RBAC tests.
+4. Create controller and service tests.
+5. Create MongoDB integration tests.
+6. Create frontend tests.
+7. Create API integration tests.
+8. Create E2E tests where practical.
+9. Add test configuration and documentation.
+10. Verify that test files are executable where the environment permits.
+
+## Phase C — Prepare production readiness
+
+1. Inspect current production configuration.
+2. Prepare environment templates.
+3. Prepare MongoDB production instructions.
+4. Prepare Nginx template.
+5. Prepare DNS instructions.
+6. Prepare HTTPS instructions.
+7. Prepare hosting recommendation.
+8. Prepare security checklist.
+9. Prepare backup and rollback instructions.
+
+This phase is preparation only. No actual deployment.
+
+## Phase D — Run available safe tests
+
+Run only tests that can safely execute in the current environment.
+
+Report actual results.
+
+If a dependency, MongoDB instance, browser, or other infrastructure is unavailable:
+- Mark the relevant test NOT RUN or BLOCKED.
+- Explain why.
+- Provide the exact command needed to run it later.
+- Do not claim success.
+
+## Phase E — Final report
+
+Provide separate reports for:
+
+**Report A: Automated Test Suite**
+- Files created.
+- Files modified.
+- Test cases created.
+- Commands.
+- Actual results.
+- Coverage inventory.
+- Defects.
+- Remaining gaps.
+
+**Report B: Production Readiness**
+- Configuration templates.
+- Hosting recommendation.
+- Domain/DNS instructions.
+- Security checklist.
+- Deployment instructions.
+- Missing information.
+- Manual actions still required.
+
+---
+
+# PART 12 — INDEPENDENT CLAUDE CODE VERIFICATION
+
+After the test suite is created and I review and synchronize the approved changes to GitHub, I will independently verify the project using Claude Code on Windows.
+
+Prepare a clear handoff document containing:
+
+- Backend test commands.
+- Frontend test commands.
+- E2E test commands.
+- Required environment variables.
+- MongoDB test database setup.
+- Test execution order.
+- Expected outputs.
+- How to interpret failed, skipped, and blocked tests.
+- Known issues requiring investigation.
+
+Do not assume that tests passed merely because test files were created.
+
+Do not assume that a local change has been synchronized to GitHub.
+
+Do not automatically push any changes.
+
+---
+
+# PART 13 — WHEN ACTUAL DEPLOYMENT BECOMES POSSIBLE
+
+Do not deploy now.
+
+Actual deployment must wait until I have:
+
+1. Purchased or selected a VPS.
+2. Confirmed the server's public IP.
+3. Confirmed the server operating system.
+4. Identified the DNS provider.
+5. Configured DNS.
+6. Verified the automated test suite.
+7. Resolved critical security defects.
+8. Prepared production MongoDB credentials.
+9. Generated secure production secrets.
+10. Reviewed and approved the deployment plan.
+
+When those details become available, ask me for the missing information and prepare server-specific instructions.
+
+Do not assume that owning a domain means I already have a server.
+
+Do not deploy to my personal Windows 10 computer unless I explicitly request that architecture.
+
+---
+
+# PART 14 — FINAL ACCEPTANCE CRITERIA
+
+The work is complete only when the following are clearly reported:
+
+- Existing application preserved.
+- Existing features and APIs preserved.
+- All ten roles inspected.
+- Public registration security verified.
+- Backend automated tests created.
+- Frontend automated tests created.
+- MongoDB integration tests prepared.
+- E2E tests created where practical.
+- In-memory business persistence risk inspected.
+- MongoDB remains the only application database.
+- Test and production configurations are separated.
+- Deployment templates prepared.
+- `task.mitratechgroup.com` configuration documented.
+- No server or DNS changes made.
+- No production deployment attempted.
+- No secrets committed.
+- No automatic GitHub push or merge performed.
+- All untested or blocked areas disclosed honestly.
+
+**Important final instruction:** Work carefully, inspect before editing, preserve existing application functionality, and complete each phase in order. If you encounter an existing defect, report it and make only a minimal, justified correction when it is necessary and safe. Never hide a defect, weaken a permission, fabricate test results, or claim deployment readiness without evidence.
+
+Start with **Phase A — Complete Project Inspection**. Do not skip directly to deployment or redesign.
